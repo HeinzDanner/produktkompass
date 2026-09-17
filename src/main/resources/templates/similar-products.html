@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' – Ähnliche Produkte'">Ähnliche Produkte</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container page-content">
+    <section class="box">
+        <div class="section-header">
+            <h1 th:text="${product.name} + ' – Ähnliche Produkte'">Ähnliche Produkte</h1>
+            <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Zur Produktseite</a>
+        </div>
+        <p class="lead" th:text="${product.description}">Beschreibung</p>
+    </section>
+
+    <section class="box">
+        <h2>Ursprungsprodukt</h2>
+        <div class="product-grid">
+            <article class="product-card">
+                <h3 th:text="${product.name}">Produktname</h3>
+                <p th:text="${product.description}">Beschreibung</p>
+                <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+            </article>
+        </div>
+    </section>
+
+    <section class="box">
+        <h2>Ähnliche Produkte</h2>
+        <div class="product-grid" th:if="${!#lists.isEmpty(similarProducts)}">
+            <article class="product-card" th:each="alternative : ${similarProducts}">
+                <h3 th:text="${alternative.name}">Produktname</h3>
+                <p th:text="${alternative.description != null ? alternative.description : 'Keine Beschreibung verfügbar.'}">Beschreibung</p>
+                <a class="button secondary" th:href="@{/products/{id}(id=${alternative.id})}">Details</a>
+            </article>
+        </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(similarProducts)}">Keine ähnlichen Produkte gefunden.</p>
+    </section>
+</main>
+</body>
+</html>

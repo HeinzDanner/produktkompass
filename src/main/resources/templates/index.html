@@ -20,31 +20,14 @@
     </div>
 </nav>
 <main class="container page-content">
-    <section class="hero">
-        <div>
-            <p class="eyebrow">Neutral · Transparenz · Vergleich</p>
-            <h1>ProduktKompass</h1>
-            <p class="lead">Finde Produkte, Marken und Unternehmen schnell und neutral – mit nachvollziehbaren Quellen und klaren Alternativen.</p>
-        </div>
-        <div class="hero-card">
-            <h2>Für den MVP</h2>
-            <ul>
-                <li>Produktkatalog</li>
-                <li>Marken- und Kategorienzuordnung</li>
-                <li>Favoriten für angemeldete Nutzer</li>
-                <li>Admin-CRUD für Inhalte</li>
-            </ul>
-        </div>
-    </section>
-
     <section class="box">
-        <h2>Aktuelle Produktliste</h2>
+        <h2>Aktuelle Produkte</h2>
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">Noch keine Produkte vorhanden.</div>
         <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
-                    <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                    <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
                     <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
                 </div>
                 <p th:text="${product.description}">Beschreibung</p>
@@ -52,10 +35,10 @@
                     <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
                 </div>
                 <div class="meta-row" th:if="${product.company != null}">
-                    <span th:text="${product.company.name}">Unternehmen</span>
+                    <a th:href="@{/companies/{id}(id=${product.company.id})}" th:text="${product.company.name}">Unternehmen</a>
                 </div>
-                <div class="actions">
-                    <a class="button secondary" th:href="@{/products}">Mehr ansehen</a>
+                <div class="actions action-group">
+                    <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
                     <form th:if="${favoriteProductIds == null or !favoriteProductIds.contains(product.id)}" th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
                         <button type="submit" class="favorite-toggle">♥ Favorit hinzufügen</button>
                     </form>
@@ -64,13 +47,6 @@
                     </form>
                 </div>
             </article>
-        </div>
-    </section>
-
-    <section class="box" th:if="${favoriteProductIds != null and !favoriteProductIds.isEmpty()}">
-        <h2>Deine Favoriten</h2>
-        <div class="meta-row">
-            <span th:each="product : ${products}" th:if="${favoriteProductIds.contains(product.id)}" th:text="${product.name}">Favorit</span>
         </div>
     </section>
 </main>

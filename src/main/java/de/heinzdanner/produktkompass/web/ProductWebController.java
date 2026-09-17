@@ -1,7 +1,10 @@
 package de.heinzdanner.produktkompass.web;
 
 import de.heinzdanner.produktkompass.product.BrandService;
+import de.heinzdanner.produktkompass.product.Brand;
 import de.heinzdanner.produktkompass.product.CategoryService;
+import de.heinzdanner.produktkompass.product.Company;
+import de.heinzdanner.produktkompass.product.CompanyService;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductService;
 import de.heinzdanner.produktkompass.user.AppUserService;
@@ -28,15 +31,18 @@ public class ProductWebController {
     private final AppUserService appUserService;
     private final BrandService brandService;
     private final CategoryService categoryService;
+    private final CompanyService companyService;
 
     public ProductWebController(ProductService productService,
                                AppUserService appUserService,
                                BrandService brandService,
-                               CategoryService categoryService) {
+                               CategoryService categoryService,
+                               CompanyService companyService) {
         this.productService = productService;
         this.appUserService = appUserService;
         this.brandService = brandService;
         this.categoryService = categoryService;
+        this.companyService = companyService;
     }
 
     @GetMapping("/")
@@ -74,6 +80,46 @@ public class ProductWebController {
         model.addAttribute("product", product);
         model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
         return "product-detail";
+    }
+
+    @GetMapping("/products/{id}/similar")
+    public String similarProducts(@PathVariable Long id, Model model) {
+        Product product = productService.getProductById(id).orElse(null);
+        if (product == null) {
+            return "redirect:/products";
+        }
+
+        model.addAttribute("product", product);
+        model.addAttribute("similarProducts", productService.getAlternativeProducts(id));
+        return "similar-products";
+    }
+
+    @GetMapping("/brands/{id}")
+    public String brandDetail(@PathVariable Long id, Model model) {
+        Brand brand = brandService.getBrandById(id).orElse(null);
+        if (brand == null) {
+            return "redirect:/products";
+        }
+
+        model.addAttribute("brand", brand);
+        model.addAttribute("products", productService.getAllProducts().stream()
+                .filter(product -> product.getBrand() != null && product.getBrand().getId().equals(id))
+                .toList());
+        return "brand-detail";
+    }
+
+    @GetMapping("/companies/{id}")
+    public String companyDetail(@PathVariable Long id, Model model) {
+        Company company = companyService.getCompanyById(id).orElse(null);
+        if (company == null) {
+            return "redirect:/products";
+        }
+
+        model.addAttribute("company", company);
+        model.addAttribute("products", productService.getAllProducts().stream()
+                .filter(product -> product.getCompany() != null && product.getCompany().getId().equals(id))
+                .toList());
+        return "company-detail";
     }
 
     @GetMapping("/favorites")

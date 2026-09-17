@@ -44,10 +44,14 @@ public class ProductService {
     }
 
     public List<Product> getAlternativeProducts(Long productId) {
-        return productRepository.findById(productId)
+        return productRepository.findByIdWithDetails(productId)
                 .map(Product::getAlternativeProducts)
                 .map(alternatives -> alternatives.stream().toList())
                 .orElse(List.of());
+    }
+
+    public List<Product> getProductsWithAlternatives() {
+        return productRepository.findAllWithAlternatives();
     }
 
     public List<Product> searchProducts(String name, Long brandId, Long categoryId) {

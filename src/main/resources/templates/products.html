@@ -52,7 +52,8 @@
             <article class="product-card" th:each="product : ${products}">
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
-                    <span class="badge" th:text="${product.brand != null ? product.brand.name : 'Ohne Marke'}">Marke</span>
+                    <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
+                    <span class="badge" th:if="${product.brand == null}">Ohne Marke</span>
                     <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
                 </div>
                 <p th:text="${product.description}">Beschreibung</p>
@@ -60,10 +61,11 @@
                     <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
                 </div>
                 <div class="meta-row" th:if="${product.company != null}">
-                    <span th:text="${product.company != null ? product.company.name : ''}">Unternehmen</span>
+                    <a th:href="@{/companies/{id}(id=${product.company.id})}" th:text="${product.company.name}">Unternehmen</a>
                 </div>
                 <div class="actions">
                     <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+                    <a class="button secondary" th:href="@{/products/{id}/similar(id=${product.id})}">Ähnliche Produkte</a>
                     <form th:if="${favoriteProductIds == null or !favoriteProductIds.contains(product.id)}"
                           th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
                         <button type="submit" class="favorite-toggle">♥ Favorit hinzufügen</button>
