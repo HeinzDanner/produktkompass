@@ -1,0 +1,98 @@
+package de.heinzdanner.produktkompass.user;
+
+import de.heinzdanner.produktkompass.product.Product;
+import de.heinzdanner.produktkompass.product.ProductRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+public class AppUserService implements UserDetailsService {
+
+    private final AppUserRepository appUserRepository;
+    private final ProductRepository productRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AppUserService(AppUserRepository appUserRepository,
+                          ProductRepository productRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.appUserRepository = appUserRepository;
+        this.productRepository = productRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser appUser = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
+
+        return User.withUsername(appUser.getUsername())
+                .password(appUser.getPassword())
+                .roles(appUser.getRole().name())
+                .disabled(!appUser.isEnabled())
+                .build();
+    }
+
+    public List<AppUser> getAllUsers() {
+        return appUserRepository.findAll();
+    }
+
+    public Optional<AppUser> findByUsername(String username) {
+        return appUserRepository.findByUsername(username);
+    }
+
+    public List<Product> getFavoriteProducts(String username) {
+        AppUser user = findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
+
+        return user.getFavoriteProducts().stream().toList();
+    }
+
+    @Transactional
+    public AppUser addFavoriteProduct(String username, Long productId) {
+        AppUser user = findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden: " + productId));
+
+        user.addFavoriteProduct(product);
+        return appUserRepository.save(user);
+    }
+
+    @Transactional
+    public boolean removeFavoriteProduct(String username, Long productId) {
+        AppUser user = findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden: " + productId));
+
+        if (!user.getFavoriteProducts().contains(product)) {
+            return false;
+        }
+
+        user.removeFavoriteProduct(product);
+        appUserRepository.save(user);
+        return true;
+    }
+
+    @Transactional
+    public AppUser registerUser(String username, String rawPassword, Role role) {
+        if (appUserRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Benutzername ist bereits vorhanden.");
+        }
+
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+        AppUser appUser = new AppUser(username, encodedPassword, role);
+        return appUserRepository.save(appUser);
+    }
+}

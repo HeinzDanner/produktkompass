@@ -1,0 +1,277 @@
+:root {
+    --bg: #f4f7fb;
+    --panel: #ffffff;
+    --border: #dfe8f3;
+    --primary: #1f6feb;
+    --primary-dark: #1849a0;
+    --text: #1d2433;
+    --muted: #5d6b82;
+    --success: #1e8e5a;
+    --warning: #d97706;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.topbar {
+    background: #0f172a;
+    color: white;
+    padding: 1rem 0;
+    box-shadow: var(--shadow);
+}
+
+.nav-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand {
+    color: white;
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-links a,
+.nav-links button {
+    color: white;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.page-content {
+    padding: 2rem 0 3rem;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.hero h1 {
+    margin: 0 0 0.75rem;
+    font-size: 2.5rem;
+}
+
+.lead {
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.hero-card,
+.box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+}
+
+.hero-card ul {
+    margin: 1rem 0 0;
+    padding-left: 1.2rem;
+    color: var(--muted);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.product-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.product-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.button,
+button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button.secondary,
+button.secondary {
+    background: #e2e8f0;
+    color: var(--text);
+}
+
+button:hover,
+.button:hover {
+    background: var(--primary-dark);
+}
+
+button.secondary:hover,
+.button.secondary:hover {
+    background: #cbd5e1;
+}
+
+.empty-state {
+    background: #f8fafc;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    color: var(--muted);
+}
+
+.login-panel {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.login-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.login-panel input {
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.alert.error {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.alert.success {
+    background: #ecfdf5;
+    color: #166534;
+}
+
+.hint {
+    color: var(--muted);
+    margin-top: 1rem;
+}
+
+.logout-form {
+    display: inline;
+}
+
+@media (max-width: 720px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-wrap,
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

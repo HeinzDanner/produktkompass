@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="topbar">
+    <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}">ProduktKompass</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Übersicht</a>
+            <a th:href="@{/products}">Produkte</a>
+        </div>
+    </div>
+</nav>
+<main class="container page-content">
+    <section class="login-panel box">
+        <h1>Anmelden</h1>
+        <p>Für Favoriten und Admin-Bereiche bitte mit einem Benutzerkonto anmelden.</p>
+
+        <div th:if="${param.error}" class="alert error">Benutzername oder Passwort ist falsch.</div>
+        <div th:if="${param.logout}" class="alert success">Du hast dich erfolgreich abgemeldet.</div>
+
+        <form th:action="@{/login}" method="post">
+            <label for="username">Benutzername</label>
+            <input id="username" type="text" name="username" placeholder="admin" required>
+
+            <label for="password">Passwort</label>
+            <input id="password" type="password" name="password" placeholder="admin123" required>
+
+            <button type="submit">Einloggen</button>
+        </form>
+
+        <p class="hint">Demo-Admin: <strong>admin</strong> / <strong>admin123</strong></p>
+    </section>
+</main>
+</body>
+</html>

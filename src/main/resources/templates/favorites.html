@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Favoriten</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="topbar">
+    <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}">ProduktKompass</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Übersicht</a>
+            <a th:href="@{/products}">Produkte</a>
+            <a th:href="@{/favorites}">Favoriten</a>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Meine Favoriten</h1>
+
+        <div th:if="${#lists.isEmpty(products)}" class="empty-state">
+            Du hast noch keine Favoriten gespeichert.
+        </div>
+
+        <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
+            <article class="product-card" th:each="product : ${products}">
+                <div class="product-header">
+                    <h3 th:text="${product.name}">Produktname</h3>
+                    <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                </div>
+                <p th:text="${product.description}">Beschreibung</p>
+                <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
+                    <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
+                </div>
+                <div class="meta-row" th:if="${product.company != null}">
+                    <span th:text="${product.company.name}">Unternehmen</span>
+                </div>
+                <div class="actions">
+                    <form th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="secondary">Entfernen</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+</body>
+</html>
