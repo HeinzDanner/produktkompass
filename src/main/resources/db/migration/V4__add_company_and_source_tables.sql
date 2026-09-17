@@ -37,27 +37,3 @@ CREATE TABLE product_sources
     CONSTRAINT fk_product_sources_source
         FOREIGN KEY (source_id) REFERENCES sources (id)
 );
-
-INSERT INTO companies (name, website, country, description)
-VALUES ('Alnatura', 'https://www.alnatura.de', 'Deutschland', 'Naturnahes Lebensmittelunternehmen.'),
-       ('Fairtrade Deutschland', 'https://www.fairtrade-deutschland.de', 'Deutschland', 'Organisation für faire Handelsstandards.');
-
-INSERT INTO sources (title, url, type, verified_at)
-VALUES ('Alnatura Produktseite', 'https://www.alnatura.de', 'website', CURRENT_TIMESTAMP),
-       ('Fairtrade Standards', 'https://www.fairtrade-deutschland.de', 'organization', CURRENT_TIMESTAMP);
-
-UPDATE products
-SET company_id = (SELECT id FROM companies WHERE name = 'Alnatura')
-WHERE name = 'Bio-Hafermilch';
-
-UPDATE products
-SET company_id = (SELECT id FROM companies WHERE name = 'Fairtrade Deutschland')
-WHERE name = 'Fairtrade Schokolade';
-
-INSERT INTO product_sources (product_id, source_id)
-VALUES ((SELECT id FROM products WHERE name = 'Bio-Hafermilch'),
-        (SELECT id FROM sources WHERE title = 'Alnatura Produktseite'));
-
-INSERT INTO product_sources (product_id, source_id)
-VALUES ((SELECT id FROM products WHERE name = 'Fairtrade Schokolade'),
-        (SELECT id FROM sources WHERE title = 'Fairtrade Standards'));

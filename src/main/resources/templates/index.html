@@ -45,6 +45,7 @@
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
                     <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                    <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
                 </div>
                 <p th:text="${product.description}">Beschreibung</p>
                 <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
@@ -55,11 +56,21 @@
                 </div>
                 <div class="actions">
                     <a class="button secondary" th:href="@{/products}">Mehr ansehen</a>
-                    <form th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
-                        <button type="submit">Favorit hinzufügen</button>
+                    <form th:if="${favoriteProductIds == null or !favoriteProductIds.contains(product.id)}" th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="favorite-toggle">♥ Favorit hinzufügen</button>
+                    </form>
+                    <form th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}" th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
                     </form>
                 </div>
             </article>
+        </div>
+    </section>
+
+    <section class="box" th:if="${favoriteProductIds != null and !favoriteProductIds.isEmpty()}">
+        <h2>Deine Favoriten</h2>
+        <div class="meta-row">
+            <span th:each="product : ${products}" th:if="${favoriteProductIds.contains(product.id)}" th:text="${product.name}">Favorit</span>
         </div>
     </section>
 </main>

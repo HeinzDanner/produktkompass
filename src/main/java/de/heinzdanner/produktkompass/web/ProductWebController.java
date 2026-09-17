@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class ProductWebController {
@@ -38,8 +40,9 @@ public class ProductWebController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Principal principal, Model model) {
         model.addAttribute("products", productService.getAllProducts());
+        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
         return "index";
     }
 
@@ -47,6 +50,7 @@ public class ProductWebController {
     public String products(@RequestParam(required = false) String query,
                            @RequestParam(required = false) Long brandId,
                            @RequestParam(required = false) Long categoryId,
+                           Principal principal,
                            Model model) {
         model.addAttribute("products", productService.searchProducts(query, brandId, categoryId));
         model.addAttribute("brands", brandService.getAllBrands());
@@ -54,11 +58,12 @@ public class ProductWebController {
         model.addAttribute("selectedQuery", query == null ? "" : query);
         model.addAttribute("selectedBrandId", brandId);
         model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
         return "products";
     }
 
     @GetMapping("/products/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
+    public String productDetail(@PathVariable Long id, Principal principal, Model model) {
         Product product = productService.getProductById(id)
                 .orElse(null);
 
@@ -67,6 +72,7 @@ public class ProductWebController {
         }
 
         model.addAttribute("product", product);
+        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
         return "product-detail";
     }
 
@@ -78,6 +84,7 @@ public class ProductWebController {
 
         List<Product> favoriteProducts = appUserService.getFavoriteProducts(principal.getName());
         model.addAttribute("products", favoriteProducts);
+        model.addAttribute("favoriteProductIds", appUserService.getFavoriteProductIds(principal.getName()));
         return "favorites";
     }
 
@@ -116,7 +123,7 @@ public class ProductWebController {
         }
 
         appUserService.addFavoriteProduct(principal.getName(), id);
-        return "redirect:/products";
+        return "redirect:/products/" + id;
     }
 
     @PostMapping("/favorites/remove/{id}")
@@ -141,5 +148,13 @@ public class ProductWebController {
         public RegistrationForm() {
             this(null, null);
         }
+    }
+
+    private Set<Long> resolveFavoriteProductIds(Principal principal) {
+        if (principal == null) {
+            return Set.of();
+        }
+
+        return appUserService.getFavoriteProductIds(principal.getName());
     }
 }

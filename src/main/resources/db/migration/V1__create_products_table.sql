@@ -6,11 +6,3 @@ CREATE TABLE products
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-INSERT INTO products (name, description)
-VALUES ('Bio-Hafermilch',
-        'Klassische Hafermilch aus kontrolliert biologischem Anbau.');
-
-INSERT INTO products (name, description)
-VALUES ('Fairtrade Schokolade',
-        'Zartbitterschokolade mit 70% Kakaoanteil.');

@@ -89,6 +89,23 @@ class ProductServiceTest {
     }
 
     @Test
+    void getProductsByCategoryReturnsMatchingProducts() {
+        Category category = new Category("Milchalternativen", "Pflanzlich");
+        setField(category, "id", 7L);
+
+        Product product = new Product("Bio-Hafermilch", "Klassische Hafermilch.");
+        product.addCategory(category);
+
+        when(productRepository.findByCategoryId(7L)).thenReturn(List.of(product));
+
+        List<Product> result = productService.getProductsByCategory(7L);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getCategories()).extracting(Category::getName)
+                .containsExactly("Milchalternativen");
+    }
+
+    @Test
     void getAlternativeProductsReturnsAlternativesForProduct() {
         Product product = new Product("Bio-Hafermilch", "Klassische Hafermilch.");
         Product alternative = new Product("Haferdrink", "Alternative ohne Tierprodukte.");

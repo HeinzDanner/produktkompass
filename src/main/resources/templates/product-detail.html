@@ -46,8 +46,14 @@
         </div>
 
         <div class="actions" style="margin-top:1.5rem; justify-content:flex-start;">
-            <form th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
-                <button type="submit">Als Favorit speichern</button>
+            <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
+            <form th:if="${favoriteProductIds == null or !favoriteProductIds.contains(product.id)}"
+                  th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
+                <button type="submit" class="favorite-toggle">♥ Favorit speichern</button>
+            </form>
+            <form th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}"
+                  th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
+                <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
             </form>
         </div>
     </section>

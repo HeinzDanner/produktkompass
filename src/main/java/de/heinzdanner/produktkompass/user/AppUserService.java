@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -50,15 +51,24 @@ public class AppUserService implements UserDetailsService {
     }
 
     public List<Product> getFavoriteProducts(String username) {
-        AppUser user = findByUsername(username)
+        AppUser user = appUserRepository.findByUsernameWithFavorites(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
         return user.getFavoriteProducts().stream().toList();
     }
 
+    public Set<Long> getFavoriteProductIds(String username) {
+        return appUserRepository.findByUsernameWithFavorites(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username))
+                .getFavoriteProducts()
+                .stream()
+                .map(Product::getId)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
     @Transactional
     public AppUser addFavoriteProduct(String username, Long productId) {
-        AppUser user = findByUsername(username)
+        AppUser user = appUserRepository.findByUsernameWithFavorites(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
         Product product = productRepository.findById(productId)
@@ -70,7 +80,7 @@ public class AppUserService implements UserDetailsService {
 
     @Transactional
     public boolean removeFavoriteProduct(String username, Long productId) {
-        AppUser user = findByUsername(username)
+        AppUser user = appUserRepository.findByUsernameWithFavorites(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
         Product product = productRepository.findById(productId)
@@ -83,6 +93,14 @@ public class AppUserService implements UserDetailsService {
         user.removeFavoriteProduct(product);
         appUserRepository.save(user);
         return true;
+    }
+
+    public boolean isFavoriteProduct(String username, Long productId) {
+        return appUserRepository.findByUsernameWithFavorites(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username))
+                .getFavoriteProducts()
+                .stream()
+                .anyMatch(product -> product.getId() != null && product.getId().equals(productId));
     }
 
     @Transactional

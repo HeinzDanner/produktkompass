@@ -35,7 +35,7 @@ class AppUserServiceTest {
         AppUser user = new AppUser("max", "pw", Role.USER);
         Product product = new Product("Bio-Hafermilch", "Klassisch");
 
-        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.findByUsernameWithFavorites("max")).thenReturn(Optional.of(user));
         when(productRepository.findById(5L)).thenReturn(Optional.of(product));
         when(appUserRepository.save(user)).thenReturn(user);
 
@@ -51,7 +51,7 @@ class AppUserServiceTest {
         Product product = new Product("Bio-Hafermilch", "Klassisch");
         user.addFavoriteProduct(product);
 
-        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.findByUsernameWithFavorites("max")).thenReturn(Optional.of(user));
 
         List<Product> result = appUserService.getFavoriteProducts("max");
 

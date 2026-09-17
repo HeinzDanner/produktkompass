@@ -17,10 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.alternativeProducts alt LEFT JOIN FETCH alt.brand WHERE p.id = :id")
     Optional<Product> findByIdWithDetails(@Param("id") Long id);
 
-    List<Product> findByNameContainingIgnoreCase(String name);
-
-    List<Product> findByBrandId(Long brandId);
-
     @Query("SELECT p FROM Product p JOIN p.categories c WHERE c.id = :categoryId")
     List<Product> findByCategoryId(@Param("categoryId") Long categoryId);
 }

@@ -54,9 +54,10 @@ public class ProductService {
         List<Product> products = productRepository.findAllWithDetails();
 
         if (name != null && !name.isBlank()) {
+            String normalizedName = name.trim().toLowerCase();
             products = products.stream()
                     .filter(product -> product.getName() != null
-                            && product.getName().toLowerCase().contains(name.toLowerCase()))
+                            && product.getName().toLowerCase().contains(normalizedName))
                     .toList();
         }
 
@@ -76,6 +77,29 @@ public class ProductService {
         }
 
         return products;
+    }
+
+    public List<Product> searchProducts(String name, Long brandId) {
+        return searchProducts(name, brandId, null);
+    }
+
+    public List<Product> searchProducts(String name) {
+        return searchProducts(name, null, null);
+    }
+
+    public List<Product> getProductsByCategory(Long categoryId) {
+        return productRepository.findByCategoryId(categoryId);
+    }
+
+    public List<Product> getProductsByBrand(Long brandId) {
+        return productRepository.findAllWithDetails().stream()
+                .filter(product -> product.getBrand() != null
+                        && Objects.equals(product.getBrand().getId(), brandId))
+                .toList();
+    }
+
+    public List<Product> getProductsByName(String name) {
+        return searchProducts(name, null, null);
     }
 
     @Transactional

@@ -33,27 +33,3 @@ CREATE TABLE product_categories
     CONSTRAINT fk_product_categories_category
         FOREIGN KEY (category_id) REFERENCES categories (id)
 );
-
-INSERT INTO brands (name, description)
-VALUES ('Alnatura', 'Bio- und Naturprodukte aus Europa.'),
-       ('Fairtrade GmbH', 'Marke für fair gehandelte Lebensmittel.');
-
-INSERT INTO categories (name, description)
-VALUES ('Milchalternativen', 'Pflanzliche Alternativen zu Milchprodukten.'),
-       ('Schokolade', 'Süßwaren und Kakaoprodukte.');
-
-UPDATE products
-SET brand_id = 1
-WHERE name = 'Bio-Hafermilch';
-
-UPDATE products
-SET brand_id = 2
-WHERE name = 'Fairtrade Schokolade';
-
-INSERT INTO product_categories (product_id, category_id)
-VALUES ((SELECT id FROM products WHERE name = 'Bio-Hafermilch'),
-        (SELECT id FROM categories WHERE name = 'Milchalternativen'));
-
-INSERT INTO product_categories (product_id, category_id)
-VALUES ((SELECT id FROM products WHERE name = 'Fairtrade Schokolade'),
-        (SELECT id FROM categories WHERE name = 'Schokolade'));

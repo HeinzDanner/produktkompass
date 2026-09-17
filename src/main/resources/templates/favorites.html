@@ -33,6 +33,7 @@
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
                     <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                    <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
                 </div>
                 <p th:text="${product.description}">Beschreibung</p>
                 <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
@@ -42,8 +43,10 @@
                     <span th:text="${product.company.name}">Unternehmen</span>
                 </div>
                 <div class="actions">
-                    <form th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
-                        <button type="submit" class="secondary">Entfernen</button>
+                    <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+                    <form th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}"
+                          th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
                     </form>
                 </div>
             </article>
