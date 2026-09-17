@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="topbar">
+    <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}">ProduktKompass</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Start</a>
+            <a th:href="@{/products}">Produkte</a>
+            <a th:href="@{/admin}">Admin</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Admin-Bereich</h1>
+        <p>Verwalte Produkte, Marken, Unternehmen, Kategorien und Quellen zentral.</p>
+    </section>
+
+    <section class="box">
+        <h2>Neues Produkt anlegen</h2>
+        <form th:action="@{/admin/products}" th:object="${productRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="name">Name</label>
+                <input id="name" type="text" th:field="*{name}" required>
+            </div>
+
+            <div class="form-row">
+                <label for="description">Beschreibung</label>
+                <textarea id="description" th:field="*{description}" rows="4"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label for="brandId">Marke</label>
+                <select id="brandId" th:field="*{brandId}">
+                    <option value="">Keine Marke</option>
+                    <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="companyId">Unternehmen</label>
+                <select id="companyId" th:field="*{companyId}">
+                    <option value="">Kein Unternehmen</option>
+                    <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="categoryIds">Kategorien</label>
+                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6">
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="sourceIds">Quellen</label>
+                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6">
+                    <option th:each="source : ${sources}" th:value="${source.id}" th:text="${source.title}"></option>
+                </select>
+            </div>
+
+            <button type="submit" class="button primary">Produkt speichern</button>
+        </form>
+    </section>
+
+    <section class="box">
+        <h2>Marken verwalten</h2>
+        <form th:action="@{/admin/brands}" th:object="${brandRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="brandName">Name</label>
+                <input id="brandName" type="text" th:field="*{name}" required>
+            </div>
+            <div class="form-row">
+                <label for="brandDescription">Beschreibung</label>
+                <textarea id="brandDescription" th:field="*{description}" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button primary">Marke anlegen</button>
+        </form>
+
+        <div class="admin-list" th:if="${!#lists.isEmpty(brands)}">
+            <div class="admin-item" th:each="brand : ${brands}">
+                <strong th:text="${brand.name}">Marke</strong>
+                <form th:action="@{/admin/brands/{id}/delete(id=${brand.id})}" method="post">
+                    <button type="submit" class="button secondary danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h2>Kategorien verwalten</h2>
+        <form th:action="@{/admin/categories}" th:object="${categoryRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="categoryName">Name</label>
+                <input id="categoryName" type="text" th:field="*{name}" required>
+            </div>
+            <div class="form-row">
+                <label for="categoryDescription">Beschreibung</label>
+                <textarea id="categoryDescription" th:field="*{description}" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button primary">Kategorie anlegen</button>
+        </form>
+
+        <div class="admin-list" th:if="${!#lists.isEmpty(categories)}">
+            <div class="admin-item" th:each="category : ${categories}">
+                <strong th:text="${category.name}">Kategorie</strong>
+                <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post">
+                    <button type="submit" class="button secondary danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h2>Unternehmen verwalten</h2>
+        <form th:action="@{/admin/companies}" th:object="${companyRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="companyName">Name</label>
+                <input id="companyName" type="text" th:field="*{name}" required>
+            </div>
+            <div class="form-row">
+                <label for="companyWebsite">Website</label>
+                <input id="companyWebsite" type="text" th:field="*{website}">
+            </div>
+            <div class="form-row">
+                <label for="companyCountry">Land</label>
+                <input id="companyCountry" type="text" th:field="*{country}">
+            </div>
+            <div class="form-row">
+                <label for="companyDescription">Beschreibung</label>
+                <textarea id="companyDescription" th:field="*{description}" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button primary">Unternehmen anlegen</button>
+        </form>
+
+        <div class="admin-list" th:if="${!#lists.isEmpty(companies)}">
+            <div class="admin-item" th:each="company : ${companies}">
+                <strong th:text="${company.name}">Unternehmen</strong>
+                <form th:action="@{/admin/companies/{id}/delete(id=${company.id})}" method="post">
+                    <button type="submit" class="button secondary danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h2>Quellen verwalten</h2>
+        <form th:action="@{/admin/sources}" th:object="${sourceRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="sourceTitle">Titel</label>
+                <input id="sourceTitle" type="text" th:field="*{title}" required>
+            </div>
+            <div class="form-row">
+                <label for="sourceUrl">URL</label>
+                <input id="sourceUrl" type="url" th:field="*{url}" required>
+            </div>
+            <div class="form-row">
+                <label for="sourceType">Typ</label>
+                <input id="sourceType" type="text" th:field="*{type}">
+            </div>
+            <button type="submit" class="button primary">Quelle anlegen</button>
+        </form>
+
+        <div class="admin-list" th:if="${!#lists.isEmpty(sources)}">
+            <div class="admin-item" th:each="source : ${sources}">
+                <strong th:text="${source.title}">Quelle</strong>
+                <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post">
+                    <button type="submit" class="button secondary danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h2>Produktliste</h2>
+        <div th:if="${#lists.isEmpty(products)}" class="empty-state">Noch keine Produkte angelegt.</div>
+
+        <div th:unless="${#lists.isEmpty(products)}" class="admin-list">
+            <div class="admin-item" th:each="product : ${products}">
+                <div>
+                    <strong th:text="${product.name}">Produktname</strong>
+                    <div class="meta-row">
+                        <span th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                        <span th:if="${product.company != null}" th:text="${product.company.name}">Unternehmen</span>
+                    </div>
+                </div>
+
+                <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post">
+                    <button type="submit" class="button secondary danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

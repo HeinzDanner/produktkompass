@@ -24,7 +24,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/", "/products", "/favorites", "/login", "/error", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/products", "/products/**", "/favorites", "/login", "/register", "/error", "/css/**", "/js/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "EDITOR")
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/products",

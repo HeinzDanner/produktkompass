@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrieren – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="topbar">
+    <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}">ProduktKompass</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Übersicht</a>
+            <a th:href="@{/products}">Produkte</a>
+            <a th:href="@{/login}">Login</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container page-content">
+    <section class="login-panel box">
+        <h1>Registrieren</h1>
+        <p>Erstelle ein Konto, um Produkte zu merken und später deine Favoriten zu verwalten.</p>
+
+        <div th:if="${errorMessage}" class="alert error" th:text="${errorMessage}">Fehler beim Registrieren.</div>
+
+        <form th:action="@{/register}" th:object="${registrationRequest}" method="post">
+            <label for="username">Benutzername</label>
+            <input id="username" type="text" th:field="*{username}" placeholder="dein_name" required>
+
+            <label for="password">Passwort</label>
+            <input id="password" type="password" th:field="*{password}" placeholder="mindestens 6 Zeichen" required>
+
+            <button type="submit">Konto erstellen</button>
+        </form>
+
+        <p class="hint">Du hast bereits ein Konto? <a th:href="@{/login}">Zum Login</a></p>
+    </section>
+</main>
+</body>
+</html>

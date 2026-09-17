@@ -36,11 +36,11 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findAllWithDetails();
     }
 
     public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+        return productRepository.findByIdWithDetails(id);
     }
 
     public List<Product> getAlternativeProducts(Long productId) {
@@ -51,7 +51,7 @@ public class ProductService {
     }
 
     public List<Product> searchProducts(String name, Long brandId, Long categoryId) {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllWithDetails();
 
         if (name != null && !name.isBlank()) {
             products = products.stream()

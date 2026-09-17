@@ -23,6 +23,7 @@
 
         <div th:if="${param.error}" class="alert error">Benutzername oder Passwort ist falsch.</div>
         <div th:if="${param.logout}" class="alert success">Du hast dich erfolgreich abgemeldet.</div>
+        <div th:if="${param.registered}" class="alert success">Registrierung erfolgreich. Du kannst dich jetzt anmelden.</div>
 
         <form th:action="@{/login}" method="post">
             <label for="username">Benutzername</label>
@@ -35,6 +36,7 @@
         </form>
 
         <p class="hint">Demo-Admin: <strong>admin</strong> / <strong>admin123</strong></p>
+        <p class="hint"><a th:href="@{/register}">Noch kein Konto? Jetzt registrieren</a></p>
     </section>
 </main>
 </body>

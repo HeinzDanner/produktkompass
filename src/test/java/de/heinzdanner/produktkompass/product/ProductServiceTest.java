@@ -45,7 +45,7 @@ class ProductServiceTest {
         Product product1 = new Product("Bio-Hafermilch", "Klassische Hafermilch.");
         Product product2 = new Product("Fairtrade Schokolade", "Zartbitterschokolade.");
 
-        when(productRepository.findAll()).thenReturn(List.of(product1, product2));
+        when(productRepository.findAllWithDetails()).thenReturn(List.of(product1, product2));
 
         List<Product> result = productService.getAllProducts();
 
@@ -58,7 +58,7 @@ class ProductServiceTest {
     void getProductByIdReturnsProductWhenPresent() {
         Product product = new Product("Bio-Hafermilch", "Klassische Hafermilch.");
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(product));
 
         Optional<Product> result = productService.getProductById(1L);
 
@@ -80,7 +80,7 @@ class ProductServiceTest {
         Product product2 = new Product("Kakao Drink", "Getränk");
         product2.setBrand(new Brand("TestBrand", "Brand"));
 
-        when(productRepository.findAll()).thenReturn(List.of(product1, product2));
+        when(productRepository.findAllWithDetails()).thenReturn(List.of(product1, product2));
 
         List<Product> result = productService.searchProducts("hafer", 1L, 1L);
 
