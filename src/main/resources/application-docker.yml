@@ -1,6 +1,20 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/produktkompass
-    username: produktkompass
-    password: secret
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB:produktkompass}
+    username: ${POSTGRES_USER:produktkompass}
+    password: ${POSTGRES_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+
+server:
+  port: 8080

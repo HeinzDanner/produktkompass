@@ -4,18 +4,34 @@ services:
     container_name: produktkompass-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: produktkompass
-      POSTGRES_USER: produktkompass
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${POSTGRES_DB:-produktkompass}
+      POSTGRES_USER: ${POSTGRES_USER:-produktkompass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U produktkompass -d produktkompass"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-produktkompass} -d ${POSTGRES_DB:-produktkompass}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  app:
+    build:
+      context: .
+    container_name: produktkompass-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POSTGRES_DB: ${POSTGRES_DB:-produktkompass}
+      POSTGRES_USER: ${POSTGRES_USER:-produktkompass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
 volumes:
   postgres_data:
