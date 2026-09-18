@@ -54,6 +54,70 @@
             </div>
 
             <div class="form-row">
+                <label for="nutritionGrade">Nutri-Score</label>
+                <select id="nutritionGrade" th:field="*{nutritionGrade}">
+                    <option th:each="grade : ${nutritionGrades}" th:value="${grade}" th:text="${grade}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="packagingType">Verpackungsart</label>
+                <select id="packagingType" th:field="*{packagingType}">
+                    <option value="">Keine Angabe</option>
+                    <option th:each="packagingType : ${packagingTypes}" th:value="${packagingType}" th:text="${packagingType}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="packageSize">Packungsgröße</label>
+                <input id="packageSize" type="text" th:field="*{packageSize}" placeholder="z. B. 1 l oder 450 g">
+            </div>
+
+            <div class="form-row">
+                <label for="madeInGermany">Hersteller aus Deutschland</label>
+                <select id="madeInGermany" th:field="*{madeInGermany}">
+                    <option value="">Keine Angabe</option>
+                    <option th:value="true">Ja</option>
+                    <option th:value="false">Nein</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsLactose">Laktose</label>
+                <select id="containsLactose" th:field="*{containsLactose}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsGluten">Gluten</label>
+                <select id="containsGluten" th:field="*{containsGluten}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsAlcohol">Alkohol</label>
+                <select id="containsAlcohol" th:field="*{containsAlcohol}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsCaffeine">Koffein</label>
+                <select id="containsCaffeine" th:field="*{containsCaffeine}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="labels">Labels</label>
+                <select id="labels" th:field="*{labels}" multiple="multiple" size="8">
+                    <option th:each="label : ${productLabels}" th:value="${label}" th:text="${label}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
                 <label for="categoryIds">Kategorien</label>
                 <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6">
                     <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
@@ -190,6 +254,7 @@
                     <div class="meta-row">
                         <span th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
                         <span th:if="${product.company != null}" th:text="${product.company.name}">Unternehmen</span>
+                        <span th:if="${product.nutritionGrade != null}" th:text="${'Nutri-Score: ' + product.nutritionGrade}">Nutri-Score</span>
                     </div>
                 </div>
 

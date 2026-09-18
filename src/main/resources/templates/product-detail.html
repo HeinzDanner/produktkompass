@@ -45,6 +45,55 @@
             <strong>Unternehmen:</strong>
             <a th:href="@{/companies/{id}(id=${product.company.id})}" th:text="${product.company.name}">Unternehmen</a>
         </div>
+        <div class="meta-row" th:if="${product.company == null}">
+            <strong>Unternehmen:</strong>
+            <span>Unbekannt</span>
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-card">
+                <strong>Nutri-Score</strong>
+                <span th:text="${product.nutritionGrade != null ? product.nutritionGrade : 'UNKNOWN'}">UNKNOWN</span>
+            </div>
+            <div class="meta-card">
+                <strong>Verpackung</strong>
+                <span th:text="${product.packagingType != null ? product.packagingType : 'Keine Angabe'}">Keine Angabe</span>
+            </div>
+            <div class="meta-card">
+                <strong>Packungsgröße</strong>
+                <span th:text="${product.packageSize != null and !product.packageSize.isBlank() ? product.packageSize : 'Keine Angabe'}">Keine Angabe</span>
+            </div>
+            <div class="meta-card">
+                <strong>Hersteller aus Deutschland</strong>
+                <span th:text="${product.madeInGermany == null ? 'Keine Angabe' : (product.madeInGermany ? 'Ja' : 'Nein')}">Keine Angabe</span>
+            </div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-card">
+                <strong>Laktose</strong>
+                <span th:text="${product.containsLactose}">UNKNOWN</span>
+            </div>
+            <div class="meta-card">
+                <strong>Gluten</strong>
+                <span th:text="${product.containsGluten}">UNKNOWN</span>
+            </div>
+            <div class="meta-card">
+                <strong>Alkohol</strong>
+                <span th:text="${product.containsAlcohol}">UNKNOWN</span>
+            </div>
+            <div class="meta-card">
+                <strong>Koffein</strong>
+                <span th:text="${product.containsCaffeine}">UNKNOWN</span>
+            </div>
+        </div>
+
+        <div class="detail-labels" th:if="${product.labels != null and !product.labels.isEmpty()}">
+            <span class="badge detail-label-badge" th:each="label : ${product.labels}" th:text="${label}">VEGAN</span>
+        </div>
+        <div class="detail-labels detail-labels-empty" th:if="${product.labels == null or product.labels.isEmpty()}">
+            <span>Keine Angabe</span>
+        </div>
 
         <div class="actions action-group" style="margin-top:1.5rem; justify-content:flex-start;">
             <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>

@@ -1,11 +1,15 @@
 package de.heinzdanner.produktkompass.product;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -37,6 +41,42 @@ public class Product {
     @Size(max = 1000, message = "Die Beschreibung darf maximal 1000 Zeichen lang sein.")
     @Column(length = 1000)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nutrition_grade", length = 20)
+    private NutritionGrade nutritionGrade = NutritionGrade.UNKNOWN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "packaging_type", length = 30)
+    private PackagingType packagingType;
+
+    @Column(name = "package_size", length = 100)
+    private String packageSize;
+
+    @Column(name = "made_in_germany")
+    private Boolean madeInGermany;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contains_lactose", length = 20)
+    private IngredientStatus containsLactose = IngredientStatus.UNKNOWN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contains_gluten", length = 20)
+    private IngredientStatus containsGluten = IngredientStatus.UNKNOWN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contains_alcohol", length = 20)
+    private IngredientStatus containsAlcohol = IngredientStatus.UNKNOWN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contains_caffeine", length = 20)
+    private IngredientStatus containsCaffeine = IngredientStatus.UNKNOWN;
+
+    @ElementCollection(targetClass = ProductLabel.class)
+    @CollectionTable(name = "product_labels", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "label", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private Set<ProductLabel> labels = new HashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -120,6 +160,78 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public NutritionGrade getNutritionGrade() {
+        return nutritionGrade;
+    }
+
+    public void setNutritionGrade(NutritionGrade nutritionGrade) {
+        this.nutritionGrade = nutritionGrade;
+    }
+
+    public PackagingType getPackagingType() {
+        return packagingType;
+    }
+
+    public void setPackagingType(PackagingType packagingType) {
+        this.packagingType = packagingType;
+    }
+
+    public String getPackageSize() {
+        return packageSize;
+    }
+
+    public void setPackageSize(String packageSize) {
+        this.packageSize = packageSize;
+    }
+
+    public Boolean getMadeInGermany() {
+        return madeInGermany;
+    }
+
+    public void setMadeInGermany(Boolean madeInGermany) {
+        this.madeInGermany = madeInGermany;
+    }
+
+    public IngredientStatus getContainsLactose() {
+        return containsLactose;
+    }
+
+    public void setContainsLactose(IngredientStatus containsLactose) {
+        this.containsLactose = containsLactose;
+    }
+
+    public IngredientStatus getContainsGluten() {
+        return containsGluten;
+    }
+
+    public void setContainsGluten(IngredientStatus containsGluten) {
+        this.containsGluten = containsGluten;
+    }
+
+    public IngredientStatus getContainsAlcohol() {
+        return containsAlcohol;
+    }
+
+    public void setContainsAlcohol(IngredientStatus containsAlcohol) {
+        this.containsAlcohol = containsAlcohol;
+    }
+
+    public IngredientStatus getContainsCaffeine() {
+        return containsCaffeine;
+    }
+
+    public void setContainsCaffeine(IngredientStatus containsCaffeine) {
+        this.containsCaffeine = containsCaffeine;
+    }
+
+    public Set<ProductLabel> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Set<ProductLabel> labels) {
+        this.labels = labels;
     }
 
     public LocalDateTime getCreatedAt() {

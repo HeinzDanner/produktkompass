@@ -153,6 +153,11 @@ body {
     gap: 0.75rem;
 }
 
+.product-card-button {
+    margin-top: auto;
+    align-self: flex-start;
+}
+
 .product-header {
     display: flex;
     justify-content: space-between;
@@ -350,6 +355,39 @@ button.secondary:hover,
     border: 1px solid var(--border);
     border-radius: 12px;
     background: #f8fafc;
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.meta-card {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.detail-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1.75rem;
+}
+
+.detail-labels-empty {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.detail-label-badge {
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
 }
 
 button.danger {

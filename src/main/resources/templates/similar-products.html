@@ -21,8 +21,8 @@
         <div class="product-grid">
             <article class="product-card">
                 <h3 th:text="${product.name}">Produktname</h3>
-                <p th:text="${product.description}">Beschreibung</p>
-                <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+                <p th:text="${product.description != null ? product.description : 'Keine Beschreibung verfügbar.'}">Beschreibung</p>
+                <a class="button secondary product-card-button" th:href="@{/products/{id}(id=${product.id})}">Details</a>
             </article>
         </div>
     </section>
@@ -33,7 +33,7 @@
             <article class="product-card" th:each="alternative : ${similarProducts}">
                 <h3 th:text="${alternative.name}">Produktname</h3>
                 <p th:text="${alternative.description != null ? alternative.description : 'Keine Beschreibung verfügbar.'}">Beschreibung</p>
-                <a class="button secondary" th:href="@{/products/{id}(id=${alternative.id})}">Details</a>
+                <a class="button secondary product-card-button" th:href="@{/products/{id}(id=${alternative.id})}">Details</a>
             </article>
         </div>
         <p class="empty-state" th:if="${#lists.isEmpty(similarProducts)}">Keine ähnlichen Produkte gefunden.</p>

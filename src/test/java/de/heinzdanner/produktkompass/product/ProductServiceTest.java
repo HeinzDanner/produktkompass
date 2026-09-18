@@ -70,11 +70,14 @@ class ProductServiceTest {
     void searchProductsFiltersByNameBrandAndCategory() {
         Brand brand = new Brand("Alnatura", "Bio");
         Category category = new Category("Milchalternativen", "Pflanzlich");
+        Company company = new Company("Test Company", "https://example.com", "Deutschland", "Beschreibung");
         setField(brand, "id", 1L);
         setField(category, "id", 1L);
 
         Product product1 = new Product("Bio-Hafermilch", "Klassische Hafermilch.");
         product1.setBrand(brand);
+        product1.setCompany(company);
+        product1.setLabels(java.util.Set.of(ProductLabel.VEGAN));
         product1.addCategory(category);
 
         Product product2 = new Product("Kakao Drink", "Getränk");
@@ -86,6 +89,25 @@ class ProductServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("Bio-Hafermilch");
+    }
+
+    @Test
+    void searchProductsAlsoFindsByCategoryCompanyAndLabel() {
+        Brand brand = new Brand("Lindt", "Schokolade");
+        Category category = new Category("Süßwaren und Schokolade", "Schokolade");
+        Company company = new Company("Lindt & Sprüngli AG", "https://example.com", "Schweiz", "Beschreibung");
+
+        Product product = new Product("Excellence 70%", "Zartbitterschokolade.");
+        product.setBrand(brand);
+        product.setCompany(company);
+        product.setLabels(java.util.Set.of(ProductLabel.VEGETARIAN));
+        product.addCategory(category);
+
+        when(productRepository.findAllWithDetails()).thenReturn(List.of(product));
+
+        assertThat(productService.searchProducts("schokolade", null, null)).hasSize(1);
+        assertThat(productService.searchProducts("lindt", null, null)).hasSize(1);
+        assertThat(productService.searchProducts("vegetarian", null, null)).hasSize(1);
     }
 
     @Test
@@ -111,12 +133,47 @@ class ProductServiceTest {
         Product alternative = new Product("Haferdrink", "Alternative ohne Tierprodukte.");
         product.addAlternativeProduct(alternative);
 
-        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithDetails(10L)).thenReturn(Optional.of(product));
 
         List<Product> result = productService.getAlternativeProducts(10L);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("Haferdrink");
+    }
+
+    @Test
+    void getAlternativeProductsFallsBackToCategoryAndAttributes() {
+        Category category = new Category("Milchprodukte und Milchalternativen", "Beschreibung");
+        setField(category, "id", 1L);
+
+        Product product = new Product("Oat Drink", "Haferdrink");
+        setField(product, "id", 10L);
+        product.addCategory(category);
+        product.setNutritionGrade(NutritionGrade.A);
+        product.setPackagingType(PackagingType.TETRA_PAK);
+        product.setMadeInGermany(false);
+        product.setLabels(java.util.Set.of(ProductLabel.VEGAN));
+
+        Product strongMatch = new Product("Sojadrink", "Alternative");
+        setField(strongMatch, "id", 11L);
+        strongMatch.addCategory(category);
+        strongMatch.setNutritionGrade(NutritionGrade.A);
+        strongMatch.setPackagingType(PackagingType.TETRA_PAK);
+        strongMatch.setMadeInGermany(false);
+        strongMatch.setLabels(java.util.Set.of(ProductLabel.VEGAN));
+
+        Product weakerMatch = new Product("Schokomilch", "Andere Alternative");
+        setField(weakerMatch, "id", 12L);
+        weakerMatch.addCategory(category);
+        weakerMatch.setNutritionGrade(NutritionGrade.C);
+
+        when(productRepository.findByIdWithDetails(10L)).thenReturn(Optional.of(product));
+        when(productRepository.findAllWithDetails()).thenReturn(List.of(product, weakerMatch, strongMatch));
+
+        List<Product> result = productService.getAlternativeProducts(10L);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().getName()).isEqualTo("Sojadrink");
     }
 
     @Test
@@ -132,6 +189,15 @@ class ProductServiceTest {
                 "Klassische Hafermilch.",
                 1L,
                 null,
+                NutritionGrade.A,
+                PackagingType.TETRA_PAK,
+                "1 l",
+                true,
+                IngredientStatus.DOES_NOT_CONTAIN,
+                IngredientStatus.UNKNOWN,
+                IngredientStatus.DOES_NOT_CONTAIN,
+                IngredientStatus.DOES_NOT_CONTAIN,
+                java.util.Set.of(ProductLabel.VEGAN, ProductLabel.BIO),
                 List.of(2L),
                 List.of(),
                 List.of());
@@ -150,6 +216,11 @@ class ProductServiceTest {
         assertThat(result.getBrand().getName()).isEqualTo("Alnatura");
         assertThat(result.getCategories()).hasSize(1);
         assertThat(result.getCategories().iterator().next().getName()).isEqualTo("Milchalternativen");
+        assertThat(result.getNutritionGrade()).isEqualTo(NutritionGrade.A);
+        assertThat(result.getPackagingType()).isEqualTo(PackagingType.TETRA_PAK);
+        assertThat(result.getPackageSize()).isEqualTo("1 l");
+        assertThat(result.getMadeInGermany()).isTrue();
+        assertThat(result.getLabels()).containsExactlyInAnyOrder(ProductLabel.VEGAN, ProductLabel.BIO);
     }
 
     private static void setField(Object target, String fieldName, Long value) {

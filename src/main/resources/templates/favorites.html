@@ -42,6 +42,9 @@
                 <div class="meta-row" th:if="${product.company != null}">
                     <span th:text="${product.company.name}">Unternehmen</span>
                 </div>
+                <div class="meta-row" th:if="${product.company == null}">
+                    <span>Unternehmen unbekannt</span>
+                </div>
                 <div class="actions">
                     <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
                     <form th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}"

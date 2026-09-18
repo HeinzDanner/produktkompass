@@ -3,7 +3,11 @@ package de.heinzdanner.produktkompass.web;
 import de.heinzdanner.produktkompass.product.BrandService;
 import de.heinzdanner.produktkompass.product.CategoryService;
 import de.heinzdanner.produktkompass.product.CompanyService;
+import de.heinzdanner.produktkompass.product.IngredientStatus;
+import de.heinzdanner.produktkompass.product.NutritionGrade;
+import de.heinzdanner.produktkompass.product.PackagingType;
 import de.heinzdanner.produktkompass.product.ProductService;
+import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.product.SourceService;
 import de.heinzdanner.produktkompass.product.dto.BrandRequest;
 import de.heinzdanner.produktkompass.product.dto.CategoryRequest;
@@ -149,7 +153,16 @@ public class AdminController {
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("companies", companyService.getAllCompanies());
         model.addAttribute("sources", sourceService.getAllSources());
-        model.addAttribute("productRequest", new ProductRequest("", "", null, null, List.of(), List.of(), List.of()));
+        model.addAttribute("nutritionGrades", NutritionGrade.values());
+        model.addAttribute("packagingTypes", PackagingType.values());
+        model.addAttribute("ingredientStatuses", IngredientStatus.values());
+        model.addAttribute("productLabels", ProductLabel.values());
+        model.addAttribute("productRequest", new ProductRequest(
+                "", "", null, null,
+                NutritionGrade.UNKNOWN, null, "", null,
+                IngredientStatus.UNKNOWN, IngredientStatus.UNKNOWN, IngredientStatus.UNKNOWN, IngredientStatus.UNKNOWN,
+                java.util.Set.<ProductLabel>of(),
+                List.of(), List.of(), List.of()));
         model.addAttribute("brandRequest", new BrandRequest("", ""));
         model.addAttribute("categoryRequest", new CategoryRequest("", ""));
         model.addAttribute("companyRequest", new CompanyRequest("", "", "", ""));

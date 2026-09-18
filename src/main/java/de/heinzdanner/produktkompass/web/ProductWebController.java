@@ -5,7 +5,9 @@ import de.heinzdanner.produktkompass.product.Brand;
 import de.heinzdanner.produktkompass.product.CategoryService;
 import de.heinzdanner.produktkompass.product.Company;
 import de.heinzdanner.produktkompass.product.CompanyService;
+import de.heinzdanner.produktkompass.product.NutritionGrade;
 import de.heinzdanner.produktkompass.product.Product;
+import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.product.ProductService;
 import de.heinzdanner.produktkompass.user.AppUserService;
 import de.heinzdanner.produktkompass.user.Role;
@@ -46,9 +48,7 @@ public class ProductWebController {
     }
 
     @GetMapping("/")
-    public String home(Principal principal, Model model) {
-        model.addAttribute("products", productService.getAllProducts());
-        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
+    public String home() {
         return "index";
     }
 
@@ -56,14 +56,23 @@ public class ProductWebController {
     public String products(@RequestParam(required = false) String query,
                            @RequestParam(required = false) Long brandId,
                            @RequestParam(required = false) Long categoryId,
+                           @RequestParam(required = false) ProductLabel label,
+                           @RequestParam(required = false) NutritionGrade nutritionGrade,
+                           @RequestParam(required = false) Boolean madeInGermany,
                            Principal principal,
                            Model model) {
-        model.addAttribute("products", productService.searchProducts(query, brandId, categoryId));
+        model.addAttribute("products", productService.searchProducts(query, brandId, categoryId, label, nutritionGrade, madeInGermany));
         model.addAttribute("brands", brandService.getAllBrands());
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("productLabels", ProductLabel.values());
+        model.addAttribute("nutritionGrades", NutritionGrade.values());
         model.addAttribute("selectedQuery", query == null ? "" : query);
         model.addAttribute("selectedBrandId", brandId);
         model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedLabel", label);
+        model.addAttribute("selectedNutritionGrade", nutritionGrade);
+        model.addAttribute("selectedMadeInGermany", madeInGermany);
+        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null);
         model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
         return "products";
     }

@@ -1,8 +1,13 @@
 package de.heinzdanner.produktkompass.product.dto;
 
+import de.heinzdanner.produktkompass.product.IngredientStatus;
+import de.heinzdanner.produktkompass.product.NutritionGrade;
+import de.heinzdanner.produktkompass.product.PackagingType;
 import de.heinzdanner.produktkompass.product.Product;
+import de.heinzdanner.produktkompass.product.ProductLabel;
 
 import java.util.List;
+import java.util.Set;
 
 public record ProductResponse(
         Long id,
@@ -10,6 +15,15 @@ public record ProductResponse(
         String description,
         BrandResponse brand,
         CompanyResponse company,
+        NutritionGrade nutritionGrade,
+        PackagingType packagingType,
+        String packageSize,
+        Boolean madeInGermany,
+        IngredientStatus containsLactose,
+        IngredientStatus containsGluten,
+        IngredientStatus containsAlcohol,
+        IngredientStatus containsCaffeine,
+        Set<ProductLabel> labels,
         List<CategoryResponse> categories,
         List<SourceResponse> sources,
         List<Long> alternativeProductIds
@@ -47,6 +61,15 @@ public record ProductResponse(
                 product.getDescription(),
                 brandResponse,
                 companyResponse,
+                product.getNutritionGrade(),
+                product.getPackagingType(),
+                product.getPackageSize(),
+                product.getMadeInGermany(),
+                product.getContainsLactose(),
+                product.getContainsGluten(),
+                product.getContainsAlcohol(),
+                product.getContainsCaffeine(),
+                product.getLabels(),
                 categoryResponses,
                 sourceResponses,
                 alternativeProductIds

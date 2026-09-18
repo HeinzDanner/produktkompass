@@ -44,10 +44,24 @@ public class ProductService {
     }
 
     public List<Product> getAlternativeProducts(Long productId) {
-        return productRepository.findByIdWithDetails(productId)
-                .map(Product::getAlternativeProducts)
-                .map(alternatives -> alternatives.stream().toList())
-                .orElse(List.of());
+        Optional<Product> baseProductOptional = productRepository.findByIdWithDetails(productId);
+        if (baseProductOptional.isEmpty()) {
+            return List.of();
+        }
+
+        Product baseProduct = baseProductOptional.get();
+        if (baseProduct.getAlternativeProducts() != null && !baseProduct.getAlternativeProducts().isEmpty()) {
+            return baseProduct.getAlternativeProducts().stream().toList();
+        }
+
+        return productRepository.findAllWithDetails().stream()
+                .filter(candidate -> !Objects.equals(candidate.getId(), productId))
+                .filter(candidate -> sharesCategory(baseProduct, candidate))
+                .sorted((left, right) -> Integer.compare(
+                        similarityScore(baseProduct, right),
+                        similarityScore(baseProduct, left)))
+                .limit(6)
+                .toList();
     }
 
     public List<Product> getProductsWithAlternatives() {
@@ -55,13 +69,17 @@ public class ProductService {
     }
 
     public List<Product> searchProducts(String name, Long brandId, Long categoryId) {
+        return searchProducts(name, brandId, categoryId, null, null, null);
+    }
+
+    public List<Product> searchProducts(String name, Long brandId, Long categoryId, ProductLabel label,
+                                        NutritionGrade nutritionGrade, Boolean madeInGermany) {
         List<Product> products = productRepository.findAllWithDetails();
 
         if (name != null && !name.isBlank()) {
             String normalizedName = name.trim().toLowerCase();
             products = products.stream()
-                    .filter(product -> product.getName() != null
-                            && product.getName().toLowerCase().contains(normalizedName))
+                    .filter(product -> matchesSearchTerm(product, normalizedName))
                     .toList();
         }
 
@@ -80,7 +98,77 @@ public class ProductService {
                     .toList();
         }
 
+        if (label != null) {
+            products = products.stream()
+                    .filter(product -> product.getLabels() != null && product.getLabels().contains(label))
+                    .toList();
+        }
+
+        if (nutritionGrade != null) {
+            products = products.stream()
+                    .filter(product -> nutritionGrade.equals(product.getNutritionGrade()))
+                    .toList();
+        }
+
+        if (madeInGermany != null) {
+            products = products.stream()
+                    .filter(product -> Objects.equals(product.getMadeInGermany(), madeInGermany))
+                    .toList();
+        }
+
         return products;
+    }
+
+    private boolean matchesSearchTerm(Product product, String searchTerm) {
+        if (product.getName() != null && product.getName().toLowerCase().contains(searchTerm)) {
+            return true;
+        }
+        if (product.getDescription() != null && product.getDescription().toLowerCase().contains(searchTerm)) {
+            return true;
+        }
+        if (product.getBrand() != null && product.getBrand().getName() != null
+                && product.getBrand().getName().toLowerCase().contains(searchTerm)) {
+            return true;
+        }
+        if (product.getCompany() != null && product.getCompany().getName() != null
+                && product.getCompany().getName().toLowerCase().contains(searchTerm)) {
+            return true;
+        }
+        if (product.getCategories() != null && product.getCategories().stream()
+                .anyMatch(category -> category.getName() != null && category.getName().toLowerCase().contains(searchTerm))) {
+            return true;
+        }
+        return product.getLabels() != null && product.getLabels().stream()
+                .map(Enum::name)
+                .map(label -> label.toLowerCase().replace('_', ' '))
+                .anyMatch(label -> label.contains(searchTerm));
+    }
+
+    private boolean sharesCategory(Product left, Product right) {
+        return left.getCategories() != null
+                && right.getCategories() != null
+                && left.getCategories().stream().anyMatch(right.getCategories()::contains);
+    }
+
+    private int similarityScore(Product baseProduct, Product candidate) {
+        int score = 0;
+
+        if (Objects.equals(baseProduct.getNutritionGrade(), candidate.getNutritionGrade())) {
+            score += 2;
+        }
+        if (Objects.equals(baseProduct.getPackagingType(), candidate.getPackagingType())) {
+            score += 1;
+        }
+        if (Objects.equals(baseProduct.getMadeInGermany(), candidate.getMadeInGermany())) {
+            score += 1;
+        }
+        if (baseProduct.getLabels() != null && candidate.getLabels() != null) {
+            score += (int) baseProduct.getLabels().stream()
+                    .filter(candidate.getLabels()::contains)
+                    .count();
+        }
+
+        return score;
     }
 
     public List<Product> searchProducts(String name, Long brandId) {
@@ -112,6 +200,15 @@ public class ProductService {
 
         product.setBrand(resolveBrand(request.brandId()));
         product.setCompany(resolveCompany(request.companyId()));
+        product.setNutritionGrade(request.nutritionGrade() == null ? NutritionGrade.UNKNOWN : request.nutritionGrade());
+        product.setPackagingType(request.packagingType());
+        product.setPackageSize(request.packageSize());
+        product.setMadeInGermany(request.madeInGermany());
+        product.setContainsLactose(request.containsLactose() == null ? IngredientStatus.UNKNOWN : request.containsLactose());
+        product.setContainsGluten(request.containsGluten() == null ? IngredientStatus.UNKNOWN : request.containsGluten());
+        product.setContainsAlcohol(request.containsAlcohol() == null ? IngredientStatus.UNKNOWN : request.containsAlcohol());
+        product.setContainsCaffeine(request.containsCaffeine() == null ? IngredientStatus.UNKNOWN : request.containsCaffeine());
+        product.setLabels(new HashSet<>(request.labels()));
         product.setCategories(new HashSet<>(resolveCategories(request.categoryIds())));
         product.setSources(new HashSet<>(resolveSources(request.sourceIds())));
         product.setAlternativeProducts(new HashSet<>(resolveAlternatives(request.alternativeProductIds())));
@@ -129,6 +226,15 @@ public class ProductService {
                     existingProduct.setDescription(request.description());
                     existingProduct.setBrand(resolveBrand(request.brandId()));
                     existingProduct.setCompany(resolveCompany(request.companyId()));
+                    existingProduct.setNutritionGrade(request.nutritionGrade() == null ? NutritionGrade.UNKNOWN : request.nutritionGrade());
+                    existingProduct.setPackagingType(request.packagingType());
+                    existingProduct.setPackageSize(request.packageSize());
+                    existingProduct.setMadeInGermany(request.madeInGermany());
+                    existingProduct.setContainsLactose(request.containsLactose() == null ? IngredientStatus.UNKNOWN : request.containsLactose());
+                    existingProduct.setContainsGluten(request.containsGluten() == null ? IngredientStatus.UNKNOWN : request.containsGluten());
+                    existingProduct.setContainsAlcohol(request.containsAlcohol() == null ? IngredientStatus.UNKNOWN : request.containsAlcohol());
+                    existingProduct.setContainsCaffeine(request.containsCaffeine() == null ? IngredientStatus.UNKNOWN : request.containsCaffeine());
+                    existingProduct.setLabels(new HashSet<>(request.labels()));
                     existingProduct.setCategories(new HashSet<>(resolveCategories(request.categoryIds())));
                     existingProduct.setSources(new HashSet<>(resolveSources(request.sourceIds())));
                     existingProduct.setAlternativeProducts(new HashSet<>(resolveAlternatives(request.alternativeProductIds())));
