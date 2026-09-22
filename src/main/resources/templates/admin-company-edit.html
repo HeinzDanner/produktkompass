@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unternehmen bearbeiten - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Unternehmen bearbeiten</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+
+        <form th:action="@{/admin/companies/{id}(id=${companyId})}" th:object="${companyRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="companyName">Name</label>
+                <input id="companyName" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="companyWebsite">Website</label>
+                <input id="companyWebsite" type="text" th:field="*{website}">
+                <span class="field-error" th:if="${#fields.hasErrors('website')}" th:errors="*{website}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="companyCountry">Land</label>
+                <input id="companyCountry" type="text" th:field="*{country}">
+                <span class="field-error" th:if="${#fields.hasErrors('country')}" th:errors="*{country}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="companyDescription">Beschreibung</label>
+                <textarea id="companyDescription" th:field="*{description}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
+            </div>
+            <button type="submit" class="button primary">Änderungen speichern</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

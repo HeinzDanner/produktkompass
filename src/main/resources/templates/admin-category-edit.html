@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategorie bearbeiten - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Kategorie bearbeiten</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+
+        <form th:action="@{/admin/categories/{id}(id=${categoryId})}" th:object="${categoryRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="categoryName">Name</label>
+                <input id="categoryName" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="categoryDescription">Beschreibung</label>
+                <textarea id="categoryDescription" th:field="*{description}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
+            </div>
+            <button type="submit" class="button primary">Änderungen speichern</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

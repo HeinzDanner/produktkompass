@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ public record SourceRequest(
         @Size(max = 255, message = "Der Typ darf maximal 255 Zeichen lang sein.")
         String type,
 
+        @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
         LocalDateTime verifiedAt
 ) {
 }

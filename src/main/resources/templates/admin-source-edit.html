@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quelle bearbeiten - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Quelle bearbeiten</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+
+        <form th:action="@{/admin/sources/{id}(id=${sourceId})}" th:object="${sourceRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="sourceTitle">Titel</label>
+                <input id="sourceTitle" type="text" th:field="*{title}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="sourceUrl">URL</label>
+                <input id="sourceUrl" type="url" th:field="*{url}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('url')}" th:errors="*{url}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="sourceType">Typ</label>
+                <input id="sourceType" type="text" th:field="*{type}">
+                <span class="field-error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="verifiedAt">Prüfdatum</label>
+                <input id="verifiedAt" type="datetime-local" th:field="*{verifiedAt}">
+                <span class="field-error" th:if="${#fields.hasErrors('verifiedAt')}" th:errors="*{verifiedAt}">Fehler</span>
+            </div>
+            <button type="submit" class="button primary">Änderungen speichern</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -13,6 +13,18 @@
     <section class="box">
         <h1>Admin-Bereich</h1>
         <p>Verwalte Produkte, Marken, Unternehmen, Kategorien und Quellen zentral.</p>
+        <p><a th:href="@{/admin/audit-log}">Audit-Log ansehen &rarr;</a></p>
+
+        <div th:if="${adminSuccess}" class="alert success" th:text="${adminSuccess}">Erfolg.</div>
+        <div th:if="${adminError}" class="alert error" th:text="${adminError}">Fehler.</div>
+    </section>
+
+    <section class="box" th:if="${dataQualityWarnings != null and !#lists.isEmpty(dataQualityWarnings)}">
+        <h2>Datenqualitätswarnungen</h2>
+        <p class="hint">Diese Hinweise verhindern nichts, helfen aber bei der redaktionellen Pflege.</p>
+        <ul class="quality-warnings">
+            <li th:each="warning : ${dataQualityWarnings}" th:text="${warning}">Warnung</li>
+        </ul>
     </section>
 
     <section class="box">
@@ -21,11 +33,13 @@
             <div class="form-row">
                 <label for="name">Name</label>
                 <input id="name" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
             </div>
 
             <div class="form-row">
                 <label for="description">Beschreibung</label>
                 <textarea id="description" th:field="*{description}" rows="4"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
             </div>
 
             <div class="form-row">
@@ -132,10 +146,12 @@
             <div class="form-row">
                 <label for="brandName">Name</label>
                 <input id="brandName" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="brandDescription">Beschreibung</label>
                 <textarea id="brandDescription" th:field="*{description}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
             </div>
             <button type="submit" class="button primary">Marke anlegen</button>
         </form>
@@ -143,9 +159,12 @@
         <div class="admin-list" th:if="${!#lists.isEmpty(brands)}">
             <div class="admin-item" th:each="brand : ${brands}">
                 <strong th:text="${brand.name}">Marke</strong>
-                <form th:action="@{/admin/brands/{id}/delete(id=${brand.id})}" method="post">
-                    <button type="submit" class="button secondary danger">Löschen</button>
-                </form>
+                <div class="admin-item-actions">
+                    <a th:href="@{/admin/brands/{id}/edit(id=${brand.id})}" class="button secondary">Bearbeiten</a>
+                    <form th:action="@{/admin/brands/{id}/delete(id=${brand.id})}" method="post">
+                        <button type="submit" class="button secondary danger">Löschen</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
@@ -156,10 +175,12 @@
             <div class="form-row">
                 <label for="categoryName">Name</label>
                 <input id="categoryName" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="categoryDescription">Beschreibung</label>
                 <textarea id="categoryDescription" th:field="*{description}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
             </div>
             <button type="submit" class="button primary">Kategorie anlegen</button>
         </form>
@@ -167,9 +188,12 @@
         <div class="admin-list" th:if="${!#lists.isEmpty(categories)}">
             <div class="admin-item" th:each="category : ${categories}">
                 <strong th:text="${category.name}">Kategorie</strong>
-                <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post">
-                    <button type="submit" class="button secondary danger">Löschen</button>
-                </form>
+                <div class="admin-item-actions">
+                    <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}" class="button secondary">Bearbeiten</a>
+                    <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post">
+                        <button type="submit" class="button secondary danger">Löschen</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
@@ -180,18 +204,22 @@
             <div class="form-row">
                 <label for="companyName">Name</label>
                 <input id="companyName" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="companyWebsite">Website</label>
                 <input id="companyWebsite" type="text" th:field="*{website}">
+                <span class="field-error" th:if="${#fields.hasErrors('website')}" th:errors="*{website}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="companyCountry">Land</label>
                 <input id="companyCountry" type="text" th:field="*{country}">
+                <span class="field-error" th:if="${#fields.hasErrors('country')}" th:errors="*{country}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="companyDescription">Beschreibung</label>
                 <textarea id="companyDescription" th:field="*{description}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
             </div>
             <button type="submit" class="button primary">Unternehmen anlegen</button>
         </form>
@@ -199,9 +227,12 @@
         <div class="admin-list" th:if="${!#lists.isEmpty(companies)}">
             <div class="admin-item" th:each="company : ${companies}">
                 <strong th:text="${company.name}">Unternehmen</strong>
-                <form th:action="@{/admin/companies/{id}/delete(id=${company.id})}" method="post">
-                    <button type="submit" class="button secondary danger">Löschen</button>
-                </form>
+                <div class="admin-item-actions">
+                    <a th:href="@{/admin/companies/{id}/edit(id=${company.id})}" class="button secondary">Bearbeiten</a>
+                    <form th:action="@{/admin/companies/{id}/delete(id=${company.id})}" method="post">
+                        <button type="submit" class="button secondary danger">Löschen</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
@@ -212,14 +243,22 @@
             <div class="form-row">
                 <label for="sourceTitle">Titel</label>
                 <input id="sourceTitle" type="text" th:field="*{title}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="sourceUrl">URL</label>
                 <input id="sourceUrl" type="url" th:field="*{url}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('url')}" th:errors="*{url}">Fehler</span>
             </div>
             <div class="form-row">
                 <label for="sourceType">Typ</label>
                 <input id="sourceType" type="text" th:field="*{type}">
+                <span class="field-error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="verifiedAt">Prüfdatum</label>
+                <input id="verifiedAt" type="datetime-local" th:field="*{verifiedAt}">
+                <span class="field-error" th:if="${#fields.hasErrors('verifiedAt')}" th:errors="*{verifiedAt}">Fehler</span>
             </div>
             <button type="submit" class="button primary">Quelle anlegen</button>
         </form>
@@ -227,9 +266,12 @@
         <div class="admin-list" th:if="${!#lists.isEmpty(sources)}">
             <div class="admin-item" th:each="source : ${sources}">
                 <strong th:text="${source.title}">Quelle</strong>
-                <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post">
-                    <button type="submit" class="button secondary danger">Löschen</button>
-                </form>
+                <div class="admin-item-actions">
+                    <a th:href="@{/admin/sources/{id}/edit(id=${source.id})}" class="button secondary">Bearbeiten</a>
+                    <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post">
+                        <button type="submit" class="button secondary danger">Löschen</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
@@ -249,9 +291,12 @@
                     </div>
                 </div>
 
-                <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post">
-                    <button type="submit" class="button secondary danger">Löschen</button>
-                </form>
+                <div class="admin-item-actions">
+                    <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="button secondary">Bearbeiten</a>
+                    <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post">
+                        <button type="submit" class="button secondary danger">Löschen</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit-Log - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Audit-Log</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+        <p>Lückenlose Protokollierung aller redaktionellen Änderungen (neueste zuerst).</p>
+
+        <div th:if="${#lists.isEmpty(auditLogs)}" class="empty-state">Noch keine Einträge vorhanden.</div>
+
+        <table class="audit-table" th:unless="${#lists.isEmpty(auditLogs)}">
+            <thead>
+            <tr>
+                <th>Zeitpunkt</th>
+                <th>Entität</th>
+                <th>ID</th>
+                <th>Aktion</th>
+                <th>Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${auditLogs}">
+                <td th:text="${#temporals.format(log.createdAt, 'dd.MM.yyyy HH:mm:ss')}">Zeitpunkt</td>
+                <td th:text="${log.entityName}">Entität</td>
+                <td th:text="${log.entityId}">ID</td>
+                <td th:text="${log.action}">Aktion</td>
+                <td th:text="${log.details}">Details</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

@@ -87,6 +87,15 @@ Die App verbindet sich dann über den Compose-Service `postgres` mit PostgreSQL.
 - Passwort: `admin123`
 - Gilt nur, solange das Profil `prod` **nicht** aktiv ist (siehe oben).
 
+## Admin-Bereich
+
+Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
+
+- Anlegen, Bearbeiten und Löschen von Produkten, Marken, Kategorien, Unternehmen und Quellen
+- Feldbezogene Validierungsfehler direkt im jeweiligen Formular
+- Automatische Datenqualitätswarnungen (z. B. Produkt ohne Marke, ohne Quelle oder Quelle ohne Prüfdatum)
+- Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
+
 ## Wichtige Hinweise
 
 - Lokale Entwicklung und Produktivbetrieb laufen beide gegen PostgreSQL,

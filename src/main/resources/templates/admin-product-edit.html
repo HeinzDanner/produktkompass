@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produkt bearbeiten - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Produkt bearbeiten</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+
+        <form th:action="@{/admin/products/{id}(id=${productId})}" th:object="${productRequest}" method="post" class="admin-form">
+            <div class="form-row">
+                <label for="name">Name</label>
+                <input id="name" type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</span>
+            </div>
+
+            <div class="form-row">
+                <label for="description">Beschreibung</label>
+                <textarea id="description" th:field="*{description}" rows="4"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
+            </div>
+
+            <div class="form-row">
+                <label for="brandId">Marke</label>
+                <select id="brandId" th:field="*{brandId}">
+                    <option value="">Keine Marke</option>
+                    <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="companyId">Unternehmen</label>
+                <select id="companyId" th:field="*{companyId}">
+                    <option value="">Kein Unternehmen</option>
+                    <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="nutritionGrade">Nutri-Score</label>
+                <select id="nutritionGrade" th:field="*{nutritionGrade}">
+                    <option th:each="grade : ${nutritionGrades}" th:value="${grade}" th:text="${grade}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="packagingType">Verpackungsart</label>
+                <select id="packagingType" th:field="*{packagingType}">
+                    <option value="">Keine Angabe</option>
+                    <option th:each="packagingType : ${packagingTypes}" th:value="${packagingType}" th:text="${packagingType}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="packageSize">Packungsgröße</label>
+                <input id="packageSize" type="text" th:field="*{packageSize}" placeholder="z. B. 1 l oder 450 g">
+            </div>
+
+            <div class="form-row">
+                <label for="madeInGermany">Hersteller aus Deutschland</label>
+                <select id="madeInGermany" th:field="*{madeInGermany}">
+                    <option value="">Keine Angabe</option>
+                    <option th:value="true">Ja</option>
+                    <option th:value="false">Nein</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsLactose">Laktose</label>
+                <select id="containsLactose" th:field="*{containsLactose}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsGluten">Gluten</label>
+                <select id="containsGluten" th:field="*{containsGluten}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsAlcohol">Alkohol</label>
+                <select id="containsAlcohol" th:field="*{containsAlcohol}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="containsCaffeine">Koffein</label>
+                <select id="containsCaffeine" th:field="*{containsCaffeine}">
+                    <option th:each="status : ${ingredientStatuses}" th:value="${status}" th:text="${status}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="labels">Labels</label>
+                <select id="labels" th:field="*{labels}" multiple="multiple" size="8">
+                    <option th:each="label : ${productLabels}" th:value="${label}" th:text="${label}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="categoryIds">Kategorien</label>
+                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6">
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="sourceIds">Quellen</label>
+                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6">
+                    <option th:each="source : ${sources}" th:value="${source.id}" th:text="${source.title}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="alternativeProductIds">Alternative Produkte</label>
+                <select id="alternativeProductIds" th:field="*{alternativeProductIds}" multiple="multiple" size="6">
+                    <option th:each="candidate : ${allProducts}"
+                            th:if="${candidate.id != productId}"
+                            th:value="${candidate.id}" th:text="${candidate.name}"></option>
+                </select>
+            </div>
+
+            <button type="submit" class="button primary">Änderungen speichern</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

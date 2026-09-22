@@ -16,7 +16,7 @@ public class AuditLogService {
     }
 
     public List<AuditLog> getAllLogs() {
-        return auditLogRepository.findAll();
+        return auditLogRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @Transactional

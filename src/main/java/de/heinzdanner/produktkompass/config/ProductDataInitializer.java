@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -239,9 +240,9 @@ public class ProductDataInitializer implements ApplicationRunner {
         product.setContainsGluten(containsGluten);
         product.setContainsAlcohol(containsAlcohol);
         product.setContainsCaffeine(containsCaffeine);
-        product.setLabels(labels);
-        product.setCategories(categories);
-        product.setSources(sources);
+        product.setLabels(new HashSet<>(labels));
+        product.setCategories(new HashSet<>(categories));
+        product.setSources(new HashSet<>(sources));
         productRepository.save(product);
     }
 
@@ -266,9 +267,9 @@ public class ProductDataInitializer implements ApplicationRunner {
             existingProduct.setContainsGluten(containsGluten);
             existingProduct.setContainsAlcohol(containsAlcohol);
             existingProduct.setContainsCaffeine(containsCaffeine);
-            existingProduct.setLabels(labels);
-            existingProduct.setCategories(categories);
-            existingProduct.setSources(sources);
+            existingProduct.setLabels(new HashSet<>(labels));
+            existingProduct.setCategories(new HashSet<>(categories));
+            existingProduct.setSources(new HashSet<>(sources));
             productRepository.save(existingProduct);
             return;
         }
