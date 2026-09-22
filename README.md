@@ -8,27 +8,53 @@ ProduktKompass ist eine Spring Boot-Anwendung für einen neutralen Produkt- und 
 - Spring Boot 4.1.1
 - Spring Data JPA
 - Flyway
-- PostgreSQL
-- H2 für lokale Entwicklung
+- PostgreSQL (lokale Entwicklung und Produktivbetrieb)
+- H2 nur noch für automatisierte Tests
 - Thymeleaf für eine einfache Weboberfläche
 
 ## Entwicklungsprofile
 
-- `local`: Standardprofil mit H2-In-Memory-Datenbank
+- `local`: Standardprofil, verbindet sich mit einer lokal installierten
+  PostgreSQL-Datenbank (siehe unten für die Einrichtung)
 - `docker`: PostgreSQL-Setup für Container-basierte lokale Entwicklung
+  (z. B. für einen Rechner ohne lokale PostgreSQL-Installation)
 - `prod`: Muss bei einem echten Produktivbetrieb zusätzlich aktiviert werden
   (z. B. `SPRING_PROFILES_ACTIVE=docker,prod`). Dadurch werden die
   Demo-Zugänge (`admin`/`admin123`, `max`/`pw`) **nicht** angelegt.
 
-## Lokale Entwicklung mit H2
+Automatisierte Tests laufen unabhängig davon immer gegen eine isolierte
+H2-In-Memory-Datenbank (`src/test/resources/application-local.yml`), damit
+sie ohne lokale PostgreSQL-Installation und ohne gegenseitige Beeinflussung
+funktionieren.
+
+## Lokale Entwicklung mit PostgreSQL
+
+Voraussetzung: Eine lokal laufende PostgreSQL-Instanz (z. B. Version 16+).
+
+1. Rolle und Datenbank einmalig anlegen (als PostgreSQL-Superuser, z. B. `postgres`):
+
+```sql
+CREATE ROLE produktkompass LOGIN PASSWORD 'produktkompass_local_pw';
+CREATE DATABASE produktkompass OWNER produktkompass;
+GRANT ALL PRIVILEGES ON DATABASE produktkompass TO produktkompass;
+```
+
+2. App starten (Standardprofil `local`):
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Die App startet mit dem Standardprofil `local` und nutzt H2.
+Flyway führt beim Start automatisch alle Migrationen aus `src/main/resources/db/migration`
+gegen die Datenbank `produktkompass` aus und legt Demo-Daten an (außerhalb des `prod`-Profils).
+
+Falls andere Zugangsdaten verwendet werden sollen, können `spring.datasource.username`
+und `spring.datasource.password` in `src/main/resources/application-local.yml`
+angepasst werden (oder per Umgebungsvariable überschrieben werden).
 
 ## PostgreSQL mit Docker Compose
+
+Alternative, falls keine lokale PostgreSQL-Installation vorhanden ist:
 
 1. Kopiere die Beispiel-Umgebungsdatei:
 
@@ -52,8 +78,7 @@ Die App verbindet sich dann über den Compose-Service `postgres` mit PostgreSQL.
 
 ## Zugriff
 
-- App: http://localhost:8080
-- H2 Console: http://localhost:8080/h2-console
+- App: http://localhost:8082 (lokal) bzw. http://localhost:8080 (Docker-Profil)
 - PostgreSQL: localhost:5432
 
 ## Standardlogin
@@ -64,8 +89,9 @@ Die App verbindet sich dann über den Compose-Service `postgres` mit PostgreSQL.
 
 ## Wichtige Hinweise
 
-- Der lokale Standard bleibt H2, damit Entwicklung schnell und unkompliziert bleibt.
-- PostgreSQL wird als echte, persistente Datenbank für die spätere Produktiv- bzw. Container-Umgebung vorbereitet.
+- Lokale Entwicklung und Produktivbetrieb laufen beide gegen PostgreSQL,
+  um Verhaltensunterschiede zwischen Testumgebung und echter Datenbank zu vermeiden.
+- H2 wird ausschließlich noch von automatisierten Tests verwendet.
 - Flyway verwaltet die Schema-Änderungen und macht die Datenbankmigrationen reproduzierbar.
 - Server-seitige Zugriffsregeln (`SecurityConfig`) und deren Absicherung für anonym/USER/ADMIN sind
   durch `SecurityAccessTest` automatisiert abgedeckt.
