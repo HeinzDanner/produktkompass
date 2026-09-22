@@ -7,15 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav class="topbar">
-    <div class="container nav-wrap">
-        <a class="brand" th:href="@{/}">ProduktKompass</a>
-        <div class="nav-links">
-            <a th:href="@{/}">Übersicht</a>
-            <a th:href="@{/products}">Produkte</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 <main class="container page-content">
     <section class="login-panel box">
         <h1>Anmelden</h1>

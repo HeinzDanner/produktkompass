@@ -7,19 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav class="topbar">
-    <div class="container nav-wrap">
-        <a class="brand" th:href="@{/}">ProduktKompass</a>
-        <div class="nav-links">
-            <a th:href="@{/}">Übersicht</a>
-            <a th:href="@{/products}">Produkte</a>
-            <a th:href="@{/favorites}">Favoriten</a>
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit">Logout</button>
-            </form>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 <main class="container page-content">
     <section class="box">
         <h1>Meine Favoriten</h1>

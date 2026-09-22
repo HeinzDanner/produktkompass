@@ -65,6 +65,12 @@ body {
     font-size: 0.95rem;
 }
 
+.nav-username {
+    color: #93c5fd;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
 .page-content {
     padding: 2rem 0 3rem;
 }

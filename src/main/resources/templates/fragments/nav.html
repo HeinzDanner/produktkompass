@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="topbar" th:fragment="nav">
+    <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}">ProduktKompass</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Übersicht</a>
+            <a th:href="@{/products}">Produkte</a>
+            <a th:if="${navAuthenticated}" th:href="@{/favorites}">Favoriten</a>
+            <a th:if="${navIsAdmin}" th:href="@{/admin}">Admin</a>
+            <span class="nav-username" th:if="${navAuthenticated}" th:text="${navUsername}">Benutzer</span>
+            <a th:unless="${navAuthenticated}" th:href="@{/login}">Login</a>
+            <a th:unless="${navAuthenticated}" th:href="@{/register}">Registrieren</a>
+            <form th:if="${navAuthenticated}" th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

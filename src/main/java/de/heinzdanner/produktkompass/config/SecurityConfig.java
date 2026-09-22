@@ -24,7 +24,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/", "/products", "/products/**", "/favorites", "/login", "/register", "/error", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/products", "/products/**", "/brands/**", "/companies/**",
+                                "/login", "/register", "/error", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN", "EDITOR")
@@ -59,11 +60,11 @@ public class SecurityConfig {
                                 "/api/v1/companies/**",
                                 "/api/v1/sources/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("/favorites/**").authenticated()
+                        .requestMatchers("/favorites", "/favorites/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
+                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll())
                 .httpBasic(Customizer.withDefaults());
 
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));

@@ -7,20 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav class="topbar">
-    <div class="container nav-wrap">
-        <a class="brand" th:href="@{/}">ProduktKompass</a>
-        <div class="nav-links">
-            <a th:href="@{/}">Übersicht</a>
-            <a th:href="@{/products}">Produkte</a>
-            <a sec:authorize="isAuthenticated()" th:href="@{/favorites}">Favoriten</a>
-            <a sec:authorize="!isAuthenticated()" th:href="@{/login}">Login</a>
-            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit">Logout</button>
-            </form>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 <main class="container page-content">
     <th:block th:replace="${content}">
         Inhalt
