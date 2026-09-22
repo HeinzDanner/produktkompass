@@ -1,0 +1,33 @@
+server:
+  # In Produktion läuft die App typischerweise hinter einem Reverse Proxy
+  # (z. B. nginx, Traefik), der TLS terminiert und X-Forwarded-*-Header setzt.
+  # "framework" sorgt dafür, dass Spring diese Header auswertet (u. a. für
+  # korrekte https-Redirect-URLs), ohne dass die App selbst ein TLS-Zertifikat
+  # benötigt.
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+    de.heinzdanner.produktkompass: INFO

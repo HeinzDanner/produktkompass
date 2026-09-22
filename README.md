@@ -96,6 +96,50 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Automatische Datenqualitätswarnungen (z. B. Produkt ohne Marke, ohne Quelle oder Quelle ohne Prüfdatum)
 - Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
 
+## Fehlerseiten
+
+Für die häufigsten Fehlerfälle gibt es eigene, gestaltete Seiten statt der
+Spring-Boot-Whitelabel-Seite:
+
+- `403` – Kein Zugriff (z. B. USER versucht, `/admin` aufzurufen)
+- `404` – Seite nicht gefunden
+- `500` – Unerwarteter Serverfehler
+- Ein generischer Fallback für alle übrigen Fehlerstatuscodes
+
+Die Vorlagen liegen unter `src/main/resources/templates/error/` und werden von
+Spring Boots `BasicErrorController` automatisch anhand des HTTP-Status
+ausgewählt. Sie zeigen weiterhin die normale Navigation inkl. Loginstatus an.
+
+## Produktivbetrieb (`prod`-Profil)
+
+Das Profil `application-prod.yml` ist für einen echten Serverbetrieb hinter
+einem Reverse Proxy (z. B. nginx, Traefik) gedacht, der TLS terminiert:
+
+- `server.forward-headers-strategy: framework` sorgt dafür, dass die von dem
+  Proxy gesetzten `X-Forwarded-*`-Header korrekt ausgewertet werden.
+- Session-Cookies werden mit `Secure`, `HttpOnly` und `SameSite=Lax` gesetzt,
+  damit sie nur über HTTPS und nicht per JavaScript ausgelesen werden können.
+- Die Datenbankverbindung wird ausschließlich über Umgebungsvariablen
+  konfiguriert: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`,
+  `SPRING_DATASOURCE_PASSWORD`.
+- `ddl-auto: validate` – das Schema wird ausschließlich von Flyway verwaltet,
+  Hibernate darf es im Produktivbetrieb nicht selbst verändern.
+- Demo-Zugänge (`admin`/`admin123`, `max`/`pw`) werden nicht angelegt.
+
+Aktivierung zusätzlich zu einem Datenbankprofil, z. B.:
+
+```bash
+SPRING_PROFILES_ACTIVE=docker,prod \
+SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/produktkompass \
+SPRING_DATASOURCE_USERNAME=<user> \
+SPRING_DATASOURCE_PASSWORD=<passwort> \
+./mvnw spring-boot:run
+```
+
+**Wichtig:** Da Cookies mit `Secure` gesetzt werden, muss die App wirklich
+hinter HTTPS erreichbar sein – über HTTP würde der Browser den Cookie sonst
+verwerfen und Logins würden fehlschlagen.
+
 ## Wichtige Hinweise
 
 - Lokale Entwicklung und Produktivbetrieb laufen beide gegen PostgreSQL,
@@ -104,3 +148,7 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Flyway verwaltet die Schema-Änderungen und macht die Datenbankmigrationen reproduzierbar.
 - Server-seitige Zugriffsregeln (`SecurityConfig`) und deren Absicherung für anonym/USER/ADMIN sind
   durch `SecurityAccessTest` automatisiert abgedeckt.
+- Ein vollständiger Web-Flow (Registrierung → Login → Favorit hinzufügen/entfernen → Logout)
+  wird durch `WebFlowIntegrationTest` automatisiert geprüft.
+- Die eigenen Fehlerseiten (403/404) werden durch `ErrorPageRenderingTest` gegen
+  einen echten eingebetteten Server verifiziert.

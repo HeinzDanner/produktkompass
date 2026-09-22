@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seite nicht gefunden – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box error-page">
+        <h1>404 – Seite nicht gefunden</h1>
+        <p>Die angeforderte Seite oder das gesuchte Produkt existiert nicht (mehr).</p>
+        <p><a th:href="@{/products}" class="button primary">Zur Produktsuche</a></p>
+    </section>
+</main>
+</body>
+</html>

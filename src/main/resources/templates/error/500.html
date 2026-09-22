@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serverfehler – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box error-page">
+        <h1>500 – Es ist ein Fehler aufgetreten</h1>
+        <p>Etwas ist bei der Verarbeitung deiner Anfrage schiefgelaufen. Bitte versuche es später erneut.</p>
+        <p><a th:href="@{/}" class="button primary">Zur Startseite</a></p>
+    </section>
+</main>
+</body>
+</html>

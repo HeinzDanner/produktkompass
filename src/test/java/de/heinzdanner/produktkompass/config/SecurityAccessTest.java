@@ -94,4 +94,43 @@ class SecurityAccessTest {
     void adminIsReachableForEditor() throws Exception {
         mockMvc.perform(get("/admin")).andExpect(status().isOk());
     }
+
+    // --- Admin-Unterseiten (Bearbeiten, Audit-Log): gleiche Regeln wie /admin ---
+
+    @Test
+    @WithAnonymousUser
+    void adminAuditLogRedirectsAnonymousUserToLogin() throws Exception {
+        mockMvc.perform(get("/admin/audit-log"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser(username = "max", roles = "USER")
+    void adminAuditLogIsForbiddenForPlainUser() throws Exception {
+        mockMvc.perform(get("/admin/audit-log")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminAuditLogIsReachableForAdmin() throws Exception {
+        mockMvc.perform(get("/admin/audit-log")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "max", roles = "USER")
+    void adminProductEditIsForbiddenForPlainUser() throws Exception {
+        mockMvc.perform(get("/admin/products/1/edit")).andExpect(status().isForbidden());
+    }
+
+    // --- Zugriff auf 403-Seite liefert korrekten Statuscode ---
+    // (Die tatsächliche HTML-Fehlerseite wird in ErrorPageRenderingTest mit
+    // einem echten eingebetteten Server geprüft, da MockMvc keinen
+    // Error-Dispatch an einen Servlet-Container durchführt.)
+
+    @Test
+    @WithMockUser(username = "max", roles = "USER")
+    void forbiddenAdminAccessReturnsForbiddenStatus() throws Exception {
+        mockMvc.perform(get("/admin")).andExpect(status().isForbidden());
+    }
 }

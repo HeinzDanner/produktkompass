@@ -463,6 +463,15 @@ button.secondary:hover,
     font-weight: 600;
 }
 
+.error-page {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.error-page h1 {
+    margin-bottom: 1rem;
+}
+
 .meta-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
