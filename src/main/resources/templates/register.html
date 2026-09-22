@@ -19,9 +19,15 @@
         <form th:action="@{/register}" th:object="${registrationRequest}" method="post">
             <label for="username">Benutzername</label>
             <input id="username" type="text" th:field="*{username}" placeholder="dein_name" required>
+            <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Fehler</span>
 
             <label for="password">Passwort</label>
-            <input id="password" type="password" th:field="*{password}" placeholder="mindestens 6 Zeichen" required>
+            <input id="password" type="password" th:field="*{password}" placeholder="mindestens 8 Zeichen, Groß-/Kleinbuchstaben und Zahl" required>
+            <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Fehler</span>
+
+            <label for="confirmPassword">Passwort bestätigen</label>
+            <input id="confirmPassword" type="password" th:field="*{confirmPassword}" placeholder="Passwort wiederholen" required>
+            <span class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Fehler</span>
 
             <button type="submit">Konto erstellen</button>
         </form>

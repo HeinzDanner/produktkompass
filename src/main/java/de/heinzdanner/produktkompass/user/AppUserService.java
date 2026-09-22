@@ -32,7 +32,7 @@ public class AppUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser appUser = appUserRepository.findByUsername(username)
+        AppUser appUser = appUserRepository.findByUsername(normalizeUsername(username))
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
         return User.withUsername(appUser.getUsername())
@@ -105,12 +105,25 @@ public class AppUserService implements UserDetailsService {
 
     @Transactional
     public AppUser registerUser(String username, String rawPassword, Role role) {
-        if (appUserRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Benutzername ist bereits vorhanden.");
+        String normalizedUsername = normalizeUsername(username);
+        if (appUserRepository.findByUsername(normalizedUsername).isPresent()) {
+            throw new IllegalArgumentException("Dieser Benutzername ist bereits vergeben. Bitte wähle einen anderen.");
         }
 
         String encodedPassword = passwordEncoder.encode(rawPassword);
-        AppUser appUser = new AppUser(username, encodedPassword, role);
+        AppUser appUser = new AppUser(normalizedUsername, encodedPassword, role);
         return appUserRepository.save(appUser);
+    }
+
+    /**
+     * Entfernt führende/nachfolgende Leerzeichen sowie doppelte Leerzeichen
+     * innerhalb des Benutzernamens, damit z. B. "max " und "max" nicht als
+     * unterschiedliche Konten behandelt werden.
+     */
+    private String normalizeUsername(String username) {
+        if (username == null) {
+            return null;
+        }
+        return username.trim().replaceAll("\\s+", " ");
     }
 }

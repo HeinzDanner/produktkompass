@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Tags – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">Persönliche Tags</p>
+                <h1>Meine Tags</h1>
+            </div>
+        </div>
+
+        <p class="lead">
+            Lege eigene Tags an, um Produkte und Marken für deine Suche zu gruppieren
+            (z. B. "Lieblingsmarken" oder "Einkaufsliste"). Du kannst maximal
+            <strong th:text="${maxTags}">5</strong> Tags gleichzeitig anlegen.
+        </p>
+
+        <div th:if="${tagError}" class="alert error" th:text="${tagError}">Fehler</div>
+
+        <ul class="tag-list" th:if="${tags != null and !tags.isEmpty()}">
+            <li th:each="tag : ${tags}" class="tag-list-item">
+                <span class="badge" th:text="${tag.name}">Tag</span>
+                <span class="tag-meta" th:text="${tag.products.size()} + ' Produkt(e), ' + ${tag.brands.size()} + ' Marke(n)'">0 Produkte</span>
+                <form th:action="@{/tags/{id}/delete(id=${tag.id})}" method="post">
+                    <button type="submit" class="secondary">Löschen</button>
+                </form>
+            </li>
+        </ul>
+        <p th:if="${tags == null or tags.isEmpty()}">Du hast noch keine eigenen Tags angelegt.</p>
+
+        <form th:if="${tags == null or tags.size() < maxTags}" th:action="@{/tags}" method="post" class="tag-create-form">
+            <label for="name">Neuer Tag</label>
+            <input id="name" type="text" name="name" placeholder="z. B. Lieblingsmarken" maxlength="50" required>
+            <button type="submit">Tag anlegen</button>
+        </form>
+        <p class="hint" th:if="${tags != null and tags.size() >= maxTags}">
+            Du hast die maximale Anzahl an Tags erreicht. Lösche einen Tag, um einen neuen anzulegen.
+        </p>
+    </section>
+</main>
+</body>
+</html>

@@ -58,4 +58,26 @@ class AppUserServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("Bio-Hafermilch");
     }
+
+    @Test
+    void registerUserTrimsAndCollapsesWhitespaceInUsername() {
+        when(appUserRepository.findByUsername("max mustermann")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Passwort1")).thenReturn("encoded");
+        when(appUserRepository.save(org.mockito.ArgumentMatchers.any(AppUser.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AppUser result = appUserService.registerUser("  max   mustermann  ", "Passwort1", Role.USER);
+
+        assertThat(result.getUsername()).isEqualTo("max mustermann");
+    }
+
+    @Test
+    void registerUserRejectsDuplicateUsername() {
+        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(new AppUser("max", "pw", Role.USER)));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> appUserService.registerUser("max", "Passwort1", Role.USER))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("bereits vergeben");
+    }
 }

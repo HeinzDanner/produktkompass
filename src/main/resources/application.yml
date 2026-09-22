@@ -16,3 +16,8 @@ spring:
 
   flyway:
     enabled: true
+
+produktkompass:
+  user-tags:
+    # Maximale Anzahl eigener Tags, die ein Benutzer anlegen darf.
+    max-per-user: 5

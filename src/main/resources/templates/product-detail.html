@@ -97,6 +97,23 @@
             </form>
             <a class="button secondary" th:href="@{/products/{id}/similar(id=${product.id})}">Ähnliche Produkte</a>
         </div>
+
+        <div class="tag-assign-box" th:if="${userTags != null}">
+            <strong>Meine Tags für dieses Produkt</strong>
+            <p class="hint" th:if="${userTags.isEmpty()}">
+                Du hast noch keine eigenen Tags. <a th:href="@{/tags}">Jetzt einen Tag anlegen</a>.
+            </p>
+            <form th:if="${!userTags.isEmpty()}" th:action="@{/tags/products/{id}(id=${product.id})}" method="post">
+                <div class="tag-assign-options">
+                    <label th:each="tag : ${userTags}">
+                        <input type="checkbox" name="tagIds" th:value="${tag.id}"
+                               th:checked="${assignedTagIds.contains(tag.id)}">
+                        <span th:text="${tag.name}">Tag</span>
+                    </label>
+                </div>
+                <button type="submit" class="secondary">Tags speichern</button>
+            </form>
+        </div>
     </section>
 
     <section class="box" th:if="${product.sources != null and !product.sources.isEmpty()}">

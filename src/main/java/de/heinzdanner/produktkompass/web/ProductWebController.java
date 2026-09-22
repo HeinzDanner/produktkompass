@@ -11,6 +11,8 @@ import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.product.ProductService;
 import de.heinzdanner.produktkompass.user.AppUserService;
 import de.heinzdanner.produktkompass.user.Role;
+import de.heinzdanner.produktkompass.usertag.UserTag;
+import de.heinzdanner.produktkompass.usertag.UserTagService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,17 +36,20 @@ public class ProductWebController {
     private final BrandService brandService;
     private final CategoryService categoryService;
     private final CompanyService companyService;
+    private final UserTagService userTagService;
 
     public ProductWebController(ProductService productService,
                                AppUserService appUserService,
                                BrandService brandService,
                                CategoryService categoryService,
-                               CompanyService companyService) {
+                               CompanyService companyService,
+                               UserTagService userTagService) {
         this.productService = productService;
         this.appUserService = appUserService;
         this.brandService = brandService;
         this.categoryService = categoryService;
         this.companyService = companyService;
+        this.userTagService = userTagService;
     }
 
     @GetMapping("/")
@@ -59,9 +64,19 @@ public class ProductWebController {
                            @RequestParam(required = false) ProductLabel label,
                            @RequestParam(required = false) NutritionGrade nutritionGrade,
                            @RequestParam(required = false) Boolean madeInGermany,
+                           @RequestParam(required = false) Long tagId,
                            Principal principal,
                            Model model) {
-        model.addAttribute("products", productService.searchProducts(query, brandId, categoryId, label, nutritionGrade, madeInGermany));
+        List<Product> products = productService.searchProducts(query, brandId, categoryId, label, nutritionGrade, madeInGermany);
+
+        if (tagId != null && principal != null) {
+            Set<Long> tagProductIds = userTagService.resolveProductIdsForTag(principal.getName(), tagId);
+            products = products.stream()
+                    .filter(product -> tagProductIds.contains(product.getId()))
+                    .toList();
+        }
+
+        model.addAttribute("products", products);
         model.addAttribute("brands", brandService.getAllBrands());
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("productLabels", ProductLabel.values());
@@ -72,8 +87,12 @@ public class ProductWebController {
         model.addAttribute("selectedLabel", label);
         model.addAttribute("selectedNutritionGrade", nutritionGrade);
         model.addAttribute("selectedMadeInGermany", madeInGermany);
-        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null);
+        model.addAttribute("selectedTagId", tagId);
+        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
         model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
+        if (principal != null) {
+            model.addAttribute("userTagOptions", userTagService.getTagsForUser(principal.getName()));
+        }
         return "products";
     }
 
@@ -88,6 +107,14 @@ public class ProductWebController {
 
         model.addAttribute("product", product);
         model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
+        if (principal != null) {
+            List<UserTag> userTags = userTagService.getTagsForUser(principal.getName());
+            model.addAttribute("userTags", userTags);
+            model.addAttribute("assignedTagIds", userTags.stream()
+                    .filter(tag -> tag.getProducts().contains(product))
+                    .map(UserTag::getId)
+                    .collect(Collectors.toSet()));
+        }
         return "product-detail";
     }
 
@@ -104,7 +131,7 @@ public class ProductWebController {
     }
 
     @GetMapping("/brands/{id}")
-    public String brandDetail(@PathVariable Long id, Model model) {
+    public String brandDetail(@PathVariable Long id, Principal principal, Model model) {
         Brand brand = brandService.getBrandById(id).orElse(null);
         if (brand == null) {
             return "redirect:/products";
@@ -114,6 +141,14 @@ public class ProductWebController {
         model.addAttribute("products", productService.getAllProducts().stream()
                 .filter(product -> product.getBrand() != null && product.getBrand().getId().equals(id))
                 .toList());
+        if (principal != null) {
+            List<UserTag> userTags = userTagService.getTagsForUser(principal.getName());
+            model.addAttribute("userTags", userTags);
+            model.addAttribute("assignedTagIds", userTags.stream()
+                    .filter(tag -> tag.getBrands().contains(brand))
+                    .map(UserTag::getId)
+                    .collect(Collectors.toSet()));
+        }
         return "brand-detail";
     }
 
@@ -156,8 +191,14 @@ public class ProductWebController {
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("registrationRequest") RegistrationForm registrationForm,
-                              BindingResult bindingResult,
-                              Model model) {
+                              BindingResult bindingResult) {
+        if (registrationForm.password() != null
+                && registrationForm.confirmPassword() != null
+                && !registrationForm.password().equals(registrationForm.confirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "password.mismatch",
+                    "Die Passwörter stimmen nicht überein.");
+        }
+
         if (bindingResult.hasErrors()) {
             return "register";
         }
@@ -166,7 +207,7 @@ public class ProductWebController {
             appUserService.registerUser(registrationForm.username(), registrationForm.password(), Role.USER);
             return "redirect:/login?registered";
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+            bindingResult.rejectValue("username", "username.duplicate", ex.getMessage());
             return "register";
         }
     }
@@ -197,11 +238,17 @@ public class ProductWebController {
             String username,
 
             @jakarta.validation.constraints.NotBlank(message = "Das Passwort darf nicht leer sein.")
-            @jakarta.validation.constraints.Size(min = 6, message = "Das Passwort muss mindestens 6 Zeichen lang sein.")
-            String password
+            @jakarta.validation.constraints.Pattern(
+                    regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+                    message = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß-, Kleinbuchstaben sowie eine Ziffer enthalten."
+            )
+            String password,
+
+            @jakarta.validation.constraints.NotBlank(message = "Bitte bestätige das Passwort.")
+            String confirmPassword
     ) {
         public RegistrationForm() {
-            this(null, null);
+            this(null, null, null);
         }
     }
 
