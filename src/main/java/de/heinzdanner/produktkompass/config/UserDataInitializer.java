@@ -6,10 +6,18 @@ import de.heinzdanner.produktkompass.user.Role;
 import de.heinzdanner.produktkompass.product.ProductRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Legt Demo-Zugänge (admin/max) für Entwicklung und Tests an.
+ * Läuft NICHT, wenn das Profil "prod" aktiv ist - vor einem echten
+ * Produktivbetrieb muss das Profil "prod" (zusätzlich zum DB-Profil)
+ * aktiviert werden, damit diese Demo-Konten nicht im Live-System landen.
+ */
 @Component
+@Profile("!prod")
 public class UserDataInitializer implements ApplicationRunner {
 
     private final AppUserRepository appUserRepository;
