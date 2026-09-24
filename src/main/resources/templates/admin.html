@@ -161,7 +161,8 @@
                 <strong th:text="${brand.name}">Marke</strong>
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/brands/{id}/edit(id=${brand.id})}" class="button secondary">Bearbeiten</a>
-                    <form th:action="@{/admin/brands/{id}/delete(id=${brand.id})}" method="post">
+                    <form th:action="@{/admin/brands/{id}/delete(id=${brand.id})}" method="post"
+                          onsubmit="return confirm('Marke wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                         <button type="submit" class="button secondary danger">Löschen</button>
                     </form>
                 </div>
@@ -190,7 +191,8 @@
                 <strong th:text="${category.name}">Kategorie</strong>
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}" class="button secondary">Bearbeiten</a>
-                    <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post">
+                    <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post"
+                          onsubmit="return confirm('Kategorie wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                         <button type="submit" class="button secondary danger">Löschen</button>
                     </form>
                 </div>
@@ -229,7 +231,8 @@
                 <strong th:text="${company.name}">Unternehmen</strong>
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/companies/{id}/edit(id=${company.id})}" class="button secondary">Bearbeiten</a>
-                    <form th:action="@{/admin/companies/{id}/delete(id=${company.id})}" method="post">
+                    <form th:action="@{/admin/companies/{id}/delete(id=${company.id})}" method="post"
+                          onsubmit="return confirm('Unternehmen wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                         <button type="submit" class="button secondary danger">Löschen</button>
                     </form>
                 </div>
@@ -268,7 +271,8 @@
                 <strong th:text="${source.title}">Quelle</strong>
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/sources/{id}/edit(id=${source.id})}" class="button secondary">Bearbeiten</a>
-                    <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post">
+                    <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post"
+                          onsubmit="return confirm('Quelle wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                         <button type="submit" class="button secondary danger">Löschen</button>
                     </form>
                 </div>
@@ -293,7 +297,8 @@
 
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="button secondary">Bearbeiten</a>
-                    <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post">
+                    <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post"
+                          onsubmit="return confirm('Produkt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                         <button type="submit" class="button secondary danger">Löschen</button>
                     </form>
                 </div>

@@ -80,4 +80,46 @@ class AppUserServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("bereits vergeben");
     }
+
+    @Test
+    void registerFailedLoginLocksAccountAfterMaxAttempts() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.save(user)).thenReturn(user);
+
+        for (int i = 0; i < AppUserService.MAX_FAILED_LOGIN_ATTEMPTS - 1; i++) {
+            appUserService.registerFailedLogin("max");
+        }
+        assertThat(user.getFailedLoginAttempts()).isEqualTo(AppUserService.MAX_FAILED_LOGIN_ATTEMPTS - 1);
+        assertThat(user.isCurrentlyLocked()).isFalse();
+
+        appUserService.registerFailedLogin("max");
+
+        assertThat(user.getFailedLoginAttempts()).isEqualTo(AppUserService.MAX_FAILED_LOGIN_ATTEMPTS);
+        assertThat(user.isCurrentlyLocked()).isTrue();
+        assertThat(user.getLockedUntil()).isAfter(java.time.LocalDateTime.now());
+    }
+
+    @Test
+    void registerSuccessfulLoginResetsFailedAttemptsAndLock() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        user.setFailedLoginAttempts(4);
+        user.setLockedUntil(java.time.LocalDateTime.now().plusMinutes(10));
+        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.save(user)).thenReturn(user);
+
+        appUserService.registerSuccessfulLogin("max");
+
+        assertThat(user.getFailedLoginAttempts()).isZero();
+        assertThat(user.getLockedUntil()).isNull();
+        assertThat(user.isCurrentlyLocked()).isFalse();
+    }
+
+    @Test
+    void expiredLockDoesNotCountAsCurrentlyLocked() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        user.setLockedUntil(java.time.LocalDateTime.now().minusMinutes(1));
+
+        assertThat(user.isCurrentlyLocked()).isFalse();
+    }
 }

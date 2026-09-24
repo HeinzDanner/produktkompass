@@ -91,7 +91,8 @@ public class SecurityConfig {
                         .requestMatchers("/favorites", "/favorites/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form.loginPage("/login").permitAll())
+                .formLogin(form -> form.loginPage("/login").permitAll()
+                        .failureHandler(new LoginFailureHandler()))
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll());
 
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));

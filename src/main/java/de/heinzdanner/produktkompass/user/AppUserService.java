@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,6 +19,17 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class AppUserService implements UserDetailsService {
+
+    /**
+     * Nach so vielen aufeinanderfolgenden Fehlversuchen wird das Konto
+     * vorübergehend gesperrt (Schutz gegen Brute-Force-Angriffe).
+     */
+    static final int MAX_FAILED_LOGIN_ATTEMPTS = 5;
+
+    /**
+     * Dauer der automatischen Sperre nach zu vielen Fehlversuchen.
+     */
+    static final Duration LOCKOUT_DURATION = Duration.ofMinutes(15);
 
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
@@ -39,7 +52,40 @@ public class AppUserService implements UserDetailsService {
                 .password(appUser.getPassword())
                 .roles(appUser.getRole().name())
                 .disabled(!appUser.isEnabled())
+                .accountLocked(appUser.isCurrentlyLocked())
                 .build();
+    }
+
+    /**
+     * Wird nach einem fehlgeschlagenen Login-Versuch aufgerufen. Zählt die
+     * Fehlversuche des Benutzers hoch und sperrt das Konto vorübergehend,
+     * sobald {@link #MAX_FAILED_LOGIN_ATTEMPTS} erreicht ist.
+     */
+    @Transactional
+    public void registerFailedLogin(String username) {
+        appUserRepository.findByUsername(normalizeUsername(username)).ifPresent(user -> {
+            int attempts = user.getFailedLoginAttempts() + 1;
+            user.setFailedLoginAttempts(attempts);
+            if (attempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+                user.setLockedUntil(LocalDateTime.now().plus(LOCKOUT_DURATION));
+            }
+            appUserRepository.save(user);
+        });
+    }
+
+    /**
+     * Setzt den Fehlversuchszähler und eine eventuelle Sperre nach einem
+     * erfolgreichen Login zurück.
+     */
+    @Transactional
+    public void registerSuccessfulLogin(String username) {
+        appUserRepository.findByUsername(normalizeUsername(username)).ifPresent(user -> {
+            if (user.getFailedLoginAttempts() > 0 || user.getLockedUntil() != null) {
+                user.setFailedLoginAttempts(0);
+                user.setLockedUntil(null);
+                appUserRepository.save(user);
+            }
+        });
     }
 
     public List<AppUser> getAllUsers() {

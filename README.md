@@ -95,6 +95,25 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Feldbezogene Validierungsfehler direkt im jeweiligen Formular
 - Automatische Datenqualitätswarnungen (z. B. Produkt ohne Marke, ohne Quelle oder Quelle ohne Prüfdatum)
 - Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
+- Eine JavaScript-Bestätigung ("Wirklich löschen?") vor jedem Löschvorgang, um versehentliches Löschen zu verhindern
+
+## Schutz gegen Brute-Force-Logins
+
+Nach 5 aufeinanderfolgenden Fehlversuchen wird ein Benutzerkonto für 15 Minuten
+automatisch gesperrt (`AppUserService.MAX_FAILED_LOGIN_ATTEMPTS` /
+`LOCKOUT_DURATION`). Ein erfolgreicher Login setzt den Zähler zurück.
+
+- Falsches Passwort/unbekannter Benutzername → `/login?error`
+- Konto gesperrt → `/login?locked` mit eigener Meldung
+- Selbst das korrekte Passwort wird während der Sperre abgelehnt
+- Umgesetzt über einen `AuthenticationEventPublisher`-Listener
+  (`config/LoginAttemptListener.java`) und zwei neue Spalten in `app_users`
+  (`failed_login_attempts`, `locked_until`, Migration `V11`)
+- Falls ein Testkonto (z. B. `max`) versehentlich gesperrt wird, kann die Sperre
+  manuell per SQL aufgehoben werden:
+  ```sql
+  UPDATE app_users SET failed_login_attempts = 0, locked_until = NULL WHERE username = 'max';
+  ```
 
 ## Fehlerseiten
 
