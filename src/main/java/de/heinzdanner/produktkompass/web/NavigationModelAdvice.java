@@ -25,6 +25,7 @@ public class NavigationModelAdvice {
         model.addAttribute("navAuthenticated", authenticated);
         model.addAttribute("navUsername", authenticated ? authentication.getName() : null);
         model.addAttribute("navIsAdmin", authenticated && hasAnyRole(authentication, "ROLE_ADMIN", "ROLE_EDITOR"));
+        model.addAttribute("navIsAdministrator", authenticated && hasAnyRole(authentication, "ROLE_ADMIN"));
     }
 
     private boolean isAnonymous(Authentication authentication) {

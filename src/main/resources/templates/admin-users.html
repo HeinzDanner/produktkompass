@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benutzerverwaltung - ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main class="container page-content">
+    <section class="box">
+        <h1>Benutzer und Rollen</h1>
+        <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
+        <p>Nur Administratoren können Rollen ändern und gesperrte Konten entsperren.</p>
+
+        <div th:if="${adminSuccess}" class="alert success" th:text="${adminSuccess}">Erfolg.</div>
+        <div th:if="${adminError}" class="alert error" th:text="${adminError}">Fehler.</div>
+
+        <div class="table-scroll">
+            <table class="audit-table user-table">
+                <thead>
+                <tr>
+                    <th>Benutzername</th>
+                    <th>Rolle</th>
+                    <th>Status</th>
+                    <th>Fehlversuche</th>
+                    <th>Aktionen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td>
+                        <strong th:text="${user.username}">Benutzer</strong>
+                        <span th:if="${user.username == navUsername}" class="hint">(du)</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post"
+                              class="inline-form"
+                              onsubmit="return confirm('Rolle dieses Benutzers wirklich ändern?');">
+                            <select name="role" th:disabled="${user.username == navUsername}">
+                                <option th:each="role : ${roles}"
+                                        th:value="${role}"
+                                        th:text="${role}"
+                                        th:selected="${role == user.role}">USER</option>
+                            </select>
+                            <button type="submit" class="button secondary"
+                                    th:disabled="${user.username == navUsername}">Rolle speichern</button>
+                        </form>
+                    </td>
+                    <td>
+                        <span th:if="${user.currentlyLocked}" class="status-badge status-locked">Gesperrt</span>
+                        <span th:unless="${user.currentlyLocked}" class="status-badge status-active">Aktiv</span>
+                        <div th:if="${user.currentlyLocked}" class="hint"
+                             th:text="${'bis ' + #temporals.format(user.lockedUntil, 'dd.MM.yyyy HH:mm')}">
+                            bis Zeitpunkt
+                        </div>
+                    </td>
+                    <td th:text="${user.failedLoginAttempts}">0</td>
+                    <td>
+                        <form th:if="${user.failedLoginAttempts > 0 or user.lockedUntil != null}"
+                              th:action="@{/admin/users/{id}/unlock(id=${user.id})}" method="post">
+                            <button type="submit" class="button secondary">Entsperren / Zähler zurücksetzen</button>
+                        </form>
+                        <span th:unless="${user.failedLoginAttempts > 0 or user.lockedUntil != null}"
+                              class="hint">Keine Aktion nötig</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="hint">
+            Die eigene Rolle kann nicht geändert werden. Der letzte vorhandene Administrator
+            kann ebenfalls nicht herabgestuft werden.
+        </p>
+    </section>
+</main>
+</body>
+</html>

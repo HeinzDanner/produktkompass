@@ -1,5 +1,6 @@
 package de.heinzdanner.produktkompass.user;
 
+import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductRepository;
 import org.springframework.security.core.userdetails.User;
@@ -34,13 +35,16 @@ public class AppUserService implements UserDetailsService {
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public AppUserService(AppUserRepository appUserRepository,
                           ProductRepository productRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          AuditLogService auditLogService) {
         this.appUserRepository = appUserRepository;
         this.productRepository = productRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -89,7 +93,46 @@ public class AppUserService implements UserDetailsService {
     }
 
     public List<AppUser> getAllUsers() {
-        return appUserRepository.findAll();
+        return appUserRepository.findAllByOrderByUsernameAsc();
+    }
+
+    @Transactional
+    public AppUser updateRole(Long userId, Role newRole, String actingUsername) {
+        AppUser user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Benutzer wurde nicht gefunden."));
+
+        if (user.getUsername().equals(actingUsername) && user.getRole() != newRole) {
+            throw new IllegalArgumentException("Die eigene Rolle kann nicht geändert werden.");
+        }
+        if (user.getRole() == Role.ADMIN
+                && newRole != Role.ADMIN
+                && appUserRepository.countByRole(Role.ADMIN) <= 1) {
+            throw new IllegalArgumentException("Der letzte Administrator kann nicht herabgestuft werden.");
+        }
+        if (user.getRole() == newRole) {
+            return user;
+        }
+
+        Role previousRole = user.getRole();
+        user.setRole(newRole);
+        AppUser savedUser = appUserRepository.save(user);
+        auditLogService.logAction("AppUser", savedUser.getId(), "ROLE_UPDATE",
+                "Benutzer " + savedUser.getUsername() + ": " + previousRole + " -> " + newRole
+                        + " (geändert von " + actingUsername + ")");
+        return savedUser;
+    }
+
+    @Transactional
+    public AppUser unlockUser(Long userId, String actingUsername) {
+        AppUser user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Benutzer wurde nicht gefunden."));
+
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        AppUser savedUser = appUserRepository.save(user);
+        auditLogService.logAction("AppUser", savedUser.getId(), "UNLOCK",
+                "Benutzer " + savedUser.getUsername() + " entsperrt von " + actingUsername);
+        return savedUser;
     }
 
     public Optional<AppUser> findByUsername(String username) {

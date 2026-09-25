@@ -14,6 +14,9 @@
         <h1>Admin-Bereich</h1>
         <p>Verwalte Produkte, Marken, Unternehmen, Kategorien und Quellen zentral.</p>
         <p><a th:href="@{/admin/audit-log}">Audit-Log ansehen &rarr;</a></p>
+        <p th:if="${navIsAdministrator}">
+            <a th:href="@{/admin/users}">Benutzer und Rollen verwalten &rarr;</a>
+        </p>
 
         <div th:if="${adminSuccess}" class="alert success" th:text="${adminSuccess}">Erfolg.</div>
         <div th:if="${adminError}" class="alert error" th:text="${adminError}">Fehler.</div>

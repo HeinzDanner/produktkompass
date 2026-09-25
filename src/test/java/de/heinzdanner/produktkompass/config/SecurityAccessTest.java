@@ -123,6 +123,24 @@ class SecurityAccessTest {
         mockMvc.perform(get("/admin/products/1/edit")).andExpect(status().isForbidden());
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void userManagementIsReachableForAdmin() throws Exception {
+        mockMvc.perform(get("/admin/users")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "editor", roles = "EDITOR")
+    void userManagementIsForbiddenForEditor() throws Exception {
+        mockMvc.perform(get("/admin/users")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "max", roles = "USER")
+    void userManagementIsForbiddenForPlainUser() throws Exception {
+        mockMvc.perform(get("/admin/users")).andExpect(status().isForbidden());
+    }
+
     // --- Zugriff auf 403-Seite liefert korrekten Statuscode ---
     // (Die tatsächliche HTML-Fehlerseite wird in ErrorPageRenderingTest mit
     // einem echten eingebetteten Server geprüft, da MockMvc keinen

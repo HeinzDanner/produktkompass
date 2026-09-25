@@ -1,5 +1,6 @@
 package de.heinzdanner.produktkompass.user;
 
+import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductRepository;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ class AppUserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @InjectMocks
     private AppUserService appUserService;
@@ -121,5 +125,53 @@ class AppUserServiceTest {
         user.setLockedUntil(java.time.LocalDateTime.now().minusMinutes(1));
 
         assertThat(user.isCurrentlyLocked()).isFalse();
+    }
+
+    @Test
+    void updateRoleChangesAnotherUsersRole() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        when(appUserRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(appUserRepository.save(user)).thenReturn(user);
+
+        AppUser result = appUserService.updateRole(5L, Role.EDITOR, "admin");
+
+        assertThat(result.getRole()).isEqualTo(Role.EDITOR);
+    }
+
+    @Test
+    void updateRoleRejectsChangingOwnRole() {
+        AppUser admin = new AppUser("admin", "pw", Role.ADMIN);
+        when(appUserRepository.findById(1L)).thenReturn(Optional.of(admin));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> appUserService.updateRole(1L, Role.USER, "admin"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("eigene Rolle");
+    }
+
+    @Test
+    void updateRoleRejectsDemotingLastAdministrator() {
+        AppUser admin = new AppUser("other-admin", "pw", Role.ADMIN);
+        when(appUserRepository.findById(2L)).thenReturn(Optional.of(admin));
+        when(appUserRepository.countByRole(Role.ADMIN)).thenReturn(1L);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> appUserService.updateRole(2L, Role.EDITOR, "admin"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("letzte Administrator");
+    }
+
+    @Test
+    void unlockUserClearsLockAndFailedAttempts() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        user.setFailedLoginAttempts(5);
+        user.setLockedUntil(java.time.LocalDateTime.now().plusMinutes(10));
+        when(appUserRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(appUserRepository.save(user)).thenReturn(user);
+
+        AppUser result = appUserService.unlockUser(5L, "admin");
+
+        assertThat(result.getFailedLoginAttempts()).isZero();
+        assertThat(result.getLockedUntil()).isNull();
     }
 }

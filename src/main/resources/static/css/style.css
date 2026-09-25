@@ -463,6 +463,43 @@ button.secondary:hover,
     font-weight: 600;
 }
 
+.table-scroll {
+    overflow-x: auto;
+}
+
+.user-table {
+    min-width: 760px;
+}
+
+.inline-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inline-form select {
+    width: auto;
+    min-width: 7rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.status-active {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.status-locked {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
 .error-page {
     text-align: center;
     padding: 3rem 1.5rem;

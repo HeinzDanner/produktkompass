@@ -97,6 +97,21 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
 - Eine JavaScript-Bestätigung ("Wirklich löschen?") vor jedem Löschvorgang, um versehentliches Löschen zu verhindern
 
+### Benutzer- und Rollenverwaltung
+
+Nur Benutzer mit der Rolle `ADMIN` können unter `/admin/users`:
+
+- alle registrierten Konten und deren Rolle anzeigen,
+- Benutzer zwischen `USER`, `EDITOR` und `ADMIN` umstellen,
+- gesperrte Konten entsperren und deren Fehlversuchszähler zurücksetzen.
+
+`EDITOR` darf weiterhin redaktionelle Katalogdaten pflegen, hat aber keinen
+Zugriff auf die Benutzerverwaltung. Als Schutz vor einem vollständigen
+Administratorverlust kann die eigene Rolle nicht geändert und der letzte
+verbliebene Administrator nicht herabgestuft werden. Rollenänderungen und
+manuelle Entsperrungen erscheinen im Audit-Log. Eine geänderte Rolle wird für
+den betroffenen Benutzer spätestens bei dessen nächstem Login wirksam.
+
 ## Schutz gegen Brute-Force-Logins
 
 Nach 5 aufeinanderfolgenden Fehlversuchen wird ein Benutzerkonto für 15 Minuten
