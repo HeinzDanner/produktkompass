@@ -26,6 +26,36 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.sources WHERE p.id IN :ids")
     List<Product> findPageSources(@Param("ids") List<Long> ids);
 
+    @Query("""
+            SELECT candidate.id FROM Product candidate, Product base
+            WHERE base.id = :productId AND candidate.id <> base.id
+              AND EXISTS (
+                SELECT category.id FROM Product categoryProduct JOIN categoryProduct.categories category
+                WHERE categoryProduct.id = candidate.id AND category MEMBER OF base.categories
+              )
+            ORDER BY (
+                CASE WHEN candidate.nutritionGrade = base.nutritionGrade
+                  OR (candidate.nutritionGrade IS NULL AND base.nutritionGrade IS NULL) THEN 2 ELSE 0 END
+                + CASE WHEN candidate.packagingType = base.packagingType
+                  OR (candidate.packagingType IS NULL AND base.packagingType IS NULL) THEN 1 ELSE 0 END
+                + CASE WHEN candidate.madeInGermany = base.madeInGermany
+                  OR (candidate.madeInGermany IS NULL AND base.madeInGermany IS NULL) THEN 1 ELSE 0 END
+                + (SELECT COUNT(DISTINCT matchingLabel) FROM Product labelProduct JOIN labelProduct.labels matchingLabel
+                   WHERE labelProduct.id = candidate.id AND matchingLabel MEMBER OF base.labels)
+            ) DESC, candidate.id ASC
+            """)
+    List<Long> findAutomaticAlternativeIds(@Param("productId") Long productId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"brand", "company"})
+    @Query("SELECT p FROM Product p WHERE p.id IN :ids")
+    List<Product> findAlternativeProductsByIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.labels WHERE p.id IN :ids")
+    List<Product> findPageLabels(@Param("ids") List<Long> ids);
+
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.alternativeProducts a LEFT JOIN FETCH a.brand WHERE p.id IN :ids")
+    List<Product> findPageAlternatives(@Param("ids") List<Long> ids);
+
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels")
     List<Product> findAllWithDetails();
 

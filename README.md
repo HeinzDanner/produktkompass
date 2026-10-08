@@ -107,9 +107,28 @@ Migration V12 ergänzt Indizes für Sortierung, Marken, Unternehmen, Nutri-Score
 sowie Kategorie- und Labelverknüpfungen. Die Textsuche verwendet weiterhin
 Teilwortsuche; für sehr große OFF-Bestände sind später PostgreSQL-Trigram-
 oder Volltextindizes und Lastmessungen vorgesehen. Stammdatenlisten
-(z. B. Marken/Quellen) und die automatische Alternativensuche sind noch nicht
-vollständig auf große Datenbestände umgestellt; große Importe daher noch
-nicht starten.
+(z. B. Marken/Quellen) sind noch nicht vollständig auf große Datenbestände
+umgestellt; große Importe daher noch nicht starten.
+
+### Automatische Alternativensuche
+
+Redaktionell zugewiesene Alternativen haben Vorrang und bleiben vollständig
+erhalten. Sind keine hinterlegt, sucht die Datenbank Produkte mit mindestens
+einer gemeinsamen Kategorie und liefert höchstens sechs Vorschläge.
+Das Ausgangsprodukt wird ausgeschlossen.
+
+Die Rangfolge entspricht der bisherigen Ähnlichkeitsberechnung:
+gleicher Nutri-Score zählt zwei Punkte, gleiche Verpackungsart und gleiche
+Herstellerland-Angabe jeweils einen Punkt, jedes gemeinsame Label einen Punkt.
+Wie bisher gelten dabei auch zwei fehlende Angaben als gleich; dies ist keine
+Aussage über geprüfte Qualität. Bei Punktgleichheit entscheidet die Produkt-ID.
+Die Ergebnisse sind Ähnlichkeitsvorschläge, keine automatisch redaktionell
+verifizierten Alternativen.
+
+Die Datenbank wählt zunächst nur die besten sechs IDs aus. Zugehörige Details
+werden danach gezielt geladen, ohne den gesamten Katalog in Java einzulesen.
+Webseite und `GET /api/v1/products/{id}/alternatives` verwenden dieselbe Logik.
+Für sehr große Bestände stehen Messungen der Ranking-Abfrage noch aus.
 
 ## Standardlogin
 

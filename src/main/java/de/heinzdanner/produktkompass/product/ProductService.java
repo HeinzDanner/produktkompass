@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.dto.ProductRequest;
+import de.heinzdanner.produktkompass.product.dto.ProductResponse;
 import de.heinzdanner.produktkompass.product.dto.ProductSummary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -102,14 +103,26 @@ public class ProductService {
             return baseProduct.getAlternativeProducts().stream().toList();
         }
 
-        return productRepository.findAllWithDetails().stream()
-                .filter(candidate -> !Objects.equals(candidate.getId(), productId))
-                .filter(candidate -> sharesCategory(baseProduct, candidate))
-                .sorted((left, right) -> Integer.compare(
-                        similarityScore(baseProduct, right),
-                        similarityScore(baseProduct, left)))
-                .limit(6)
-                .toList();
+        if (baseProduct.getCategories().isEmpty()) {
+            return List.of();
+        }
+        List<Long> ids = productRepository.findAutomaticAlternativeIds(productId, PageRequest.of(0, 6));
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        List<Product> alternatives = productRepository.findAlternativeProductsByIds(ids);
+        // Fetch each collection separately for the six selected products, without a collection-fetch page.
+        productRepository.findPageCategories(ids);
+        productRepository.findPageSources(ids);
+        productRepository.findPageLabels(ids);
+        productRepository.findPageAlternatives(ids);
+        var byId = alternatives.stream().collect(java.util.stream.Collectors.toMap(Product::getId, product -> product));
+        return ids.stream().map(id -> Objects.requireNonNull(byId.get(id),
+                "Ausgewähltes Alternativprodukt wurde nicht gefunden: " + id)).toList();
+    }
+
+    public List<ProductResponse> getAlternativeProductResponses(Long productId) {
+        return getAlternativeProducts(productId).stream().map(ProductResponse::fromEntity).toList();
     }
 
     public List<Product> getProductsWithAlternatives() {
@@ -190,33 +203,6 @@ public class ProductService {
                 .map(Enum::name)
                 .map(label -> label.toLowerCase().replace('_', ' '))
                 .anyMatch(label -> label.contains(searchTerm));
-    }
-
-    private boolean sharesCategory(Product left, Product right) {
-        return left.getCategories() != null
-                && right.getCategories() != null
-                && left.getCategories().stream().anyMatch(right.getCategories()::contains);
-    }
-
-    private int similarityScore(Product baseProduct, Product candidate) {
-        int score = 0;
-
-        if (Objects.equals(baseProduct.getNutritionGrade(), candidate.getNutritionGrade())) {
-            score += 2;
-        }
-        if (Objects.equals(baseProduct.getPackagingType(), candidate.getPackagingType())) {
-            score += 1;
-        }
-        if (Objects.equals(baseProduct.getMadeInGermany(), candidate.getMadeInGermany())) {
-            score += 1;
-        }
-        if (baseProduct.getLabels() != null && candidate.getLabels() != null) {
-            score += (int) baseProduct.getLabels().stream()
-                    .filter(candidate.getLabels()::contains)
-                    .count();
-        }
-
-        return score;
     }
 
     public List<Product> searchProducts(String name, Long brandId) {

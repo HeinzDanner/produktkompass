@@ -168,12 +168,16 @@ class ProductServiceTest {
         weakerMatch.setNutritionGrade(NutritionGrade.C);
 
         when(productRepository.findByIdWithDetails(10L)).thenReturn(Optional.of(product));
-        when(productRepository.findAllWithDetails()).thenReturn(List.of(product, weakerMatch, strongMatch));
+        when(productRepository.findAutomaticAlternativeIds(10L, org.springframework.data.domain.PageRequest.of(0, 6)))
+                .thenReturn(List.of(11L, 12L));
+        when(productRepository.findAlternativeProductsByIds(List.of(11L, 12L)))
+                .thenReturn(List.of(weakerMatch, strongMatch));
 
         List<Product> result = productService.getAlternativeProducts(10L);
 
         assertThat(result).hasSize(2);
         assertThat(result.getFirst().getName()).isEqualTo("Sojadrink");
+        org.mockito.Mockito.verify(productRepository, org.mockito.Mockito.never()).findAllWithDetails();
     }
 
     @Test

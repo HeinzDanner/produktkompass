@@ -67,7 +67,8 @@ class ProductControllerTest {
         product.addAlternativeProduct(alternative);
         setField(product, "id", 10L);
 
-        when(productService.getAlternativeProducts(10L)).thenReturn(List.of(alternative));
+        when(productService.getAlternativeProductResponses(10L)).thenReturn(
+                List.of(de.heinzdanner.produktkompass.product.dto.ProductResponse.fromEntity(alternative)));
 
         mockMvc.perform(get("/api/v1/products/10/alternatives"))
                 .andExpect(status().isOk())
