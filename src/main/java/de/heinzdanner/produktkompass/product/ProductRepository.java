@@ -23,6 +23,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.categories WHERE p.id IN :ids")
     List<Product> findPageCategories(@Param("ids") List<Long> ids);
 
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.sources WHERE p.id IN :ids")
+    List<Product> findPageSources(@Param("ids") List<Long> ids);
+
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels")
     List<Product> findAllWithDetails();
 

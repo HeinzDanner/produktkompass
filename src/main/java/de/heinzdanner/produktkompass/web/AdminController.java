@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
@@ -59,8 +60,11 @@ public class AdminController {
     }
 
     @GetMapping("/admin")
-    public String adminPage(Model model) {
-        populateAdminModel(model);
+    public String adminPage(@RequestParam(defaultValue = "") String query,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "20") int size,
+                            Model model) {
+        populateAdminModel(model, query, page, size);
         return "admin";
     }
 
@@ -98,6 +102,7 @@ public class AdminController {
         }
         model.addAttribute("productId", id);
         populateSharedLists(model);
+        populateAlternativeOptions(model, id, (ProductRequest) model.getAttribute("productRequest"));
         return "admin-product-edit";
     }
 
@@ -110,6 +115,7 @@ public class AdminController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("productId", id);
             populateSharedLists(model);
+            populateAlternativeOptions(model, id, productRequest);
             return "admin-product-edit";
         }
 
@@ -355,9 +361,16 @@ public class AdminController {
     }
 
     private void populateAdminModel(Model model) {
-        List<Product> products = productService.getAllProducts();
+        populateAdminModel(model, "", 0, 20);
+    }
+
+    private void populateAdminModel(Model model, String query, int page, int size) {
+        var productPage = productService.getAdminProductPage(query, page, size);
+        List<Product> products = productPage.getContent();
         List<Source> sources = sourceService.getAllSources();
 
+        model.addAttribute("productPage", productPage);
+        model.addAttribute("selectedQuery", query);
         model.addAttribute("products", products);
         model.addAttribute("sources", sources);
         model.addAttribute("dataQualityWarnings", buildDataQualityWarnings(products, sources));
@@ -400,9 +413,17 @@ public class AdminController {
         model.addAttribute("packagingTypes", PackagingType.values());
         model.addAttribute("ingredientStatuses", IngredientStatus.values());
         model.addAttribute("productLabels", ProductLabel.values());
-        if (!model.containsAttribute("allProducts")) {
-            model.addAttribute("allProducts", productService.getAllProducts());
-        }
+    }
+
+    private void populateAlternativeOptions(Model model, Long productId, ProductRequest request) {
+        var options = new java.util.LinkedHashMap<Long, ProductService.ProductOption>();
+        productService.getProductOptions(request.alternativeProductIds())
+                .forEach(option -> options.put(option.id(), option));
+        productService.searchPage(null, null, null, null, null, null, null, null, 0, 20)
+                .forEach(product -> options.putIfAbsent(product.id(),
+                        new ProductService.ProductOption(product.id(), product.name())));
+        options.remove(productId);
+        model.addAttribute("allProducts", options.values());
     }
 
     private ProductRequest toProductRequest(Product product) {
@@ -461,4 +482,3 @@ public class AdminController {
         return warnings;
     }
 }
-

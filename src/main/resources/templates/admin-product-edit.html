@@ -123,6 +123,19 @@
 
             <div class="form-row">
                 <label for="alternativeProductIds">Alternative Produkte</label>
+                <label for="alternativeSearch">Weitere Alternativen suchen</label>
+                <input id="alternativeSearch" type="search" placeholder="Produktname oder Stichwort">
+                <div class="actions" id="alternativePicker" th:attr="data-product-id=${productId}"
+                     th:data-search-url="@{/api/v1/products/search}">
+                    <button id="alternativeSearchButton" type="button" class="button secondary">Suchen</button>
+                    <button id="alternativePrevious" type="button" class="button secondary" disabled>Zurück</button>
+                    <button id="alternativeNext" type="button" class="button secondary" disabled>Weiter</button>
+                </div>
+                <p id="alternativeSearchStatus" class="hint" role="status" aria-live="polite">
+                    Die ersten 20 Produkte und bereits gewählte Alternativen werden angezeigt.
+                    Zum Laden weiterer Ergebnisse ist JavaScript erforderlich.
+                </p>
+                <p class="hint">Mehrfachauswahl mit Strg/Cmd. Ausgewählte Produkte bleiben beim Suchen erhalten.</p>
                 <select id="alternativeProductIds" th:field="*{alternativeProductIds}" multiple="multiple" size="6">
                     <option th:each="candidate : ${allProducts}"
                             th:if="${candidate.id != productId}"
@@ -134,5 +147,6 @@
         </form>
     </section>
 </main>
+<script th:src="@{/js/alternative-picker.js}" defer></script>
 </body>
 </html>

@@ -48,6 +48,31 @@ public class ProductService {
     public Page<ProductSummary> searchPage(String text, Long brandId, Long categoryId, ProductLabel label,
                                            NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                            String username, int page, int size) {
+        Page<Product> results = findSearchPage(text, brandId, categoryId, label, grade,
+                madeInGermany, tagId, username, page, size);
+        return results.map(ProductSummary::fromEntity);
+    }
+
+    public Page<Product> getAdminProductPage(String text, int page, int size) {
+        Page<Product> results = findSearchPage(text, null, null, null, null, null, null, null, page, size);
+        if (!results.isEmpty()) {
+            productRepository.findPageSources(results.getContent().stream().map(Product::getId).toList());
+        }
+        return results;
+    }
+
+    public List<ProductOption> getProductOptions(List<Long> ids) {
+        return ids.isEmpty() ? List.of() : productRepository.findAllById(ids).stream()
+                .map(product -> new ProductOption(product.getId(), product.getName()))
+                .toList();
+    }
+
+    public record ProductOption(Long id, String name) {
+    }
+
+    private Page<Product> findSearchPage(String text, Long brandId, Long categoryId, ProductLabel label,
+                                         NutritionGrade grade, Boolean madeInGermany, Long tagId,
+                                         String username, int page, int size) {
         if (page < 0 || size < 1 || size > 50) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "page muss mindestens 0 sein; size muss zwischen 1 und 50 liegen.");
@@ -59,7 +84,7 @@ public class ProductService {
         if (!results.isEmpty()) {
             productRepository.findPageCategories(results.getContent().stream().map(Product::getId).toList());
         }
-        return results.map(ProductSummary::fromEntity);
+        return results;
     }
 
     public Optional<Product> getProductById(Long id) {

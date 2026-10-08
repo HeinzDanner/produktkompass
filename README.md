@@ -106,9 +106,10 @@ Quellen, Labels und Alternativen bleiben über den Produktdetail-Endpunkt
 Migration V12 ergänzt Indizes für Sortierung, Marken, Unternehmen, Nutri-Score
 sowie Kategorie- und Labelverknüpfungen. Die Textsuche verwendet weiterhin
 Teilwortsuche; für sehr große OFF-Bestände sind später PostgreSQL-Trigram-
-oder Volltextindizes und Lastmessungen vorgesehen. Admin-Listen und die
-automatische Alternativensuche sind noch nicht vollständig auf große
-Datenbestände umgestellt; große Importe daher noch nicht starten.
+oder Volltextindizes und Lastmessungen vorgesehen. Stammdatenlisten
+(z. B. Marken/Quellen) und die automatische Alternativensuche sind noch nicht
+vollständig auf große Datenbestände umgestellt; große Importe daher noch
+nicht starten.
 
 ## Standardlogin
 
@@ -125,6 +126,20 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Automatische Datenqualitätswarnungen (z. B. Produkt ohne Marke, ohne Quelle oder Quelle ohne Prüfdatum)
 - Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
 - Eine JavaScript-Bestätigung ("Wirklich löschen?") vor jedem Löschvorgang, um versehentliches Löschen zu verhindern
+
+Die Produktliste unter `/admin` besitzt eine Datenbanksuche und Pagination
+mit standardmäßig 20, maximal 50 Produkten pro Seite, z. B.
+`/admin?query=hafer&page=0&size=20`. Produkthinweise zur Datenqualität beziehen
+sich auf die aktuelle Ergebnisseite; Quellenhinweise beziehen sich weiterhin
+auf alle Quellen.
+
+Beim Bearbeiten eines Produkts lädt die Alternative-Auswahl nur die ersten
+20 Produkte sowie bereits ausgewählte Alternativen. Mit JavaScript können
+weitere Produkte gesucht und Ergebnisseiten geladen werden, ohne das
+Bearbeitungsformular neu zu laden. Gewählte Alternativen bleiben während
+der Suche und nach Formular-Validierungsfehlern erhalten. Ohne JavaScript
+können die anfänglich geladenen Optionen weiterhin bearbeitet werden.
+Die übrigen Stammdaten-Auswahllisten sind noch nicht paginiert.
 
 ### Benutzer- und Rollenverwaltung
 
