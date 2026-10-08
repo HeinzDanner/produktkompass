@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="controls(key, result, label, previousUrl, nextUrl)">
+    <form method="get" th:action="@{/admin}" class="product-search">
+        <input th:each="entry : ${adminListParams}"
+               th:if="${entry.key != key + 'Query' and entry.key != key + 'Page'}"
+               type="hidden" th:name="${entry.key}" th:value="${entry.value}">
+        <label th:for="${key + 'Query'}" th:text="${label + ' suchen'}">Suchen</label>
+        <input type="search" th:id="${key + 'Query'}" th:name="${key + 'Query'}"
+               th:value="${adminListParams.get(key + 'Query')}">
+        <button type="submit" class="button secondary">Suchen</button>
+    </form>
+    <nav class="actions" th:aria-label="${label + ' Ergebnisse'}">
+        <a th:if="${result.hasPrevious()}" th:href="${previousUrl}"
+           class="button secondary">Zurück</a>
+        <span th:text="${result.totalElements + ' Treffer; Seite ' + (result.totalPages > 0 ? result.number + 1 : 0) + ' von ' + result.totalPages}"></span>
+        <a th:if="${result.hasNext()}" th:href="${nextUrl}"
+           class="button secondary">Weiter</a>
+    </nav>
+</div>
+</body>
+</html>

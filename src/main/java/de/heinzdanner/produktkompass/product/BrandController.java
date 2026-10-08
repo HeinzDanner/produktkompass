@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.product.dto.BrandRequest;
 import de.heinzdanner.produktkompass.product.dto.BrandResponse;
+import de.heinzdanner.produktkompass.product.dto.MasterDataPage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/brands")
@@ -27,13 +27,12 @@ public class BrandController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BrandResponse>> getAllBrands() {
-        List<BrandResponse> brands = brandService.getAllBrands()
-                .stream()
-                .map(BrandResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(brands);
+    public ResponseEntity<MasterDataPage<BrandResponse>> getAllBrands(
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(MasterDataPage.from(
+                brandService.getBrandPage(query, page, size).map(BrandResponse::fromEntity)));
     }
 
     @GetMapping("/{id}")

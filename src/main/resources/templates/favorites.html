@@ -11,10 +11,15 @@
 <main class="container page-content">
     <section class="box">
         <h1>Meine Favoriten</h1>
+        <p th:text="${productPage.totalElements + ' Favoriten gespeichert'}">Trefferzahl</p>
 
-        <div th:if="${#lists.isEmpty(products)}" class="empty-state">
+        <div th:if="${productPage.totalElements == 0}" class="empty-state">
             Du hast noch keine Favoriten gespeichert.
         </div>
+        <p class="empty-state" th:if="${#lists.isEmpty(products) and productPage.totalElements > 0}">
+            Auf dieser Seite gibt es keine Favoriten.
+            <a th:href="@{/favorites(size=${productPage.size})}">Zur ersten Seite</a>.
+        </p>
 
         <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
@@ -42,6 +47,14 @@
                 </div>
             </article>
         </div>
+        <nav aria-label="Favoriten" class="actions">
+            <a th:if="${productPage.hasPrevious()}" class="button secondary"
+               th:href="@{/favorites(page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+            <span th:if="${!#lists.isEmpty(products)}"
+                  th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
+            <a th:if="${productPage.hasNext()}" class="button secondary"
+               th:href="@{/favorites(page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+        </nav>
     </section>
 </main>
 </body>

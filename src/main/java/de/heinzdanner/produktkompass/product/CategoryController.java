@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.product.dto.CategoryRequest;
 import de.heinzdanner.produktkompass.product.dto.CategoryResponse;
+import de.heinzdanner.produktkompass.product.dto.MasterDataPage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -27,13 +27,12 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        List<CategoryResponse> categories = categoryService.getAllCategories()
-                .stream()
-                .map(CategoryResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<MasterDataPage<CategoryResponse>> getAllCategories(
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(MasterDataPage.from(
+                categoryService.getCategoryPage(query, page, size).map(CategoryResponse::fromEntity)));
     }
 
     @GetMapping("/{id}")

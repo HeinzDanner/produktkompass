@@ -19,6 +19,7 @@
 
     <section class="box">
         <h2>Produkte dieses Unternehmens</h2>
+        <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
         <div class="product-grid" th:if="${!#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
                 <h3 th:text="${product.name}">Produktname</h3>
@@ -26,7 +27,19 @@
                 <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Produktdetails</a>
             </article>
         </div>
-        <p class="empty-state" th:if="${#lists.isEmpty(products)}">Noch keine Produkte hinterlegt.</p>
+        <p class="empty-state" th:if="${productPage.totalElements == 0}">Noch keine Produkte hinterlegt.</p>
+        <p class="empty-state" th:if="${#lists.isEmpty(products) and productPage.totalElements > 0}">
+            Auf dieser Seite gibt es keine Produkte.
+            <a th:href="@{/companies/{id}(id=${company.id},size=${productPage.size})}">Zur ersten Seite</a>.
+        </p>
+        <nav aria-label="Produkte dieses Unternehmens" class="actions">
+            <a th:if="${productPage.hasPrevious()}" class="button secondary"
+               th:href="@{/companies/{id}(id=${company.id},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+            <span th:if="${!#lists.isEmpty(products)}"
+                  th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
+            <a th:if="${productPage.hasNext()}" class="button secondary"
+               th:href="@{/companies/{id}(id=${company.id},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+        </nav>
     </section>
 </main>
 </body>

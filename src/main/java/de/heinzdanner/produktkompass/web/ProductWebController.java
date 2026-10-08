@@ -76,8 +76,10 @@ public class ProductWebController {
                 madeInGermany, tagId, principal == null ? null : principal.getName(), page, size);
         model.addAttribute("products", results.getContent());
         model.addAttribute("productPage", results);
-        model.addAttribute("brands", brandService.getAllBrands());
-        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("brands", brandService.getBrandOptions(
+                brandId == null ? List.of() : List.of(brandId)));
+        model.addAttribute("categories", categoryService.getCategoryOptions(
+                categoryId == null ? List.of() : List.of(categoryId)));
         model.addAttribute("productLabels", ProductLabel.values());
         model.addAttribute("nutritionGrades", NutritionGrade.values());
         model.addAttribute("selectedQuery", query == null ? "" : query);
@@ -107,14 +109,12 @@ public class ProductWebController {
         }
 
         model.addAttribute("product", product);
-        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
+        model.addAttribute("favoriteProductIds", principal == null ? Set.of()
+                : appUserService.getFavoriteIdsForProducts(principal.getName(), List.of(id)));
         if (principal != null) {
-            List<UserTag> userTags = userTagService.getTagsForUser(principal.getName());
+            List<UserTag> userTags = userTagService.getTagOptionsForUser(principal.getName());
             model.addAttribute("userTags", userTags);
-            model.addAttribute("assignedTagIds", userTags.stream()
-                    .filter(tag -> tag.getProducts().contains(product))
-                    .map(UserTag::getId)
-                    .collect(Collectors.toSet()));
+            model.addAttribute("assignedTagIds", userTagService.getAssignedTagIdsForProduct(principal.getName(), id));
         }
         return "product-detail";
     }
@@ -132,50 +132,56 @@ public class ProductWebController {
     }
 
     @GetMapping("/brands/{id}")
-    public String brandDetail(@PathVariable Long id, Principal principal, Model model) {
+    public String brandDetail(@PathVariable Long id,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "20") int size,
+                              Principal principal, Model model) {
         Brand brand = brandService.getBrandById(id).orElse(null);
         if (brand == null) {
             return "redirect:/products";
         }
 
         model.addAttribute("brand", brand);
-        model.addAttribute("products", productService.getAllProducts().stream()
-                .filter(product -> product.getBrand() != null && product.getBrand().getId().equals(id))
-                .toList());
+        var results = productService.searchPage(null, id, null, null, null, null, null, null, page, size);
+        model.addAttribute("products", results.getContent());
+        model.addAttribute("productPage", results);
         if (principal != null) {
-            List<UserTag> userTags = userTagService.getTagsForUser(principal.getName());
+            List<UserTag> userTags = userTagService.getTagOptionsForUser(principal.getName());
             model.addAttribute("userTags", userTags);
-            model.addAttribute("assignedTagIds", userTags.stream()
-                    .filter(tag -> tag.getBrands().contains(brand))
-                    .map(UserTag::getId)
-                    .collect(Collectors.toSet()));
+            model.addAttribute("assignedTagIds", userTagService.getAssignedTagIdsForBrand(principal.getName(), id));
         }
         return "brand-detail";
     }
 
     @GetMapping("/companies/{id}")
-    public String companyDetail(@PathVariable Long id, Model model) {
+    public String companyDetail(@PathVariable Long id,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "20") int size, Model model) {
         Company company = companyService.getCompanyById(id).orElse(null);
         if (company == null) {
             return "redirect:/products";
         }
 
         model.addAttribute("company", company);
-        model.addAttribute("products", productService.getAllProducts().stream()
-                .filter(product -> product.getCompany() != null && product.getCompany().getId().equals(id))
-                .toList());
+        var results = productService.getProductsForCompany(id, page, size);
+        model.addAttribute("products", results.getContent());
+        model.addAttribute("productPage", results);
         return "company-detail";
     }
 
     @GetMapping("/favorites")
-    public String favorites(Principal principal, Model model) {
+    public String favorites(@RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "20") int size,
+                            Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/login";
         }
 
-        List<Product> favoriteProducts = appUserService.getFavoriteProducts(principal.getName());
-        model.addAttribute("products", favoriteProducts);
-        model.addAttribute("favoriteProductIds", appUserService.getFavoriteProductIds(principal.getName()));
+        var results = productService.getFavoriteProductPage(principal.getName(), page, size);
+        model.addAttribute("products", results.getContent());
+        model.addAttribute("productPage", results);
+        model.addAttribute("favoriteProductIds", results.getContent().stream()
+                .map(product -> product.id()).collect(Collectors.toSet()));
         return "favorites";
     }
 
@@ -253,11 +259,4 @@ public class ProductWebController {
         }
     }
 
-    private Set<Long> resolveFavoriteProductIds(Principal principal) {
-        if (principal == null) {
-            return Set.of();
-        }
-
-        return appUserService.getFavoriteProductIds(principal.getName());
-    }
 }

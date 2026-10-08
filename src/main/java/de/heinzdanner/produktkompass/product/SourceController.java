@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.product.dto.SourceRequest;
 import de.heinzdanner.produktkompass.product.dto.SourceResponse;
+import de.heinzdanner.produktkompass.product.dto.MasterDataPage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/sources")
@@ -27,13 +27,12 @@ public class SourceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SourceResponse>> getAllSources() {
-        List<SourceResponse> sources = sourceService.getAllSources()
-                .stream()
-                .map(SourceResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(sources);
+    public ResponseEntity<MasterDataPage<SourceResponse>> getAllSources(
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(MasterDataPage.from(
+                sourceService.getSourcePage(query, page, size).map(SourceResponse::fromEntity)));
     }
 
     @GetMapping("/{id}")

@@ -2,10 +2,13 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.dto.BrandRequest;
+import de.heinzdanner.produktkompass.product.dto.LookupOption;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -22,6 +25,15 @@ public class BrandService {
 
     public List<Brand> getAllBrands() {
         return brandRepository.findAll();
+    }
+
+    public Page<Brand> getBrandPage(String query, int page, int size) {
+        return brandRepository.search(MasterDataPaging.pattern(query), MasterDataPaging.request(page, size, "name"));
+    }
+
+    public List<LookupOption> getBrandOptions(Collection<Long> selectedIds) {
+        return MasterDataPaging.options(selectedIds, getBrandPage("", 0, 20).getContent(),
+                brandRepository::findById, Brand::getId, Brand::getName);
     }
 
     public Optional<Brand> getBrandById(Long id) {

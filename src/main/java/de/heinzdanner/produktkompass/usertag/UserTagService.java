@@ -59,6 +59,14 @@ public class UserTagService {
         return userTagRepository.findAllByOwnerUsernameOrderByNameAsc(username);
     }
 
+    public Set<Long> getAssignedTagIdsForBrand(String username, Long brandId) {
+        return userTagRepository.findAssignedIdsForBrand(username, brandId);
+    }
+
+    public Set<Long> getAssignedTagIdsForProduct(String username, Long productId) {
+        return userTagRepository.findAssignedIdsForProduct(username, productId);
+    }
+
     @Transactional
     public UserTag createTag(String username, String rawName) {
         String name = normalizeName(rawName);

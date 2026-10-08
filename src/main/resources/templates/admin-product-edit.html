@@ -29,17 +29,17 @@
 
             <div class="form-row">
                 <label for="brandId">Marke</label>
-                <select id="brandId" th:field="*{brandId}">
+                <select id="brandId" th:field="*{brandId}" th:data-lookup-url="@{/api/v1/brands}" aria-label="Marke">
                     <option value="">Keine Marke</option>
-                    <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                    <option th:each="brand : ${brandOptions}" th:value="${brand.id}" th:text="${brand.name}"></option>
                 </select>
             </div>
 
             <div class="form-row">
                 <label for="companyId">Unternehmen</label>
-                <select id="companyId" th:field="*{companyId}">
+                <select id="companyId" th:field="*{companyId}" th:data-lookup-url="@{/api/v1/companies}" aria-label="Unternehmen">
                     <option value="">Kein Unternehmen</option>
-                    <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
+                    <option th:each="company : ${companyOptions}" th:value="${company.id}" th:text="${company.name}"></option>
                 </select>
             </div>
 
@@ -109,15 +109,15 @@
 
             <div class="form-row">
                 <label for="categoryIds">Kategorien</label>
-                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6">
-                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6" th:data-lookup-url="@{/api/v1/categories}" aria-label="Kategorien">
+                    <option th:each="category : ${categoryOptions}" th:value="${category.id}" th:text="${category.name}"></option>
                 </select>
             </div>
 
             <div class="form-row">
                 <label for="sourceIds">Quellen</label>
-                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6">
-                    <option th:each="source : ${sources}" th:value="${source.id}" th:text="${source.title}"></option>
+                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6" th:data-lookup-url="@{/api/v1/sources}" aria-label="Quellen">
+                    <option th:each="source : ${sourceOptions}" th:value="${source.id}" th:text="${source.name}"></option>
                 </select>
             </div>
 
@@ -148,5 +148,6 @@
     </section>
 </main>
 <script th:src="@{/js/alternative-picker.js}" defer></script>
+<script th:src="@{/js/lookup-picker.js}" defer></script>
 </body>
 </html>

@@ -68,6 +68,18 @@ public class AdminController {
         return "admin";
     }
 
+    @ModelAttribute("adminListParams")
+    public java.util.Map<String, String> adminListParams(@RequestParam java.util.Map<String, String> parameters) {
+        var state = new java.util.LinkedHashMap<String, String>();
+        for (String key : List.of("query", "page", "size", "brandQuery", "brandPage",
+                "categoryQuery", "categoryPage", "companyQuery", "companyPage", "sourceQuery", "sourcePage")) {
+            if (parameters.containsKey(key)) {
+                state.put(key, parameters.get(key));
+            }
+        }
+        return state;
+    }
+
     @GetMapping("/admin/audit-log")
     public String auditLog(Model model) {
         model.addAttribute("auditLogs", auditLogService.getAllLogs());
@@ -361,20 +373,37 @@ public class AdminController {
     }
 
     private void populateAdminModel(Model model) {
-        populateAdminModel(model, "", 0, 20);
+        var state = listState(model);
+        populateAdminModel(model, state.getOrDefault("query", ""), number(state, "page", 0), number(state, "size", 20));
     }
 
     private void populateAdminModel(Model model, String query, int page, int size) {
         var productPage = productService.getAdminProductPage(query, page, size);
         List<Product> products = productPage.getContent();
-        List<Source> sources = sourceService.getAllSources();
+        var state = listState(model);
+        state.put("query", query);
+        state.put("page", String.valueOf(productPage.getNumber()));
+        state.put("size", String.valueOf(productPage.getSize()));
+        var brands = brandService.getBrandPage(state.getOrDefault("brandQuery", ""), number(state, "brandPage", 0), 20);
+        var categories = categoryService.getCategoryPage(state.getOrDefault("categoryQuery", ""), number(state, "categoryPage", 0), 20);
+        var companies = companyService.getCompanyPage(state.getOrDefault("companyQuery", ""), number(state, "companyPage", 0), 20);
+        var sources = sourceService.getSourcePage(state.getOrDefault("sourceQuery", ""), number(state, "sourcePage", 0), 20);
+        addListPage(model, state, "brand", brands);
+        addListPage(model, state, "category", categories);
+        addListPage(model, state, "company", companies);
+        addListPage(model, state, "source", sources);
 
         model.addAttribute("productPage", productPage);
         model.addAttribute("selectedQuery", query);
         model.addAttribute("products", products);
-        model.addAttribute("sources", sources);
-        model.addAttribute("dataQualityWarnings", buildDataQualityWarnings(products, sources));
-        populateSharedLists(model);
+        model.addAttribute("brands", brands.getContent());
+        model.addAttribute("categories", categories.getContent());
+        model.addAttribute("companies", companies.getContent());
+        model.addAttribute("sources", sources.getContent());
+        model.addAttribute("dataQualityWarnings", buildDataQualityWarnings(products, sources.getContent()));
+        model.addAttribute("productPreviousUrl", listUrl(state, "page", productPage.getNumber() - 1));
+        model.addAttribute("productNextUrl", listUrl(state, "page", productPage.getNumber() + 1));
+        model.addAttribute("adminQuerySuffix", listUrl(state, "page", productPage.getNumber()).substring("/admin".length()));
 
         if (!model.containsAttribute("productRequest")) {
             model.addAttribute("productRequest", new ProductRequest(
@@ -396,6 +425,41 @@ public class AdminController {
         if (!model.containsAttribute("sourceRequest")) {
             model.addAttribute("sourceRequest", new SourceRequest("", "", "", null));
         }
+        populateSharedLists(model);
+    }
+
+    @SuppressWarnings("unchecked")
+    private java.util.Map<String, String> listState(Model model) {
+        if (!model.containsAttribute("adminListParams")) {
+            model.addAttribute("adminListParams", new java.util.LinkedHashMap<String, String>());
+        }
+        return (java.util.Map<String, String>) model.getAttribute("adminListParams");
+    }
+
+    private int number(java.util.Map<String, String> state, String key, int fallback) {
+        try {
+            return Integer.parseInt(state.getOrDefault(key, String.valueOf(fallback)));
+        } catch (NumberFormatException exception) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, key + " muss eine ganze Zahl sein.", exception);
+        }
+    }
+
+    private void addListPage(Model model, java.util.Map<String, String> state, String key,
+                             org.springframework.data.domain.Page<?> page) {
+        state.put(key + "Page", String.valueOf(page.getNumber()));
+        model.addAttribute(key + "Page", page);
+        model.addAttribute(key + "PreviousUrl", listUrl(state, key + "Page", page.getNumber() - 1));
+        model.addAttribute(key + "NextUrl", listUrl(state, key + "Page", page.getNumber() + 1));
+    }
+
+    private String listUrl(java.util.Map<String, String> state, String pageKey, int page) {
+        var builder = org.springframework.web.util.UriComponentsBuilder.fromPath("/admin");
+        state.forEach((key, value) -> builder.queryParam(key, key.equals(pageKey) ? Math.max(0, page) : value));
+        if (!state.containsKey(pageKey)) {
+            builder.queryParam(pageKey, Math.max(0, page));
+        }
+        return builder.build().encode().toUriString();
     }
 
     /**
@@ -403,12 +467,13 @@ public class AdminController {
      * die Admin-Übersicht als auch die einzelnen Bearbeiten-Formulare für Auswahllisten benötigen.
      */
     private void populateSharedLists(Model model) {
-        model.addAttribute("brands", brandService.getAllBrands());
-        model.addAttribute("categories", categoryService.getAllCategories());
-        model.addAttribute("companies", companyService.getAllCompanies());
-        if (!model.containsAttribute("sources")) {
-            model.addAttribute("sources", sourceService.getAllSources());
-        }
+        ProductRequest request = (ProductRequest) model.getAttribute("productRequest");
+        model.addAttribute("brandOptions", brandService.getBrandOptions(
+                request == null || request.brandId() == null ? List.of() : List.of(request.brandId())));
+        model.addAttribute("categoryOptions", categoryService.getCategoryOptions(request == null ? List.of() : request.categoryIds()));
+        model.addAttribute("companyOptions", companyService.getCompanyOptions(
+                request == null || request.companyId() == null ? List.of() : List.of(request.companyId())));
+        model.addAttribute("sourceOptions", sourceService.getSourceOptions(request == null ? List.of() : request.sourceIds()));
         model.addAttribute("nutritionGrades", NutritionGrade.values());
         model.addAttribute("packagingTypes", PackagingType.values());
         model.addAttribute("ingredientStatuses", IngredientStatus.values());

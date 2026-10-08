@@ -2,10 +2,13 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.dto.CompanyRequest;
+import de.heinzdanner.produktkompass.product.dto.LookupOption;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -22,6 +25,15 @@ public class CompanyService {
 
     public List<Company> getAllCompanies() {
         return companyRepository.findAll();
+    }
+
+    public Page<Company> getCompanyPage(String query, int page, int size) {
+        return companyRepository.search(MasterDataPaging.pattern(query), MasterDataPaging.request(page, size, "name"));
+    }
+
+    public List<LookupOption> getCompanyOptions(Collection<Long> selectedIds) {
+        return MasterDataPaging.options(selectedIds, getCompanyPage("", 0, 20).getContent(),
+                companyRepository::findById, Company::getId, Company::getName);
     }
 
     public Optional<Company> getCompanyById(Long id) {

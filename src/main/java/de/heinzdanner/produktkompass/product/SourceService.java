@@ -2,10 +2,13 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.dto.SourceRequest;
+import de.heinzdanner.produktkompass.product.dto.LookupOption;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -22,6 +25,15 @@ public class SourceService {
 
     public List<Source> getAllSources() {
         return sourceRepository.findAll();
+    }
+
+    public Page<Source> getSourcePage(String query, int page, int size) {
+        return sourceRepository.search(MasterDataPaging.pattern(query), MasterDataPaging.request(page, size, "title"));
+    }
+
+    public List<LookupOption> getSourceOptions(Collection<Long> selectedIds) {
+        return MasterDataPaging.options(selectedIds, getSourcePage("", 0, 20).getContent(),
+                sourceRepository::findById, Source::getId, Source::getTitle);
     }
 
     public Optional<Source> getSourceById(Long id) {

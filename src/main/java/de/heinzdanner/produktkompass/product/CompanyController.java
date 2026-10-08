@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.product.dto.CompanyRequest;
 import de.heinzdanner.produktkompass.product.dto.CompanyResponse;
+import de.heinzdanner.produktkompass.product.dto.MasterDataPage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -27,13 +27,12 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CompanyResponse>> getAllCompanies() {
-        List<CompanyResponse> companies = companyService.getAllCompanies()
-                .stream()
-                .map(CompanyResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(companies);
+    public ResponseEntity<MasterDataPage<CompanyResponse>> getAllCompanies(
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(MasterDataPage.from(
+                companyService.getCompanyPage(query, page, size).map(CompanyResponse::fromEntity)));
     }
 
     @GetMapping("/{id}")

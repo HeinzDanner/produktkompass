@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserTagRepository extends JpaRepository<UserTag, Long> {
@@ -18,6 +19,12 @@ public interface UserTagRepository extends JpaRepository<UserTag, Long> {
     boolean existsByIdAndOwnerUsername(Long id, String username);
 
     List<UserTag> findAllByOwnerUsernameOrderByNameAsc(String username);
+
+    @Query("SELECT t.id FROM UserTag t JOIN t.brands b WHERE t.owner.username = :username AND b.id = :brandId")
+    Set<Long> findAssignedIdsForBrand(String username, Long brandId);
+
+    @Query("SELECT t.id FROM UserTag t JOIN t.products p WHERE t.owner.username = :username AND p.id = :productId")
+    Set<Long> findAssignedIdsForProduct(String username, Long productId);
 
     @Query("SELECT DISTINCT t FROM UserTag t LEFT JOIN FETCH t.products LEFT JOIN FETCH t.brands " +
             "WHERE t.owner.username = :username ORDER BY t.name ASC")

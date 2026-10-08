@@ -4,9 +4,11 @@ import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.dto.ProductRequest;
 import de.heinzdanner.produktkompass.product.dto.ProductResponse;
 import de.heinzdanner.produktkompass.product.dto.ProductSummary;
+import de.heinzdanner.produktkompass.user.AppUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -62,6 +65,22 @@ public class ProductService {
         return results;
     }
 
+    public Page<ProductSummary> getProductsForCompany(Long companyId, int page, int size) {
+        return findPage((product, query, builder) -> builder.equal(product.get("company").get("id"), companyId),
+                page, size).map(ProductSummary::fromEntity);
+    }
+
+    public Page<ProductSummary> getFavoriteProductPage(String username, int page, int size) {
+        return findPage((product, query, builder) -> {
+            var favoriteFilter = query.subquery(Long.class);
+            var owner = favoriteFilter.from(AppUser.class);
+            favoriteFilter.select(owner.get("id")).where(
+                    builder.equal(owner.get("username"), username),
+                    builder.<Product, Set<Product>>isMember(product, owner.get("favoriteProducts")));
+            return builder.exists(favoriteFilter);
+        }, page, size).map(ProductSummary::fromEntity);
+    }
+
     public List<ProductOption> getProductOptions(List<Long> ids) {
         return ids.isEmpty() ? List.of() : productRepository.findAllById(ids).stream()
                 .map(product -> new ProductOption(product.getId(), product.getName()))
@@ -74,18 +93,26 @@ public class ProductService {
     private Page<Product> findSearchPage(String text, Long brandId, Long categoryId, ProductLabel label,
                                          NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                          String username, int page, int size) {
-        if (page < 0 || size < 1 || size > 50) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "page muss mindestens 0 sein; size muss zwischen 1 und 50 liegen.");
-        }
-        Page<Product> results = productRepository.findAll(
-                ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId, username),
+        return findPage(ProductSearch.matching(text, brandId, categoryId, label, grade,
+                madeInGermany, tagId, username), page, size);
+    }
+
+    private Page<Product> findPage(Specification<Product> filter, int page, int size) {
+        validatePage(page, size);
+        Page<Product> results = productRepository.findAll(filter,
                 PageRequest.of(page, size, Sort.by("name").ascending().and(Sort.by("id"))));
         // Load collection data only for the bounded page, never in the paginated query.
         if (!results.isEmpty()) {
             productRepository.findPageCategories(results.getContent().stream().map(Product::getId).toList());
         }
         return results;
+    }
+
+    private void validatePage(int page, int size) {
+        if (page < 0 || size < 1 || size > 50) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "page muss mindestens 0 sein; size muss zwischen 1 und 50 liegen.");
+        }
     }
 
     public Optional<Product> getProductById(Long id) {

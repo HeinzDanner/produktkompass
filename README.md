@@ -106,9 +106,9 @@ Quellen, Labels und Alternativen bleiben über den Produktdetail-Endpunkt
 Migration V12 ergänzt Indizes für Sortierung, Marken, Unternehmen, Nutri-Score
 sowie Kategorie- und Labelverknüpfungen. Die Textsuche verwendet weiterhin
 Teilwortsuche; für sehr große OFF-Bestände sind später PostgreSQL-Trigram-
-oder Volltextindizes und Lastmessungen vorgesehen. Stammdatenlisten
-(z. B. Marken/Quellen) sind noch nicht vollständig auf große Datenbestände
-umgestellt; große Importe daher noch nicht starten.
+oder Volltextindizes und Lastmessungen vorgesehen. Katalog- und Stammdatenlisten
+laden inzwischen begrenzte Seiten. Große Importe erst nach Erweiterung des
+Import-Datenmodells und Messungen mit einem kleinen Testbestand starten.
 
 ### Automatische Alternativensuche
 
@@ -149,8 +149,8 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 Die Produktliste unter `/admin` besitzt eine Datenbanksuche und Pagination
 mit standardmäßig 20, maximal 50 Produkten pro Seite, z. B.
 `/admin?query=hafer&page=0&size=20`. Produkthinweise zur Datenqualität beziehen
-sich auf die aktuelle Ergebnisseite; Quellenhinweise beziehen sich weiterhin
-auf alle Quellen.
+sich auf die aktuelle Ergebnisseite; Quellenhinweise beziehen sich auf die
+aktuelle Ergebnisseite der Quellenliste.
 
 Beim Bearbeiten eines Produkts lädt die Alternative-Auswahl nur die ersten
 20 Produkte sowie bereits ausgewählte Alternativen. Mit JavaScript können
@@ -158,7 +158,8 @@ weitere Produkte gesucht und Ergebnisseiten geladen werden, ohne das
 Bearbeitungsformular neu zu laden. Gewählte Alternativen bleiben während
 der Suche und nach Formular-Validierungsfehlern erhalten. Ohne JavaScript
 können die anfänglich geladenen Optionen weiterhin bearbeitet werden.
-Die übrigen Stammdaten-Auswahllisten sind noch nicht paginiert.
+Die übrigen Stammdaten-Auswahllisten bieten ebenfalls Suche und Pagination
+(siehe „Begrenztes Laden von Stammdaten“).
 
 ### Benutzer- und Rollenverwaltung
 
@@ -265,6 +266,43 @@ hinter HTTPS erreichbar sein – über HTTP würde der Browser den Cookie sonst
 verwerfen und Logins würden fehlschlagen.
 
 ## Wichtige Hinweise
+
+### Begrenztes Laden von Stammdaten
+
+Die Produktlisten unter `/brands/{id}` und `/companies/{id}` sind ebenfalls
+paginiert: `page` standardmäßig 0 (nullbasiert), `size` standardmäßig 20,
+maximal 50. Die stabile Sortierung erfolgt nach Produktname und danach ID.
+Auch die HTML-Favoritenliste `/favorites` lädt Produkte seitenweise mit diesen
+Standardwerten und derselben Sortierung. Die REST-Favoritenendpunkte und die
+persönliche Tag-Zuordnungsübersicht sind davon unabhängig und bleiben
+unpaginiert. Produkt- und Markendetails laden persönliche Tag-/Favoriteninfos
+nur für die dort benötigten IDs, nicht sämtliche persönlichen Zuordnungen.
+
+`GET /api/v1/brands`, `/api/v1/categories`, `/api/v1/companies` und
+`/api/v1/sources` liefern
+**statt eines JSON-Arrays jetzt ein stabiles Seitenobjekt**:
+`{content: [...], page, size, totalElements, totalPages, hasNext, hasPrevious}`.
+`page` ist nullbasiert (Standard 0), `size` standardmäßig 20 und auf 1–100
+begrenzt; ungültige Seitennummern oder Seitengrößen liefern HTTP 400. `query` sucht ohne
+Beachtung der Groß-/Kleinschreibung im Namen bzw. Quellentitel; `%`, `_`
+und `!` sind dabei normale Suchzeichen. Sortierung: Name/Titel, danach ID.
+GET-Einzelabfragen und Schreibendpunkte sowie deren Zugriffs-/CSRF-Regeln
+bleiben unverändert.
+
+Die Admin-Stammdatenlisten laden unabhängig je 20 Einträge. `brandQuery`/
+`brandPage`, `categoryQuery`/`categoryPage`, `companyQuery`/`companyPage`
+und `sourceQuery`/`sourcePage` steuern ihre Suche/Seite; Navigation und
+Suchformulare behalten die Parameter der übrigen Listen bei.
+Quellen-Datenqualitätswarnungen gelten nur für die aktuelle Quellenseite.
+
+Auswahllisten für Marken, Kategorien, Unternehmen und Quellen laden
+zunächst maximal 20 Einträge **plus alle bereits ausgewählten IDs**.
+Suche und Vor-/Zurückblättern laden weitere Seiten über die genannten APIs,
+ohne bestehende Auswahlen zu verlieren. Ohne JavaScript bleiben die initialen
+Optionen und alle bestehenden Auswahlen verfügbar; weitere Optionen erfordern
+JavaScript. Auch nach Formularvalidierungsfehlern bleiben übermittelte
+Auswahlen außerhalb der initialen Seite erhalten. Nicht mehr vorhandene
+ausgewählte IDs werden als „Nicht verfügbar“ sichtbar, nicht still entfernt.
 
 - Lokale Entwicklung und Produktivbetrieb laufen beide gegen PostgreSQL,
   um Verhaltensunterschiede zwischen Testumgebung und echter Datenbank zu vermeiden.

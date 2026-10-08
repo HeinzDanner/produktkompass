@@ -25,7 +25,7 @@
     <section class="box" th:if="${dataQualityWarnings != null and !#lists.isEmpty(dataQualityWarnings)}">
         <h2>Datenqualitätswarnungen</h2>
         <p class="hint">Diese Hinweise verhindern nichts, helfen aber bei der redaktionellen Pflege.</p>
-        <p class="hint">Produkthinweise beziehen sich auf die aktuelle Ergebnisseite; Quellenhinweise auf alle Quellen.</p>
+        <p class="hint">Produkt- und Quellenhinweise beziehen sich jeweils nur auf die aktuelle Ergebnisseite ihrer Liste.</p>
         <ul class="quality-warnings">
             <li th:each="warning : ${dataQualityWarnings}" th:text="${warning}">Warnung</li>
         </ul>
@@ -33,7 +33,7 @@
 
     <section class="box">
         <h2>Neues Produkt anlegen</h2>
-        <form th:action="@{/admin/products}" th:object="${productRequest}" method="post" class="admin-form">
+        <form th:action="@{${'/admin/products' + adminQuerySuffix}}" th:object="${productRequest}" method="post" class="admin-form">
             <div class="form-row">
                 <label for="name">Name</label>
                 <input id="name" type="text" th:field="*{name}" required>
@@ -48,17 +48,17 @@
 
             <div class="form-row">
                 <label for="brandId">Marke</label>
-                <select id="brandId" th:field="*{brandId}">
+                <select id="brandId" th:field="*{brandId}" th:data-lookup-url="@{/api/v1/brands}" aria-label="Marke">
                     <option value="">Keine Marke</option>
-                    <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                    <option th:each="brand : ${brandOptions}" th:value="${brand.id}" th:text="${brand.name}"></option>
                 </select>
             </div>
 
             <div class="form-row">
                 <label for="companyId">Unternehmen</label>
-                <select id="companyId" th:field="*{companyId}">
+                <select id="companyId" th:field="*{companyId}" th:data-lookup-url="@{/api/v1/companies}" aria-label="Unternehmen">
                     <option value="">Kein Unternehmen</option>
-                    <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
+                    <option th:each="company : ${companyOptions}" th:value="${company.id}" th:text="${company.name}"></option>
                 </select>
             </div>
 
@@ -128,15 +128,15 @@
 
             <div class="form-row">
                 <label for="categoryIds">Kategorien</label>
-                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6">
-                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                <select id="categoryIds" th:field="*{categoryIds}" multiple="multiple" size="6" th:data-lookup-url="@{/api/v1/categories}" aria-label="Kategorien">
+                    <option th:each="category : ${categoryOptions}" th:value="${category.id}" th:text="${category.name}"></option>
                 </select>
             </div>
 
             <div class="form-row">
                 <label for="sourceIds">Quellen</label>
-                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6">
-                    <option th:each="source : ${sources}" th:value="${source.id}" th:text="${source.title}"></option>
+                <select id="sourceIds" th:field="*{sourceIds}" multiple="multiple" size="6" th:data-lookup-url="@{/api/v1/sources}" aria-label="Quellen">
+                    <option th:each="source : ${sourceOptions}" th:value="${source.id}" th:text="${source.name}"></option>
                 </select>
             </div>
 
@@ -146,7 +146,8 @@
 
     <section class="box">
         <h2>Marken verwalten</h2>
-        <form th:action="@{/admin/brands}" th:object="${brandRequest}" method="post" class="admin-form">
+        <div th:replace="~{fragments/master-pagination :: controls('brand', ${brandPage}, 'Marken', ${brandPreviousUrl}, ${brandNextUrl})}"></div>
+        <form th:action="@{${'/admin/brands' + adminQuerySuffix}}" th:object="${brandRequest}" method="post" class="admin-form">
             <div class="form-row">
                 <label for="brandName">Name</label>
                 <input id="brandName" type="text" th:field="*{name}" required>
@@ -176,7 +177,8 @@
 
     <section class="box">
         <h2>Kategorien verwalten</h2>
-        <form th:action="@{/admin/categories}" th:object="${categoryRequest}" method="post" class="admin-form">
+        <div th:replace="~{fragments/master-pagination :: controls('category', ${categoryPage}, 'Kategorien', ${categoryPreviousUrl}, ${categoryNextUrl})}"></div>
+        <form th:action="@{${'/admin/categories' + adminQuerySuffix}}" th:object="${categoryRequest}" method="post" class="admin-form">
             <div class="form-row">
                 <label for="categoryName">Name</label>
                 <input id="categoryName" type="text" th:field="*{name}" required>
@@ -206,7 +208,8 @@
 
     <section class="box">
         <h2>Unternehmen verwalten</h2>
-        <form th:action="@{/admin/companies}" th:object="${companyRequest}" method="post" class="admin-form">
+        <div th:replace="~{fragments/master-pagination :: controls('company', ${companyPage}, 'Unternehmen', ${companyPreviousUrl}, ${companyNextUrl})}"></div>
+        <form th:action="@{${'/admin/companies' + adminQuerySuffix}}" th:object="${companyRequest}" method="post" class="admin-form">
             <div class="form-row">
                 <label for="companyName">Name</label>
                 <input id="companyName" type="text" th:field="*{name}" required>
@@ -246,7 +249,8 @@
 
     <section class="box">
         <h2>Quellen verwalten</h2>
-        <form th:action="@{/admin/sources}" th:object="${sourceRequest}" method="post" class="admin-form">
+        <div th:replace="~{fragments/master-pagination :: controls('source', ${sourcePage}, 'Quellen', ${sourcePreviousUrl}, ${sourceNextUrl})}"></div>
+        <form th:action="@{${'/admin/sources' + adminQuerySuffix}}" th:object="${sourceRequest}" method="post" class="admin-form">
             <div class="form-row">
                 <label for="sourceTitle">Titel</label>
                 <input id="sourceTitle" type="text" th:field="*{title}" required>
@@ -287,6 +291,8 @@
     <section class="box">
         <h2>Produktliste</h2>
         <form method="get" th:action="@{/admin}" class="product-search">
+            <input th:each="entry : ${adminListParams}" th:if="${entry.key != 'query' and entry.key != 'page' and entry.key != 'size'}"
+                   type="hidden" th:name="${entry.key}" th:value="${entry.value}">
             <label for="adminProductQuery">Produkte suchen</label>
             <input id="adminProductQuery" type="search" name="query" th:value="${selectedQuery}"
                    placeholder="Produkt, Marke, Unternehmen oder Kategorie">
@@ -319,13 +325,14 @@
         </div>
         <nav aria-label="Admin-Produktergebnisse" class="actions">
             <a th:if="${productPage.hasPrevious()}" class="button secondary"
-               th:href="@{/admin(query=${selectedQuery},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+               th:href="${productPreviousUrl}">Zurück</a>
             <span th:if="${productPage.totalPages > 0}"
                   th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
             <a th:if="${productPage.hasNext()}" class="button secondary"
-               th:href="@{/admin(query=${selectedQuery},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+               th:href="${productNextUrl}">Weiter</a>
         </nav>
     </section>
 </main>
+<script th:src="@{/js/lookup-picker.js}" defer></script>
 </body>
 </html>
