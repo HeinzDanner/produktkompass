@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +46,7 @@ class LoginLockoutIntegrationTest {
         String correctPassword = "Sicheres1Passwort";
 
         mockMvc.perform(post("/register")
+                        .with(csrf())
                         .param("username", username)
                         .param("password", correctPassword)
                         .param("confirmPassword", correctPassword))
@@ -53,6 +55,7 @@ class LoginLockoutIntegrationTest {
         // 5 Fehlversuche mit falschem Passwort
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(post("/login")
+                            .with(csrf())
                             .param("username", username)
                             .param("password", "falschesPasswort"))
                     .andExpect(status().is3xxRedirection())
@@ -61,6 +64,7 @@ class LoginLockoutIntegrationTest {
 
         // Selbst das korrekte Passwort wird jetzt abgelehnt, weil das Konto gesperrt ist
         mockMvc.perform(post("/login")
+                        .with(csrf())
                         .param("username", username)
                         .param("password", correctPassword))
                 .andExpect(status().is3xxRedirection())

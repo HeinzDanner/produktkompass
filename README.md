@@ -112,6 +112,33 @@ verbliebene Administrator nicht herabgestuft werden. Rollenänderungen und
 manuelle Entsperrungen erscheinen im Audit-Log. Eine geänderte Rolle wird für
 den betroffenen Benutzer spätestens bei dessen nächstem Login wirksam.
 
+## Registrierung und CSRF-Schutz
+
+Die öffentliche Web- und API-Registrierung legt ausschließlich `USER`-Konten an.
+Die API akzeptiert `username` (3 bis 50 Zeichen) und `password` (mindestens
+8 Zeichen, mit Großbuchstaben, Kleinbuchstaben und Ziffer). Ein zusätzlich
+mitgesendetes `role`-Feld wird ignoriert; Rollenänderungen erfolgen nur über
+die geschützte Admin-Benutzerverwaltung.
+
+Alle schreibenden Web- und API-Anfragen benötigen einen gültigen CSRF-Token.
+Thymeleaf fügt ihn automatisch in POST-Formulare ein. Auch Login und Logout
+sind geschützt; Logout erfolgt per POST, nicht per GET.
+
+Für API-Clients mit der derzeitigen HTTP-Basic-Anmeldung gilt:
+
+1. `GET /api/v1/csrf` aufrufen; bei geschützten Aktionen bereits dabei
+   die Basic-Anmeldedaten mitsenden.
+2. Den Session-Cookie behalten. Die JSON-Antwort enthält `headerName`,
+   `parameterName` und `token`.
+3. Bei POST/PUT/DELETE den Token im genannten Header (`X-CSRF-TOKEN`)
+   zusammen mit dem Session-Cookie und gegebenenfalls Basic-Anmeldedaten senden.
+
+Ohne gültigen Token antwortet der Server mit HTTP 403. Öffentliche
+GET-Abfragen benötigen keinen Token. Nach einem Web-Login oder Logout muss
+ein neuer Token geladen werden. HTTP Basic darf außerhalb der lokalen
+Entwicklung nur über HTTPS verwendet werden; mobile Token-Anmeldung wird
+in einem späteren Schritt separat eingeführt.
+
 ## Schutz gegen Brute-Force-Logins
 
 Nach 5 aufeinanderfolgenden Fehlversuchen wird ein Benutzerkonto für 15 Minuten

@@ -69,7 +69,7 @@ public record ProductResponse(
                 product.getContainsGluten(),
                 product.getContainsAlcohol(),
                 product.getContainsCaffeine(),
-                product.getLabels(),
+                product.getLabels() == null ? Set.of() : Set.copyOf(product.getLabels()),
                 categoryResponses,
                 sourceResponses,
                 alternativeProductIds

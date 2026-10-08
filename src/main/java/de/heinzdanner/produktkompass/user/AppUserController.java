@@ -3,6 +3,7 @@ package de.heinzdanner.produktkompass.user;
 import de.heinzdanner.produktkompass.product.dto.ProductResponse;
 import de.heinzdanner.produktkompass.user.dto.UserRegistrationRequest;
 import de.heinzdanner.produktkompass.user.dto.UserResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -28,14 +28,8 @@ public class AppUserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserRegistrationRequest request) {
-        Role role = Optional.ofNullable(request.role())
-                .map(String::trim)
-                .map(String::toUpperCase)
-                .map(Role::valueOf)
-                .orElse(Role.USER);
-
-        AppUser savedUser = appUserService.registerUser(request.username(), request.password(), role);
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRegistrationRequest request) {
+        AppUser savedUser = appUserService.registerUser(request.username(), request.password(), Role.USER);
         return ResponseEntity.ok(UserResponse.fromEntity(savedUser));
     }
 
@@ -56,24 +50,13 @@ public class AppUserController {
     @GetMapping("/me/favorites")
     public ResponseEntity<List<ProductResponse>> getFavoriteProducts() {
         String username = currentUsername();
-        List<ProductResponse> favorites = appUserService.getFavoriteProducts(username)
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(favorites);
+        return ResponseEntity.ok(appUserService.getFavoriteProductResponses(username));
     }
 
     @PostMapping("/me/favorites/{productId}")
     public ResponseEntity<ProductResponse> addFavoriteProduct(@PathVariable Long productId) {
         String username = currentUsername();
-        AppUser user = appUserService.addFavoriteProduct(username, productId);
-        return user.getFavoriteProducts().stream()
-                .filter(product -> product.getId().equals(productId))
-                .findFirst()
-                .map(ProductResponse::fromEntity)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(appUserService.addFavoriteProductResponse(username, productId));
     }
 
     @DeleteMapping("/me/favorites/{productId}")

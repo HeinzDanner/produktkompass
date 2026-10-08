@@ -3,6 +3,7 @@ package de.heinzdanner.produktkompass.user;
 import de.heinzdanner.produktkompass.audit.AuditLogService;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductRepository;
+import de.heinzdanner.produktkompass.product.dto.ProductResponse;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -144,6 +145,22 @@ public class AppUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
         return user.getFavoriteProducts().stream().toList();
+    }
+
+    public List<ProductResponse> getFavoriteProductResponses(String username) {
+        return getFavoriteProducts(username).stream()
+                .map(ProductResponse::fromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public ProductResponse addFavoriteProductResponse(String username, Long productId) {
+        AppUser user = addFavoriteProduct(username, productId);
+        Product product = user.getFavoriteProducts().stream()
+                .filter(favorite -> productId.equals(favorite.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Gespeicherter Favorit wurde nicht gefunden."));
+        return ProductResponse.fromEntity(product);
     }
 
     public Set<Long> getFavoriteProductIds(String username) {
