@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
@@ -14,6 +15,9 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     List<AppUser> findAllByOrderByUsernameAsc();
 
     long countByRole(Role role);
+
+    @Query("SELECT p.id FROM AppUser u JOIN u.favoriteProducts p WHERE u.username = :username AND p.id IN :productIds")
+    Set<Long> findFavoriteIdsForProducts(String username, List<Long> productIds);
 
     @Query("SELECT DISTINCT u FROM AppUser u LEFT JOIN FETCH u.favoriteProducts fp LEFT JOIN FETCH fp.brand LEFT JOIN FETCH fp.company LEFT JOIN FETCH fp.categories LEFT JOIN FETCH fp.sources WHERE u.username = :username")
     Optional<AppUser> findByUsernameWithFavorites(String username);

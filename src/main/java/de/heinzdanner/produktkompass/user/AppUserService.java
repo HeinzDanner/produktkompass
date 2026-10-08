@@ -172,6 +172,10 @@ public class AppUserService implements UserDetailsService {
                 .collect(java.util.stream.Collectors.toSet());
     }
 
+    public Set<Long> getFavoriteIdsForProducts(String username, List<Long> productIds) {
+        return productIds.isEmpty() ? Set.of() : appUserRepository.findFavoriteIdsForProducts(username, productIds);
+    }
+
     @Transactional
     public AppUser addFavoriteProduct(String username, Long productId) {
         AppUser user = appUserRepository.findByUsernameWithFavorites(username)

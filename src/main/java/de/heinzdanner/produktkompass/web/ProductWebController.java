@@ -65,18 +65,17 @@ public class ProductWebController {
                            @RequestParam(required = false) NutritionGrade nutritionGrade,
                            @RequestParam(required = false) Boolean madeInGermany,
                            @RequestParam(required = false) Long tagId,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "20") int size,
                            Principal principal,
                            Model model) {
-        List<Product> products = productService.searchProducts(query, brandId, categoryId, label, nutritionGrade, madeInGermany);
-
-        if (tagId != null && principal != null) {
-            Set<Long> tagProductIds = userTagService.resolveProductIdsForTag(principal.getName(), tagId);
-            products = products.stream()
-                    .filter(product -> tagProductIds.contains(product.getId()))
-                    .toList();
+        if (tagId != null) {
+            userTagService.requireOwnedTag(principal == null ? null : principal.getName(), tagId);
         }
-
-        model.addAttribute("products", products);
+        var results = productService.searchPage(query, brandId, categoryId, label, nutritionGrade,
+                madeInGermany, tagId, principal == null ? null : principal.getName(), page, size);
+        model.addAttribute("products", results.getContent());
+        model.addAttribute("productPage", results);
         model.addAttribute("brands", brandService.getAllBrands());
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("productLabels", ProductLabel.values());
@@ -89,9 +88,11 @@ public class ProductWebController {
         model.addAttribute("selectedMadeInGermany", madeInGermany);
         model.addAttribute("selectedTagId", tagId);
         model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
-        model.addAttribute("favoriteProductIds", resolveFavoriteProductIds(principal));
+        model.addAttribute("favoriteProductIds", principal == null ? Set.of()
+                : appUserService.getFavoriteIdsForProducts(principal.getName(),
+                        results.getContent().stream().map(product -> product.id()).toList()));
         if (principal != null) {
-            model.addAttribute("userTagOptions", userTagService.getTagsForUser(principal.getName()));
+            model.addAttribute("userTagOptions", userTagService.getTagOptionsForUser(principal.getName()));
         }
         return "products";
     }

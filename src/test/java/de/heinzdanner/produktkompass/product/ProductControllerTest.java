@@ -41,18 +41,19 @@ class ProductControllerTest {
         product.addCategory(category);
         setField(product, "id", 10L);
 
-        when(productService.searchProducts("hafer", 1L, 1L))
-                .thenReturn(List.of(product));
+        when(productService.searchPage("hafer", 1L, 1L, null, null, null, null, null, 0, 20))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(
+                        List.of(de.heinzdanner.produktkompass.product.dto.ProductSummary.fromEntity(product))));
 
         mockMvc.perform(get("/api/v1/products/search")
                         .param("name", "hafer")
                         .param("brandId", "1")
                         .param("categoryId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10))
-                .andExpect(jsonPath("$[0].name").value("Bio-Hafermilch"))
-                .andExpect(jsonPath("$[0].brand.name").value("Alnatura"))
-                .andExpect(jsonPath("$[0].categories[0].name").value("Milchalternativen"));
+                .andExpect(jsonPath("$.content[0].id").value(10))
+                .andExpect(jsonPath("$.content[0].name").value("Bio-Hafermilch"))
+                .andExpect(jsonPath("$.content[0].brand.name").value("Alnatura"))
+                .andExpect(jsonPath("$.content[0].categories[0].name").value("Milchalternativen"));
     }
 
     @Test

@@ -15,6 +15,10 @@ public interface UserTagRepository extends JpaRepository<UserTag, Long> {
 
     boolean existsByOwnerUsernameAndNameIgnoreCase(String username, String name);
 
+    boolean existsByIdAndOwnerUsername(Long id, String username);
+
+    List<UserTag> findAllByOwnerUsernameOrderByNameAsc(String username);
+
     @Query("SELECT DISTINCT t FROM UserTag t LEFT JOIN FETCH t.products LEFT JOIN FETCH t.brands " +
             "WHERE t.owner.username = :username ORDER BY t.name ASC")
     List<UserTag> findAllWithAssignmentsByOwnerUsername(@Param("username") String username);

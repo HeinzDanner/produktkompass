@@ -81,6 +81,35 @@ Die App verbindet sich dann über den Compose-Service `postgres` mit PostgreSQL.
 - App: http://localhost:8082 (lokal) bzw. http://localhost:8080 (Docker-Profil)
 - PostgreSQL: localhost:5432
 
+## Paginierte Produktsuche
+
+Die öffentliche Suche unter `/products` filtert direkt in der Datenbank und
+zeigt standardmäßig 20 Produkte pro Seite. `page` beginnt bei 0; `size` muss
+zwischen 1 und 50 liegen. Die Navigation erhält alle aktiven Filter. Eigene
+Tags berücksichtigen sowohl direkt markierte Produkte als auch Produkte
+markierter Marken; fremde oder unbekannte Tags liefern HTTP 404.
+
+Die REST-Listen haben nun ein **geändertes Antwortformat**: statt eines
+unbegrenzten JSON-Arrays liefern sie ein Objekt mit `content`, `page`, `size`,
+`totalElements` und `totalPages`:
+
+```text
+GET /api/v1/products?page=0&size=20
+GET /api/v1/products/search?name=hafer&page=0&size=20
+```
+
+Die Such-API unterstützt außerdem `brandId`, `categoryId`, `label`,
+`nutritionGrade` und `madeInGermany`. Listen enthalten kompakte Produktdaten;
+Quellen, Labels und Alternativen bleiben über den Produktdetail-Endpunkt
+`GET /api/v1/products/{id}` verfügbar. Sortiert wird nach Name und ID.
+
+Migration V12 ergänzt Indizes für Sortierung, Marken, Unternehmen, Nutri-Score
+sowie Kategorie- und Labelverknüpfungen. Die Textsuche verwendet weiterhin
+Teilwortsuche; für sehr große OFF-Bestände sind später PostgreSQL-Trigram-
+oder Volltextindizes und Lastmessungen vorgesehen. Admin-Listen und die
+automatische Alternativensuche sind noch nicht vollständig auf große
+Datenbestände umgestellt; große Importe daher noch nicht starten.
+
 ## Standardlogin
 
 - Benutzer: `admin`

@@ -55,6 +55,10 @@ public class UserTagService {
         return userTagRepository.findAllWithAssignmentsByOwnerUsername(username);
     }
 
+    public List<UserTag> getTagOptionsForUser(String username) {
+        return userTagRepository.findAllByOwnerUsernameOrderByNameAsc(username);
+    }
+
     @Transactional
     public UserTag createTag(String username, String rawName) {
         String name = normalizeName(rawName);
@@ -139,6 +143,13 @@ public class UserTagService {
                     .forEach(product -> productIds.add(product.getId()));
         }
         return productIds;
+    }
+
+    public void requireOwnedTag(String username, Long tagId) {
+        if (username == null || !userTagRepository.existsByIdAndOwnerUsername(tagId, username)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND, "Tag wurde nicht gefunden.");
+        }
     }
 
     private UserTag getOwnedTagOrThrow(String username, Long tagId) {

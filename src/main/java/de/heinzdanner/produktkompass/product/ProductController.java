@@ -2,6 +2,7 @@ package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.product.dto.ProductRequest;
 import de.heinzdanner.produktkompass.product.dto.ProductResponse;
+import de.heinzdanner.produktkompass.product.dto.ProductPage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,27 +29,25 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        List<ProductResponse> products = productService.getAllProducts()
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(products);
+    public ResponseEntity<ProductPage> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ProductPage.from(productService.searchPage(
+                null, null, null, null, null, null, null, null, page, size)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> searchProducts(
+    public ResponseEntity<ProductPage> searchProducts(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) Long categoryId) {
-
-        List<ProductResponse> products = productService.searchProducts(name, brandId, categoryId)
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(products);
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) ProductLabel label,
+            @RequestParam(required = false) NutritionGrade nutritionGrade,
+            @RequestParam(required = false) Boolean madeInGermany,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ProductPage.from(productService.searchPage(
+                name, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null, page, size)));
     }
 
     @GetMapping("/{id}/alternatives")
