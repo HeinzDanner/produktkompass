@@ -26,7 +26,8 @@ public record ProductResponse(
         Set<ProductLabel> labels,
         List<CategoryResponse> categories,
         List<SourceResponse> sources,
-        List<Long> alternativeProductIds
+        List<Long> alternativeProductIds,
+        OpenFoodFactsDataResponse openFoodFactsData
 ) {
     public static ProductResponse fromEntity(Product product) {
         BrandResponse brandResponse = product.getBrand() == null
@@ -72,7 +73,10 @@ public record ProductResponse(
                 product.getLabels() == null ? Set.of() : Set.copyOf(product.getLabels()),
                 categoryResponses,
                 sourceResponses,
-                alternativeProductIds
+                alternativeProductIds,
+                product.getOpenFoodFactsData() == null
+                        ? null
+                        : OpenFoodFactsDataResponse.fromEntity(product.getOpenFoodFactsData())
         );
     }
 }

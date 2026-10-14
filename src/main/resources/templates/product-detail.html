@@ -11,6 +11,9 @@
 
 <main class="container page-content">
     <section class="box">
+        <span class="badge" th:if="${product.openFoodFactsData != null}">
+            Open-Food-Facts-Community-Daten
+        </span>
         <div class="section-header">
             <div>
                 <p class="eyebrow">Produktdetails</p>
@@ -123,6 +126,47 @@
                 <a th:href="${source.url}" th:text="${source.title}" target="_blank" rel="noopener noreferrer">Quelle</a>
             </li>
         </ul>
+    </section>
+
+    <section class="box" th:if="${product.openFoodFactsData != null}">
+        <h2>Angaben von Open Food Facts</h2>
+        <p class="hint">
+            Diese Angaben stammen aus der Open-Food-Facts-Community und sind nicht automatisch
+            redaktionell geprüft. Das Importdatum ist kein Prüfdatum.
+        </p>
+        <dl class="detail-list">
+            <dt>Barcode</dt>
+            <dd th:text="${product.openFoodFactsData.barcode}">Barcode</dd>
+            <dt>Produktname laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.productName ?: 'Keine Angabe'}">Produktname</dd>
+            <dt>Marken laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.brands ?: 'Keine Angabe'}">Marken</dd>
+            <dt>Kategorien laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.categories ?: 'Keine Angabe'}">Kategorien</dd>
+            <dt>Menge</dt>
+            <dd th:text="${product.openFoodFactsData.quantity ?: 'Keine Angabe'}">Menge</dd>
+            <dt>Zutaten laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.ingredientsText ?: 'Keine Angabe'}">Zutaten</dd>
+            <dt>Allergene laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.allergens ?: 'Keine Angabe'}">Allergene</dd>
+            <dt>Spurenhinweise laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.traces ?: 'Keine Angabe'}">Spurenhinweise</dd>
+            <dt>Nutri-Score laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.nutritionGrade ?: 'Keine Angabe'}">Nutri-Score</dd>
+            <dt>Sprache der Angaben</dt>
+            <dd th:text="${product.openFoodFactsData.languageCode ?: 'Keine Angabe'}">Sprache</dd>
+            <dt>Zuletzt importiert</dt>
+            <dd th:text="${#temporals.format(product.openFoodFactsData.lastImportedAt, 'dd.MM.yyyy HH:mm')}">Importdatum</dd>
+        </dl>
+        <p>
+            Quelle:
+            <a th:href="@{https://world.openfoodfacts.org/product/{barcode}(barcode=${product.openFoodFactsData.barcode})}"
+               target="_blank" rel="noopener noreferrer">Open Food Facts</a>.
+            Datenbanklizenz: <a href="https://opendatacommons.org/licenses/odbl/1-0/"
+                                target="_blank" rel="noopener noreferrer">ODbL 1.0</a>.
+            <span th:if="${product.openFoodFactsData.sourceRevision != null}"
+                  th:text="${'Datensatzrevision: ' + product.openFoodFactsData.sourceRevision}">Revision</span>
+        </p>
     </section>
 
 </main>

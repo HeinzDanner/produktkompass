@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     @Override
-    @EntityGraph(attributePaths = {"brand", "company"})
+    @EntityGraph(attributePaths = {"brand", "company", "openFoodFactsData"})
     Page<Product> findAll(Specification<Product> specification, Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.categories WHERE p.id IN :ids")
@@ -46,7 +46,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             """)
     List<Long> findAutomaticAlternativeIds(@Param("productId") Long productId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"brand", "company"})
+    @EntityGraph(attributePaths = {"brand", "company", "openFoodFactsData"})
     @Query("SELECT p FROM Product p WHERE p.id IN :ids")
     List<Product> findAlternativeProductsByIds(@Param("ids") List<Long> ids);
 
@@ -56,13 +56,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.alternativeProducts a LEFT JOIN FETCH a.brand WHERE p.id IN :ids")
     List<Product> findPageAlternatives(@Param("ids") List<Long> ids);
 
-    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels")
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels LEFT JOIN FETCH p.openFoodFactsData")
     List<Product> findAllWithDetails();
 
-    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels LEFT JOIN FETCH p.alternativeProducts alt LEFT JOIN FETCH alt.brand WHERE p.id = :id")
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels LEFT JOIN FETCH p.alternativeProducts alt LEFT JOIN FETCH alt.brand LEFT JOIN FETCH p.openFoodFactsData WHERE p.id = :id")
     Optional<Product> findByIdWithDetails(@Param("id") Long id);
 
-    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels LEFT JOIN FETCH p.alternativeProducts alt LEFT JOIN FETCH alt.brand WHERE p.alternativeProducts IS NOT EMPTY")
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.brand b LEFT JOIN FETCH p.company c LEFT JOIN FETCH p.categories cat LEFT JOIN FETCH p.sources s LEFT JOIN FETCH p.labels LEFT JOIN FETCH p.alternativeProducts alt LEFT JOIN FETCH alt.brand LEFT JOIN FETCH p.openFoodFactsData WHERE p.alternativeProducts IS NOT EMPTY")
     List<Product> findAllWithAlternatives();
 
     @Query("SELECT p FROM Product p JOIN p.categories c WHERE c.id = :categoryId")

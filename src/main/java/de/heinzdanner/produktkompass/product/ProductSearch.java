@@ -34,6 +34,11 @@ public final class ProductSearch {
                         .get("name")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(product.join("company", jakarta.persistence.criteria.JoinType.LEFT)
                         .get("name")), pattern, '\\'));
+                var openFoodFacts = product.join("openFoodFactsData", jakarta.persistence.criteria.JoinType.LEFT);
+                textMatches.add(builder.like(builder.lower(openFoodFacts.get("productName")), pattern, '\\'));
+                textMatches.add(builder.like(builder.lower(openFoodFacts.get("brands")), pattern, '\\'));
+                textMatches.add(builder.like(builder.lower(openFoodFacts.get("categories")), pattern, '\\'));
+                textMatches.add(builder.like(builder.lower(openFoodFacts.get("categoryTags")), pattern, '\\'));
                 textMatches.add(builder.exists(categorySearch));
                 for (ProductLabel value : ProductLabel.values()) {
                     if (value.name().toLowerCase(Locale.ROOT).replace('_', ' ').contains(term)) {

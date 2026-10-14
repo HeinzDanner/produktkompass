@@ -12,6 +12,31 @@ ProduktKompass ist eine Spring Boot-Anwendung für einen neutralen Produkt- und 
 - H2 nur noch für automatisierte Tests
 - Thymeleaf für eine einfache Weboberfläche
 
+## Open-Food-Facts-Datenmodell (Vorbereitung)
+
+Open-Food-Facts-Datensätze werden an einen Katalogeintrag gekoppelt, aber in
+`product_open_food_facts` getrennt von redaktionellen Produktfeldern gespeichert.
+Der Barcode ist eine eindeutige Zeichenkette (keine Zahl, damit führende Nullen
+erhalten bleiben); Name, Marken, Kategorien und OFF-Taxonomie-Tags, Menge,
+Zutaten, Allergene/Spuren, Länder und Nutri-Score bleiben als getrennte
+Quellenangaben erkennbar.
+Diese Angaben werden nicht automatisch in redaktionelle Marke-, Kategorie-,
+Zutaten- oder Nutri-Score-Felder kopiert.
+
+Die Produktdetailseite kennzeichnet solche Angaben als Open-Food-Facts-
+Community-Daten, verlinkt den Quelldatensatz und zeigt Importzeitpunkt und
+Datenbanklizenz. **Importzeitpunkt bedeutet nicht redaktionelles Prüfdatum.**
+Fehlende OFF-Angaben werden nicht als „frei von“ oder als verifizierte Aussage
+interpretiert. Produktbilder sind bewusst nicht Teil dieses ersten Datenmodells;
+für sie gelten eigene Quellen- und Lizenzbedingungen.
+
+Migrationen V13 und V14 legen dieses getrennte Modell an. Sobald ein Datensatz mit einem
+Produkt verknüpft ist, wird er öffentlich mit dem Hinweis auf Community-Daten
+angezeigt. Ein Importer und ein redaktioneller Prüfablauf sind noch nicht
+implementiert. Vor einem größeren Import müssen außerdem Attribution und die
+Bedingungen der OFF-Datenbanklizenz (ODbL) für die konkrete Bereitstellung
+geprüft werden.
+
 ## Entwicklungsprofile
 
 - `local`: Standardprofil, verbindet sich mit einer lokal installierten
@@ -99,16 +124,19 @@ GET /api/v1/products/search?name=hafer&page=0&size=20
 ```
 
 Die Such-API unterstützt außerdem `brandId`, `categoryId`, `label`,
-`nutritionGrade` und `madeInGermany`. Listen enthalten kompakte Produktdaten;
-Quellen, Labels und Alternativen bleiben über den Produktdetail-Endpunkt
-`GET /api/v1/products/{id}` verfügbar. Sortiert wird nach Name und ID.
+`nutritionGrade` und `madeInGermany`. Listen enthalten kompakte Produktdaten
+und das Merkmal `openFoodFactsDataAvailable`; OFF-Quellenangaben bleiben über
+`GET /api/v1/products/{id}` im separaten Feld `openFoodFactsData` verfügbar.
+Quellen, Labels und Alternativen sind ebenfalls im Detail-Endpunkt enthalten.
+Sortiert wird nach Name und ID.
 
 Migration V12 ergänzt Indizes für Sortierung, Marken, Unternehmen, Nutri-Score
 sowie Kategorie- und Labelverknüpfungen. Die Textsuche verwendet weiterhin
 Teilwortsuche; für sehr große OFF-Bestände sind später PostgreSQL-Trigram-
 oder Volltextindizes und Lastmessungen vorgesehen. Katalog- und Stammdatenlisten
-laden inzwischen begrenzte Seiten. Große Importe erst nach Erweiterung des
-Import-Datenmodells und Messungen mit einem kleinen Testbestand starten.
+laden inzwischen begrenzte Seiten. Migration V13 ergänzt ein getrenntes
+Provenienzmodell für OFF-Angaben; große Importe erst nach Bau des Importers und
+Messungen mit einem kleinen Testbestand starten.
 
 ### Automatische Alternativensuche
 

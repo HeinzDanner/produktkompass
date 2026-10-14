@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -17,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -115,6 +117,9 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "alternative_product_id")
     )
     private Set<Product> alternativeProducts = new HashSet<>();
+
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private OpenFoodFactsData openFoodFactsData;
 
     protected Product() {
     }
@@ -288,6 +293,14 @@ public class Product {
 
     public void setAlternativeProducts(Set<Product> alternativeProducts) {
         this.alternativeProducts = alternativeProducts;
+    }
+
+    public OpenFoodFactsData getOpenFoodFactsData() {
+        return openFoodFactsData;
+    }
+
+    public void setOpenFoodFactsData(OpenFoodFactsData openFoodFactsData) {
+        this.openFoodFactsData = openFoodFactsData;
     }
 
     public void addAlternativeProduct(Product product) {

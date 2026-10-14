@@ -7,12 +7,13 @@ import java.util.List;
 
 public record ProductSummary(Long id, String name, String description, BrandResponse brand,
                              CompanyResponse company, NutritionGrade nutritionGrade,
-                             List<CategoryResponse> categories) {
+                             List<CategoryResponse> categories, boolean openFoodFactsDataAvailable) {
     public static ProductSummary fromEntity(Product product) {
         return new ProductSummary(product.getId(), product.getName(), product.getDescription(),
                 product.getBrand() == null ? null : BrandResponse.fromEntity(product.getBrand()),
                 product.getCompany() == null ? null : CompanyResponse.fromEntity(product.getCompany()),
                 product.getNutritionGrade(),
-                product.getCategories().stream().map(CategoryResponse::fromEntity).toList());
+                product.getCategories().stream().map(CategoryResponse::fromEntity).toList(),
+                product.getOpenFoodFactsData() != null);
     }
 }
