@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * aktiviert werden, damit diese Demo-Konten nicht im Live-System landen.
  */
 @Component
-@Profile("!prod")
+@Profile("!prod & !off-import")
 public class UserDataInitializer implements ApplicationRunner {
 
     private final AppUserRepository appUserRepository;

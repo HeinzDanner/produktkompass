@@ -30,12 +30,43 @@ Fehlende OFF-Angaben werden nicht als „frei von“ oder als verifizierte Aussa
 interpretiert. Produktbilder sind bewusst nicht Teil dieses ersten Datenmodells;
 für sie gelten eigene Quellen- und Lizenzbedingungen.
 
-Migrationen V13 und V14 legen dieses getrennte Modell an. Sobald ein Datensatz mit einem
-Produkt verknüpft ist, wird er öffentlich mit dem Hinweis auf Community-Daten
-angezeigt. Ein Importer und ein redaktioneller Prüfablauf sind noch nicht
+Migrationen V13 bis V15 legen dieses getrennte Modell an. Sobald ein Datensatz
+mit einem Produkt verknüpft ist, wird er öffentlich mit dem Hinweis auf
+Community-Daten angezeigt. Ein redaktioneller Prüfablauf ist noch nicht
 implementiert. Vor einem größeren Import müssen außerdem Attribution und die
 Bedingungen der OFF-Datenbanklizenz (ODbL) für die konkrete Bereitstellung
 geprüft werden.
+
+### Lokal begrenzten OFF-Testimport ausführen
+
+Für lokale/offline Importe wird eine OFF-Exportdatei verwendet, nicht die
+Such-API. OFF stellt gzip-komprimierte TSV-Exporte über die [Datenseite](https://world.openfoodfacts.org/data)
+bereit; ein passender gefilterter CSV/TSV-Auszug kann dort über die erweiterte
+Suche erstellt werden. Für den Import müssen mindestens `code`,
+`product_name` und `countries_tags` enthalten sein. Die Datei darf als UTF-8
+TSV oder gzip-komprimierte TSV vorliegen und wird gestreamt, nicht vollständig
+in den Arbeitsspeicher geladen.
+
+Der Importer prüft zusätzlich den Länder-Tag, verarbeitet höchstens die
+explizit angegebene Zahl von 10.000 Eingabezeilen und speichert in
+transaktionalen 100er-Batches. Die Demo-Dateninitialisierung ist in diesem
+Kommando deaktiviert. Ein erneuter Lauf aktualisiert nur OFF-Rohdaten anhand
+des Barcodes; redaktionelle Produktfelder, Favoriten und persönliche Tags
+werden nicht überschrieben.
+
+Beispiel für einen lokalen Lauf mit maximal 1.000 Zeilen eines für Deutschland
+gefilterten Exports (PowerShell; Pfad zur heruntergeladenen Datei anpassen):
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.main-class=de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsImportCommand" "-Dspring-boot.run.arguments=--produktkompass.open-food-facts.import.enabled=true --produktkompass.open-food-facts.import.file=$env:USERPROFILE\Downloads\off-germany.tsv.gz --produktkompass.open-food-facts.import.max-products=1000 --produktkompass.open-food-facts.import.country-tag=en:germany"
+```
+
+Der Import läuft gegen das `local`-PostgreSQL-Profil und beendet sich danach.
+Die Konsole zeigt die Anzahl neu angelegter, aktualisierter und übersprungener
+Datensätze. `max-products` begrenzt die gelesenen Zeilen, nicht die Anzahl
+erfolgreich importierter Produkte. Vor einem größeren Gesamtexport erst mit
+einem kleinen gefilterten Testauszug beginnen und Datenbankgröße sowie
+Suchverhalten prüfen.
 
 ## Entwicklungsprofile
 

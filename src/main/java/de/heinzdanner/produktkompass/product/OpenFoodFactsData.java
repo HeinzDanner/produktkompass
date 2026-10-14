@@ -45,8 +45,7 @@ public class OpenFoodFactsData {
     @Column(name = "category_tags", columnDefinition = "TEXT")
     private String categoryTags;
 
-    @Size(max = 255)
-    @Column(length = 255)
+    @Column(columnDefinition = "TEXT")
     private String quantity;
 
     @Column(name = "ingredients_text", columnDefinition = "TEXT")

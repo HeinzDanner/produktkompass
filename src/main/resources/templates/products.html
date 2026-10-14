@@ -75,9 +75,11 @@
             <article class="product-card" th:each="product : ${products}">
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
-                    <span class="badge" th:if="${product.openFoodFactsDataAvailable}">
+                    <a class="badge" th:if="${product.openFoodFactsDataAvailable}"
+                       th:href="${product.openFoodFactsProductUrl}"
+                       target="_blank" rel="noopener noreferrer">
                         Open-Food-Facts-Community-Daten
-                    </span>
+                    </a>
                     <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
                     <span class="badge" th:if="${product.brand == null}">Ohne Marke</span>
                     <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>

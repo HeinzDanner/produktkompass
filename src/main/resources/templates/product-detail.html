@@ -155,15 +155,16 @@
             <dd th:text="${product.openFoodFactsData.nutritionGrade ?: 'Keine Angabe'}">Nutri-Score</dd>
             <dt>Sprache der Angaben</dt>
             <dd th:text="${product.openFoodFactsData.languageCode ?: 'Keine Angabe'}">Sprache</dd>
-            <dt>Zuletzt importiert</dt>
+            <dt>Zuletzt importiert (UTC)</dt>
             <dd th:text="${#temporals.format(product.openFoodFactsData.lastImportedAt, 'dd.MM.yyyy HH:mm')}">Importdatum</dd>
         </dl>
         <p>
-            Quelle:
+            Diese Seite enthält Daten von
             <a th:href="@{https://world.openfoodfacts.org/product/{barcode}(barcode=${product.openFoodFactsData.barcode})}"
-               target="_blank" rel="noopener noreferrer">Open Food Facts</a>.
-            Datenbanklizenz: <a href="https://opendatacommons.org/licenses/odbl/1-0/"
-                                target="_blank" rel="noopener noreferrer">ODbL 1.0</a>.
+               target="_blank" rel="noopener noreferrer">Open Food Facts</a>,
+            verfügbar unter der
+            <a href="https://opendatacommons.org/licenses/odbl/1-0/"
+               target="_blank" rel="noopener noreferrer">Open Database License (ODbL) 1.0</a>.
             <span th:if="${product.openFoodFactsData.sourceRevision != null}"
                   th:text="${'Datensatzrevision: ' + product.openFoodFactsData.sourceRevision}">Revision</span>
         </p>

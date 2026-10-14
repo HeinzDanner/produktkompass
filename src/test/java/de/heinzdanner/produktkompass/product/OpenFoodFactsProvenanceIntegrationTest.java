@@ -58,7 +58,9 @@ class OpenFoodFactsProvenanceIntegrationTest {
 
         mvc.perform(get("/api/v1/products/search").param("name", "OFF community display"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].openFoodFactsDataAvailable").value(true));
+                .andExpect(jsonPath("$.content[0].openFoodFactsDataAvailable").value(true))
+                .andExpect(jsonPath("$.content[0].openFoodFactsProductUrl")
+                        .value("https://world.openfoodfacts.org/product/0000123456789"));
         mvc.perform(get("/api/v1/products/search").param("name", "Community brand"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(product.getId()));
@@ -78,11 +80,12 @@ class OpenFoodFactsProvenanceIntegrationTest {
                 .contains("Open-Food-Facts-Community-Daten", "nicht automatisch",
                         "Importdatum ist kein Prüfdatum", "0000123456789",
                         "https://world.openfoodfacts.org/product/0000123456789",
-                        "Zuletzt importiert", "Datenbanklizenz", "ODbL 1.0")
+                        "Zuletzt importiert", "Open Database License (ODbL) 1.0")
                 .doesNotContain("allergenfrei");
 
         var list = mvc.perform(get("/products").param("query", "OFF community display"))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(list).contains("Open-Food-Facts-Community-Daten");
+        assertThat(list).contains("Open-Food-Facts-Community-Daten",
+                "https://world.openfoodfacts.org/product/0000123456789");
     }
 }
