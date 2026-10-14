@@ -59,4 +59,19 @@ class OpenFoodFactsTsvImporterTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("countries_tags");
     }
+
+    @Test
+    void acceptsLocalizedProductNameColumnsFromTheOfficialExport() throws Exception {
+        Path file = temporaryDirectory.resolve("localized-products.tsv");
+        Files.writeString(file, """
+                code\tproduct_name_de\tproduct_name_en\tcountries_tags
+                0001000000004\t\tOat drink\ten:germany
+                """);
+
+        var result = importer.importFile(file, "en:germany", 10);
+
+        assertThat(result.recordsRead()).isEqualTo(1);
+        assertThat(result.inserted()).isEqualTo(1);
+        assertThat(dataRepository.findAllByBarcodeIn(java.util.List.of("0001000000004"))).hasSize(1);
+    }
 }

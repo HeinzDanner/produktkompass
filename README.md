@@ -43,7 +43,9 @@ Für lokale/offline Importe wird eine OFF-Exportdatei verwendet, nicht die
 Such-API. OFF stellt gzip-komprimierte TSV-Exporte über die [Datenseite](https://world.openfoodfacts.org/data)
 bereit; ein passender gefilterter CSV/TSV-Auszug kann dort über die erweiterte
 Suche erstellt werden. Für den Import müssen mindestens `code`,
-`product_name` und `countries_tags` enthalten sein. Die Datei darf als UTF-8
+`countries_tags` und eine Namensspalte (`product_name` oder `product_name_<Sprache>`)
+enthalten sein. Deutsche Produktnamen werden bevorzugt; fehlt einer, nutzt der
+Importer einen vorhandenen englischen oder anderen lokalisierten Namen. Die Datei darf als UTF-8
 TSV oder gzip-komprimierte TSV vorliegen und wird gestreamt, nicht vollständig
 in den Arbeitsspeicher geladen.
 

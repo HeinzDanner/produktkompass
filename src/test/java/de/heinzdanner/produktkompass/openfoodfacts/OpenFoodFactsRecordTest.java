@@ -63,4 +63,16 @@ class OpenFoodFactsRecordTest {
         assertThat(german.isSoldIn("en:germany")).isTrue();
         assertThat(france.isSoldIn("en:germany")).isFalse();
     }
+
+    @Test
+    void fallsBackToAnotherLocalizedNameWhenGermanNameIsBlank() {
+        OpenFoodFactsRecord record = OpenFoodFactsRecord.from(Map.of(
+                "code", "0001000000003",
+                "product_name_de", " ",
+                "product_name_en", "Oat drink",
+                "countries_tags", "en:germany"));
+
+        assertThat(record).isNotNull();
+        assertThat(record.productName()).isEqualTo("Oat drink");
+    }
 }

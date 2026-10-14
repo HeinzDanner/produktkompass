@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 @Service
@@ -26,7 +25,7 @@ public class OpenFoodFactsTsvImporter {
 
     private static final Logger log = LoggerFactory.getLogger(OpenFoodFactsTsvImporter.class);
     private static final int BATCH_SIZE = 100;
-    private static final Set<String> REQUIRED_COLUMNS = Set.of("code", "product_name", "countries_tags");
+    private static final List<String> REQUIRED_COLUMNS = List.of("code", "countries_tags");
     private final OpenFoodFactsImportBatchService batchService;
 
     public OpenFoodFactsTsvImporter(OpenFoodFactsImportBatchService batchService) {
@@ -53,6 +52,11 @@ public class OpenFoodFactsTsvImporter {
             missing.removeIf(headers::containsKey);
             if (!missing.isEmpty()) {
                 throw new IllegalArgumentException("OFF-TSV fehlt Pflichtspalten: " + String.join(", ", missing));
+            }
+            if (headers.keySet().stream().noneMatch(header ->
+                    header.equals("product_name") || header.startsWith("product_name_"))) {
+                throw new IllegalArgumentException(
+                        "OFF-TSV fehlt eine Produktnamensspalte (product_name oder product_name_<Sprache>).");
             }
 
             for (CSVRecord row : parser) {

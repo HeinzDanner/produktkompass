@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 
 record OpenFoodFactsRecord(
@@ -30,7 +31,17 @@ record OpenFoodFactsRecord(
 ) {
     static OpenFoodFactsRecord from(Map<String, String> source) {
         String barcode = text(source, "code");
-        String name = firstText(source, "product_name_de", "product_name");
+        String name = firstText(source, "product_name_de", "product_name", "product_name_en");
+        if (name == null) {
+            name = source.entrySet().stream()
+                    .filter(entry -> entry.getKey().startsWith("product_name_"))
+                    .sorted(Comparator.comparing(Map.Entry::getKey))
+                    .map(Map.Entry::getValue)
+                    .map(OpenFoodFactsRecord::normalizeText)
+                    .filter(value -> value != null)
+                    .findFirst()
+                    .orElse(null);
+        }
         String nutritionGrade = text(source, "nutrition_grade_fr");
         String languageCode = text(source, "lang");
         if (barcode == null || barcode.length() > 32 || name == null || name.length() > 500
@@ -90,13 +101,21 @@ record OpenFoodFactsRecord(
         return product;
     }
 
-    private static String firstText(Map<String, String> source, String first, String fallback) {
-        String value = text(source, first);
-        return value == null ? text(source, fallback) : value;
+    private static String firstText(Map<String, String> source, String... fields) {
+        for (String field : fields) {
+            String value = text(source, field);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private static String text(Map<String, String> source, String field) {
-        String value = source.get(field);
+        return normalizeText(source.get(field));
+    }
+
+    private static String normalizeText(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
