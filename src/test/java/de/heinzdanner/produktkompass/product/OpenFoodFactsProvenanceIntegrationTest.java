@@ -33,6 +33,13 @@ class OpenFoodFactsProvenanceIntegrationTest {
         OpenFoodFactsData imported = new OpenFoodFactsData(product, "0000123456789",
                 "Original name from OFF", LocalDateTime.of(2026, 10, 1, 12, 30));
         imported.setBrands("Community brand");
+        imported.setBrandTags("xx:community-brand");
+        imported.setBrandOwner("Community brand owner");
+        imported.setPackaging("Glass, Bottle");
+        imported.setPackagingTags("en:glass,en:bottle");
+        imported.setLabelTags("en:organic");
+        imported.setOriginTags("en:germany");
+        imported.setManufacturingPlaceTags("en:germany");
         imported.setCategories("en:plant-milks, de:pflanzendrinks");
         imported.setCategoryTags("en:plant-milks,de:pflanzendrinks");
         imported.setQuantity("1 l");
@@ -51,6 +58,10 @@ class OpenFoodFactsProvenanceIntegrationTest {
                 .andExpect(jsonPath("$.nutritionGrade").value("UNKNOWN"))
                 .andExpect(jsonPath("$.openFoodFactsData.barcode").value("0000123456789"))
                 .andExpect(jsonPath("$.openFoodFactsData.productName").value("Original name from OFF"))
+                .andExpect(jsonPath("$.openFoodFactsData.brandTags").value("xx:community-brand"))
+                .andExpect(jsonPath("$.openFoodFactsData.brandOwner").value("Community brand owner"))
+                .andExpect(jsonPath("$.openFoodFactsData.packagingTags").value("en:glass,en:bottle"))
+                .andExpect(jsonPath("$.openFoodFactsData.labelTags").value("en:organic"))
                 .andExpect(jsonPath("$.openFoodFactsData.nutritionGrade").value("c"))
                 .andExpect(jsonPath("$.openFoodFactsData.allergens").doesNotExist())
                 .andExpect(jsonPath("$.openFoodFactsData.productUrl")
@@ -79,6 +90,8 @@ class OpenFoodFactsProvenanceIntegrationTest {
         assertThat(details)
                 .contains("Open-Food-Facts-Community-Daten", "nicht automatisch",
                         "Importdatum ist kein Prüfdatum", "0000123456789",
+                        "Marken-Tags laut Open Food Facts", "Verpackung laut Open Food Facts",
+                        "Glass, Bottle", "Kein redaktionell zugeordnetes Unternehmen",
                         "https://world.openfoodfacts.org/product/0000123456789",
                         "Zuletzt importiert", "Open Database License (ODbL) 1.0")
                 .doesNotContain("allergenfrei");

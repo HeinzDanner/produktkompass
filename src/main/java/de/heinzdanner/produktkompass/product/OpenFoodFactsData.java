@@ -39,6 +39,12 @@ public class OpenFoodFactsData {
     @Column(columnDefinition = "TEXT")
     private String brands;
 
+    @Column(name = "brand_tags", columnDefinition = "TEXT")
+    private String brandTags;
+
+    @Column(name = "brand_owner", columnDefinition = "TEXT")
+    private String brandOwner;
+
     @Column(columnDefinition = "TEXT")
     private String categories;
 
@@ -47,6 +53,12 @@ public class OpenFoodFactsData {
 
     @Column(columnDefinition = "TEXT")
     private String quantity;
+
+    @Column(columnDefinition = "TEXT")
+    private String packaging;
+
+    @Column(name = "packaging_tags", columnDefinition = "TEXT")
+    private String packagingTags;
 
     @Column(name = "ingredients_text", columnDefinition = "TEXT")
     private String ingredientsText;
@@ -68,6 +80,15 @@ public class OpenFoodFactsData {
 
     @Column(name = "country_tags", columnDefinition = "TEXT")
     private String countryTags;
+
+    @Column(name = "label_tags", columnDefinition = "TEXT")
+    private String labelTags;
+
+    @Column(name = "origin_tags", columnDefinition = "TEXT")
+    private String originTags;
+
+    @Column(name = "manufacturing_place_tags", columnDefinition = "TEXT")
+    private String manufacturingPlaceTags;
 
     @Size(max = 20)
     @Column(name = "nutrition_grade", length = 20)
@@ -130,6 +151,22 @@ public class OpenFoodFactsData {
         this.brands = brands;
     }
 
+    public String getBrandTags() {
+        return brandTags;
+    }
+
+    public void setBrandTags(String brandTags) {
+        this.brandTags = brandTags;
+    }
+
+    public String getBrandOwner() {
+        return brandOwner;
+    }
+
+    public void setBrandOwner(String brandOwner) {
+        this.brandOwner = brandOwner;
+    }
+
     public String getCategories() {
         return categories;
     }
@@ -152,6 +189,22 @@ public class OpenFoodFactsData {
 
     public void setQuantity(String quantity) {
         this.quantity = quantity;
+    }
+
+    public String getPackaging() {
+        return packaging;
+    }
+
+    public void setPackaging(String packaging) {
+        this.packaging = packaging;
+    }
+
+    public String getPackagingTags() {
+        return packagingTags;
+    }
+
+    public void setPackagingTags(String packagingTags) {
+        this.packagingTags = packagingTags;
     }
 
     public String getIngredientsText() {
@@ -208,6 +261,30 @@ public class OpenFoodFactsData {
 
     public void setCountryTags(String countryTags) {
         this.countryTags = countryTags;
+    }
+
+    public String getLabelTags() {
+        return labelTags;
+    }
+
+    public void setLabelTags(String labelTags) {
+        this.labelTags = labelTags;
+    }
+
+    public String getOriginTags() {
+        return originTags;
+    }
+
+    public void setOriginTags(String originTags) {
+        this.originTags = originTags;
+    }
+
+    public String getManufacturingPlaceTags() {
+        return manufacturingPlaceTags;
+    }
+
+    public void setManufacturingPlaceTags(String manufacturingPlaceTags) {
+        this.manufacturingPlaceTags = manufacturingPlaceTags;
     }
 
     public String getNutritionGrade() {

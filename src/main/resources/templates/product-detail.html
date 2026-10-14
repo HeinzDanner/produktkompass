@@ -24,7 +24,7 @@
 
         <div class="product-header" style="display:block; margin-bottom:1rem;">
             <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
-            <span class="badge" th:if="${product.brand == null}">Ohne Marke</span>
+            <span class="badge" th:if="${product.brand == null}">Keine redaktionell zugeordnete Marke</span>
         </div>
 
         <p class="lead" th:text="${product.description != null ? product.description : 'Keine Beschreibung verfügbar.'}">Beschreibung</p>
@@ -40,7 +40,7 @@
         </div>
         <div class="meta-row" th:if="${product.company == null}">
             <strong>Unternehmen:</strong>
-            <span>Unbekannt</span>
+            <span>Kein redaktionell zugeordnetes Unternehmen</span>
         </div>
 
         <div class="meta-grid">
@@ -141,10 +141,18 @@
             <dd th:text="${product.openFoodFactsData.productName ?: 'Keine Angabe'}">Produktname</dd>
             <dt>Marken laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.brands ?: 'Keine Angabe'}">Marken</dd>
+            <dt>Marken-Tags laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.brandTags ?: 'Keine Angabe'}">Marken-Tags</dd>
+            <dt>Markeninhaber-Angabe laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.brandOwner ?: 'Keine Angabe'}">Markeninhaber</dd>
             <dt>Kategorien laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.categories ?: 'Keine Angabe'}">Kategorien</dd>
             <dt>Menge</dt>
             <dd th:text="${product.openFoodFactsData.quantity ?: 'Keine Angabe'}">Menge</dd>
+            <dt>Verpackung laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.packaging ?: 'Keine Angabe'}">Verpackung</dd>
+            <dt>Verpackungs-Tags laut Open Food Facts</dt>
+            <dd th:text="${product.openFoodFactsData.packagingTags ?: 'Keine Angabe'}">Verpackungs-Tags</dd>
             <dt>Zutaten laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.ingredientsText ?: 'Keine Angabe'}">Zutaten</dd>
             <dt>Allergene laut Open Food Facts</dt>

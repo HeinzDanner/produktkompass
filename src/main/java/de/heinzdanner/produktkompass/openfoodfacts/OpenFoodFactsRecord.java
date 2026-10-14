@@ -14,9 +14,13 @@ record OpenFoodFactsRecord(
         String barcode,
         String productName,
         String brands,
+        String brandTags,
+        String brandOwner,
         String categories,
         String categoryTags,
         String quantity,
+        String packaging,
+        String packagingTags,
         String ingredientsText,
         String allergens,
         String allergenTags,
@@ -24,6 +28,9 @@ record OpenFoodFactsRecord(
         String traceTags,
         String countries,
         String countryTags,
+        String labelTags,
+        String originTags,
+        String manufacturingPlaceTags,
         String nutritionGrade,
         String languageCode,
         LocalDateTime sourceModifiedAt,
@@ -42,7 +49,7 @@ record OpenFoodFactsRecord(
                     .findFirst()
                     .orElse(null);
         }
-        String nutritionGrade = text(source, "nutrition_grade_fr");
+        String nutritionGrade = firstText(source, "nutrition_grade_fr", "nutriscore_grade");
         String languageCode = text(source, "lang");
         if (barcode == null || barcode.length() > 32 || name == null || name.length() > 500
                 || nutritionGrade != null && nutritionGrade.length() > 20
@@ -52,12 +59,16 @@ record OpenFoodFactsRecord(
         String quantity = text(source, "quantity");
         long revision = parseLong(text(source, "last_modified_t"));
         return new OpenFoodFactsRecord(
-                barcode, name, text(source, "brands"), text(source, "categories"),
-                text(source, "categories_tags"), quantity,
+                barcode, name, text(source, "brands"), text(source, "brands_tags"),
+                text(source, "brand_owner"), text(source, "categories"),
+                text(source, "categories_tags"), quantity, text(source, "packaging"),
+                text(source, "packaging_tags"),
                 firstText(source, "ingredients_text_de", "ingredients_text"),
                 text(source, "allergens"), text(source, "allergens_tags"),
                 text(source, "traces"), text(source, "traces_tags"),
                 text(source, "countries"), text(source, "countries_tags"),
+                text(source, "labels_tags"), text(source, "origins_tags"),
+                text(source, "manufacturing_places_tags"),
                 nutritionGrade, languageCode,
                 revision > 0 ? LocalDateTime.ofInstant(Instant.ofEpochSecond(revision), ZoneOffset.UTC) : null,
                 revision > 0 ? Long.toString(revision) : null
@@ -75,9 +86,13 @@ record OpenFoodFactsRecord(
         target.setBarcode(barcode);
         target.setProductName(productName);
         target.setBrands(brands);
+        target.setBrandTags(brandTags);
+        target.setBrandOwner(brandOwner);
         target.setCategories(categories);
         target.setCategoryTags(categoryTags);
         target.setQuantity(quantity);
+        target.setPackaging(packaging);
+        target.setPackagingTags(packagingTags);
         target.setIngredientsText(ingredientsText);
         target.setAllergens(allergens);
         target.setAllergenTags(allergenTags);
@@ -85,6 +100,9 @@ record OpenFoodFactsRecord(
         target.setTraceTags(traceTags);
         target.setCountries(countries);
         target.setCountryTags(countryTags);
+        target.setLabelTags(labelTags);
+        target.setOriginTags(originTags);
+        target.setManufacturingPlaceTags(manufacturingPlaceTags);
         target.setNutritionGrade(nutritionGrade);
         target.setLanguageCode(languageCode);
         target.setSourceModifiedAt(sourceModifiedAt);

@@ -14,22 +14,37 @@ class OpenFoodFactsRecordTest {
                 Map.entry("product_name", "Community name"),
                 Map.entry("product_name_de", "Deutscher Name"),
                 Map.entry("brands", "Community Brand"),
+                Map.entry("brands_tags", "xx:community-brand"),
+                Map.entry("brand_owner", "Community Owner"),
                 Map.entry("categories", "Haferdrinks"),
                 Map.entry("categories_tags", "en:plant-milks,de:haferdrinks"),
+                Map.entry("packaging", "Bottle"),
+                Map.entry("packaging_tags", "en:bottle"),
                 Map.entry("ingredients_text", "Water"),
                 Map.entry("ingredients_text_de", "Wasser, Hafer"),
                 Map.entry("countries", "Germany"),
                 Map.entry("countries_tags", "en:germany"),
-                Map.entry("nutrition_grade_fr", "b"),
+                Map.entry("labels_tags", "en:organic"),
+                Map.entry("origins_tags", "en:germany"),
+                Map.entry("manufacturing_places_tags", "en:germany"),
+                Map.entry("nutriscore_grade", "b"),
                 Map.entry("lang", "en"),
                 Map.entry("last_modified_t", "1790264955")));
         assertThat(record).isNotNull();
         assertThat(record.barcode()).isEqualTo("0001234567890");
         assertThat(record.productName()).isEqualTo("Deutscher Name");
+        assertThat(record.brands()).isEqualTo("Community Brand");
+        assertThat(record.brandTags()).isEqualTo("xx:community-brand");
+        assertThat(record.brandOwner()).isEqualTo("Community Owner");
+        assertThat(record.packaging()).isEqualTo("Bottle");
+        assertThat(record.packagingTags()).isEqualTo("en:bottle");
         assertThat(record.ingredientsText()).isEqualTo("Wasser, Hafer");
         assertThat(record.categoryTags()).isEqualTo("en:plant-milks,de:haferdrinks");
         assertThat(record.allergens()).isNull();
         assertThat(record.countryTags()).isEqualTo("en:germany");
+        assertThat(record.labelTags()).isEqualTo("en:organic");
+        assertThat(record.originTags()).isEqualTo("en:germany");
+        assertThat(record.manufacturingPlaceTags()).isEqualTo("en:germany");
         assertThat(record.nutritionGrade()).isEqualTo("b");
         assertThat(record.sourceRevision()).isEqualTo("1790264955");
         assertThat(record.sourceModifiedAt()).isNotNull();
@@ -74,5 +89,22 @@ class OpenFoodFactsRecordTest {
 
         assertThat(record).isNotNull();
         assertThat(record.productName()).isEqualTo("Oat drink");
+    }
+
+    @Test
+    void mapsTheFieldsPresentInTheFilteredCsvExport() {
+        OpenFoodFactsRecord record = OpenFoodFactsRecord.from(Map.of(
+                "code", "0001000000005",
+                "product_name_en", "REAL MAYONNAISE",
+                "brands_tags", "xx:hellmann-s",
+                "packaging", "rinse-jar-recycle-lid-recycle",
+                "packaging_tags", "en:rinse-jar-recycle-lid-recycle",
+                "countries_tags", "en:germany"));
+
+        assertThat(record).isNotNull();
+        assertThat(record.brands()).isNull();
+        assertThat(record.brandTags()).isEqualTo("xx:hellmann-s");
+        assertThat(record.packaging()).isEqualTo("rinse-jar-recycle-lid-recycle");
+        assertThat(record.packagingTags()).isEqualTo("en:rinse-jar-recycle-lid-recycle");
     }
 }

@@ -26,6 +26,12 @@
                 <div class="product-header">
                     <h3 th:text="${product.name}">Produktname</h3>
                     <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
+                    <span class="badge" th:if="${product.brand == null}">Keine redaktionelle Marke</span>
+                    <a class="badge" th:if="${product.openFoodFactsDataAvailable}"
+                       th:href="${product.openFoodFactsProductUrl}"
+                       target="_blank" rel="noopener noreferrer">Open-Food-Facts-Community-Daten</a>
+                    <span class="badge" th:if="${product.openFoodFactsBrandTags != null}"
+                          th:text="${'OFF-Marken-Tags: ' + product.openFoodFactsBrandTags}">OFF-Marken-Tags</span>
                     <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
                 </div>
                 <p th:text="${product.description}">Beschreibung</p>
@@ -36,7 +42,12 @@
                     <span th:text="${product.company.name}">Unternehmen</span>
                 </div>
                 <div class="meta-row" th:if="${product.company == null}">
-                    <span>Unternehmen unbekannt</span>
+                    <span>Kein redaktionell zugeordnetes Unternehmen</span>
+                    <span th:if="${product.openFoodFactsBrandOwner != null}"
+                          th:text="${'Inhaber-Angabe laut OFF: ' + product.openFoodFactsBrandOwner}">OFF-Inhaber</span>
+                </div>
+                <div class="meta-row" th:if="${product.openFoodFactsPackaging != null}">
+                    <span th:text="${'Verpackung laut OFF: ' + product.openFoodFactsPackaging}">OFF-Verpackung</span>
                 </div>
                 <div class="actions">
                     <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>

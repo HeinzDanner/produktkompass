@@ -29,6 +29,8 @@ class OpenFoodFactsImportBatchServiceTest {
     void importIsRepeatableAndOnlyRefreshesOpenFoodFactsFields() {
         OpenFoodFactsRecord first = OpenFoodFactsRecord.from(Map.of(
                 "code", "0002223334445", "product_name", "OFF imported name", "brands", "First brand",
+                "brands_tags", "en:first-brand", "brand_owner", "First owner",
+                "packaging", "Bottle", "packaging_tags", "en:bottle",
                 "categories_tags", "en:plant-milks", "nutrition_grade_fr", "b", "lang", "de"));
         var initial = importer.importPage(List.of(first));
         assertThat(initial.inserted()).isEqualTo(1);
@@ -50,7 +52,9 @@ class OpenFoodFactsImportBatchServiceTest {
 
         OpenFoodFactsRecord refreshed = OpenFoodFactsRecord.from(Map.of(
                 "code", "0002223334445", "product_name", "Changed OFF name",
-                "brands", "Updated brand", "categories_tags", "en:plant-milks,en:soy-milks",
+                "brands", "Updated brand", "brands_tags", "en:updated-brand",
+                "brand_owner", "Updated owner", "packaging", "Jar", "packaging_tags", "en:jar",
+                "categories_tags", "en:plant-milks,en:soy-milks",
                 "nutrition_grade_fr", "c", "lang", "de"));
         var replayRecords = new java.util.ArrayList<OpenFoodFactsRecord>();
         replayRecords.add(refreshed);
@@ -72,6 +76,10 @@ class OpenFoodFactsImportBatchServiceTest {
                 .getProducts()).extracting("id").contains(productId);
         assertThat(refreshedData.getProductName()).isEqualTo("Changed OFF name");
         assertThat(refreshedData.getBrands()).isEqualTo("Updated brand");
+        assertThat(refreshedData.getBrandTags()).isEqualTo("en:updated-brand");
+        assertThat(refreshedData.getBrandOwner()).isEqualTo("Updated owner");
+        assertThat(refreshedData.getPackaging()).isEqualTo("Jar");
+        assertThat(refreshedData.getPackagingTags()).isEqualTo("en:jar");
         assertThat(refreshedData.getCategoryTags()).isEqualTo("en:plant-milks,en:soy-milks");
     }
 }

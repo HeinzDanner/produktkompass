@@ -30,7 +30,9 @@ Fehlende OFF-Angaben werden nicht als „frei von“ oder als verifizierte Aussa
 interpretiert. Produktbilder sind bewusst nicht Teil dieses ersten Datenmodells;
 für sie gelten eigene Quellen- und Lizenzbedingungen.
 
-Migrationen V13 bis V15 legen dieses getrennte Modell an. Sobald ein Datensatz
+Migrationen V13 bis V16 legen dieses getrennte Modell an. Es speichert außerdem
+OFF-Marken-Tags, Markeninhaber-Angaben, Verpackung, Labels, Herkunfts- und
+Herstellungsort-Tags getrennt von redaktionellen Zuordnungen. Sobald ein Datensatz
 mit einem Produkt verknüpft ist, wird er öffentlich mit dem Hinweis auf
 Community-Daten angezeigt. Ein redaktioneller Prüfablauf ist noch nicht
 implementiert. Vor einem größeren Import müssen außerdem Attribution und die
@@ -45,7 +47,10 @@ bereit; ein passender gefilterter CSV/TSV-Auszug kann dort über die erweiterte
 Suche erstellt werden. Für den Import müssen mindestens `code`,
 `countries_tags` und eine Namensspalte (`product_name` oder `product_name_<Sprache>`)
 enthalten sein. Deutsche Produktnamen werden bevorzugt; fehlt einer, nutzt der
-Importer einen vorhandenen englischen oder anderen lokalisierten Namen. Die Datei darf als UTF-8
+Importer einen vorhandenen englischen oder anderen lokalisierten Namen.
+Zusätzliche OFF-Felder wie `brands_tags`, `brand_owner`, `packaging`,
+`packaging_tags`, `labels_tags`, `origins_tags` und `manufacturing_places_tags`
+werden übernommen, wenn die Exportdatei sie enthält. Die Datei darf als UTF-8
 TSV oder gzip-komprimierte TSV vorliegen und wird gestreamt, nicht vollständig
 in den Arbeitsspeicher geladen.
 
