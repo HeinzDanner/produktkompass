@@ -150,7 +150,39 @@ class OpenFoodFactsProvenanceIntegrationTest {
         lactose = detail.substring(detail.indexOf("<strong>Laktose</strong>"), detail.indexOf("<strong>Gluten</strong>"));
         gluten = detail.substring(detail.indexOf("<strong>Gluten</strong>"), detail.indexOf("<strong>Alkohol</strong>"));
         assertThat(lactose).contains("CONTAINS", "Milch als Allergen angegeben").doesNotContain("UNKNOWN");
-        assertThat(gluten).contains("UNKNOWN");
+        assertThat(gluten).contains("Keine Angabe").doesNotContain("UNKNOWN");
+    }
+
+    @Test
+    void detailGroupsAllFiveContentLabelsAndKeepsGeneralLabelsSeparate() throws Exception {
+        product.getOpenFoodFactsData().setLabelTags(
+                "en:no-gluten,en:no-lactose,en:alcohol-free,en:caffeine-free,en:no-palm-oil,en:no-preservatives");
+        product.getOpenFoodFactsData().setTraceTags("en:gluten");
+        products.saveAndFlush(product);
+        String html = mvc.perform(get("/products/{id}", product.getId()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        for (String[] pair : new String[][]{
+                {"Laktose", "Ohne Laktose"}, {"Gluten", "Ohne Gluten"}, {"Alkohol", "Alkoholfrei"},
+                {"Koffein", "Koffeinfrei"}, {"Palmöl", "Ohne Palmöl"}}) {
+            int start = html.indexOf("<strong>" + pair[0] + "</strong>");
+            String section = html.substring(start, html.indexOf("</div>", start));
+            assertThat(section).contains(pair[1], "off-source-marker").doesNotContain("UNKNOWN", "Keine Angabe");
+        }
+        assertThat(html).contains("Spuren von Gluten angegeben");
+        int otherStart = html.indexOf("class=\"detail-labels\"");
+        String otherLabels = html.substring(otherStart, html.indexOf("</div>", otherStart));
+        assertThat(otherLabels).contains("Ohne Konservierungsstoffe")
+                .doesNotContain("Ohne Gluten", "Ohne Laktose", "Alkoholfrei", "Koffeinfrei", "Ohne Palmöl");
+
+        product.setLabels(new java.util.HashSet<>(java.util.Set.of(ProductLabel.PALM_OIL_FREE, ProductLabel.GLUTEN_FREE)));
+        products.saveAndFlush(product);
+        html = mvc.perform(get("/products/{id}", product.getId()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        int palmStart = html.indexOf("<strong>Palmöl</strong>");
+        assertThat(html.substring(palmStart, html.indexOf("</div>", palmStart)))
+                .contains("Ohne Palmöl").doesNotContain("off-source-marker", "UNKNOWN");
+        mvc.perform(get("/api/v1/products/search").param("label", "PALM_OIL_FREE"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(product.getId()));
     }
 
     @Test

@@ -51,6 +51,8 @@ body {
 
 .nav-links {
     display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
     align-items: center;
     gap: 1rem;
 }
@@ -145,6 +147,7 @@ body {
 
 .product-grid {
     --card-details-height: 56px;
+    --card-actions-height: 0px;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
@@ -158,8 +161,123 @@ body {
     border-radius: 14px;
     padding: 1rem;
     display: grid;
-    grid-template-rows: 96px 238px 80px var(--card-details-height) 100px;
+    grid-template-rows: 96px 238px 80px var(--card-details-height) var(--card-actions-height);
     gap: 0.5rem;
+}
+
+.product-grid:has(.product-card > .actions) {
+    --card-actions-height: 44px;
+}
+
+.product-grid:has(.product-card > .actions > a) {
+    --card-actions-height: 96px;
+}
+
+.product-card > .actions {
+    grid-row: 5;
+}
+
+.product-card > .cart-panel {
+    grid-row: 6;
+}
+
+.product-card:has(> .cart-panel) {
+    padding-bottom: 0.5rem;
+}
+
+.cart-panel {
+    min-width: 0;
+    max-width: 340px;
+    width: 100%;
+}
+
+.cart-panel form {
+    margin: 0;
+}
+
+.cart-panel [hidden] {
+    display: none;
+}
+
+.cart-add {
+    width: 100%;
+    min-height: 36px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+
+.cart-stepper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 36px;
+}
+
+.cart-stepper button,
+.cart-stepper output {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 34px;
+    padding: 0.2rem;
+    border-radius: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.cart-stepper svg {
+    width: 16px;
+    height: 16px;
+}
+
+.cart-stepper .cart-decrease {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-right: 1px solid var(--border);
+}
+
+.cart-stepper .cart-increase {
+    font-size: 1.25rem;
+}
+
+.cart-feedback {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.cart-feedback:empty {
+    margin: 0;
+}
+
+.cart-panel button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.cart-list {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.cart-list-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.cart-list-item > a {
+    flex: 1 1 200px;
+    overflow-wrap: anywhere;
 }
 
 .product-grid:has(.card-nutri-scores > .nutri-score:nth-child(2)) {

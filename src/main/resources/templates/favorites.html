@@ -33,6 +33,7 @@
                         <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
                     </form>
                 </div>
+                <div th:replace="~{fragments/cart-panel :: panel(${product.id}, ${product.name})}"></div>
             </article>
         </div>
         <nav aria-label="Favoriten" class="actions">
@@ -46,5 +47,6 @@
     </section>
 </main>
 <script th:src="@{/js/product-images.js}" defer></script>
+<script th:src="@{/js/cart.js}" defer></script>
 </body>
 </html>

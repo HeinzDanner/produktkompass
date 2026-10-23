@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="panel(id, name)" class="cart-panel" th:if="${navAuthenticated}"
+     th:attr="data-cart-product=${id},data-cart-name=${name}"
+     th:with="quantity=${cartQuantities.containsKey(id) ? cartQuantities.get(id) : 0}">
+    <form th:action="@{/cart/items/{id}(id=${id})}" method="post" data-cart-form>
+        <button type="submit" name="action" value="INCREMENT" class="cart-add"
+                th:hidden="${quantity > 0}">+ In den Warenkorb</button>
+        <div class="cart-stepper" th:hidden="${quantity == 0}">
+            <button type="submit" name="action" value="DECREMENT" class="cart-decrease"
+                    th:aria-label="${quantity == 1 ? 'Aus dem Warenkorb entfernen: ' + name : 'Menge verringern: ' + name}">
+                <span data-cart-minus th:hidden="${quantity == 1}" aria-hidden="true">−</span>
+                <svg data-cart-trash th:hidden="${quantity != 1}" aria-hidden="true" width="20" height="20"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"></path>
+                </svg>
+            </button>
+            <output data-cart-quantity th:aria-label="${'Menge im Warenkorb: ' + name}" th:text="${quantity}">1</output>
+            <button type="submit" name="action" value="INCREMENT" class="cart-increase"
+                    th:aria-label="${'Menge erhöhen: ' + name}">+</button>
+        </div>
+    </form>
+    <p class="cart-feedback" data-cart-feedback aria-live="polite"></p>
+</div>
+</body>
+</html>

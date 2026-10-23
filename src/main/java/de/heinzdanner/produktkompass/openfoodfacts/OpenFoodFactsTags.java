@@ -118,6 +118,7 @@ public final class OpenFoodFactsTags {
         LABEL_EQUIVALENTS.put(ProductLabel.LACTOSE_FREE, LACTOSE_FREE_CLAIMS);
         LABEL_EQUIVALENTS.put(ProductLabel.ALCOHOL_FREE, Set.of("en:alcohol-free", "en:no-alcohol"));
         LABEL_EQUIVALENTS.put(ProductLabel.CAFFEINE_FREE, Set.of("en:caffeine-free", "en:no-caffeine"));
+        LABEL_EQUIVALENTS.put(ProductLabel.PALM_OIL_FREE, Set.of("en:no-palm-oil"));
         LABEL_EQUIVALENTS.put(ProductLabel.NO_ADDED_SUGAR, Set.of("en:no-added-sugar"));
         LABEL_EQUIVALENTS.put(ProductLabel.BIO, Set.of("en:organic", "en:eu-organic", "de:eg-öko-verordnung",
                 "en:usda-organic", "fr:ab-agriculture-biologique"));

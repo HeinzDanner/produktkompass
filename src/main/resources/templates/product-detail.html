@@ -91,38 +91,29 @@
         </div>
 
         <div class="meta-grid">
-            <div class="meta-card">
-                <strong>Laktose</strong>
-                <span th:if="${(product.containsLactose != null and product.containsLactose.name() != 'UNKNOWN') or display.offLactoseHint == null or (!display.offLactoseHint.declaredAllergen and !display.offLactoseHint.declaredTrace)}"
-                      th:text="${product.containsLactose}">UNKNOWN</span>
-                <th:block th:if="${display.offLactoseHint != null and (display.offLactoseHint.declaredAllergen or display.offLactoseHint.declaredTrace)}">
-                    <span th:replace="~{fragments/off-card :: value(${display.offLactoseHint.displaySummary('Milch')})}"></span>
+            <div class="meta-card" th:each="section : ${@offCardPresentation.contentSections(product, display)}">
+                <strong th:text="${section.title}">Gluten</strong>
+                <span th:if="${section.hasKnownStatus()}" th:text="${section.status}"></span>
+                <span class="badge detail-label-badge" th:each="label : ${section.appLabels}"
+                      th:text="${label.displayName}">Glutenfrei</span>
+                <th:block th:each="tag : ${section.offLabels}">
+                    <span th:replace="~{fragments/off-card :: label(${tag})}"></span>
                 </th:block>
-            </div>
-            <div class="meta-card">
-                <strong>Gluten</strong>
-                <span th:if="${(product.containsGluten != null and product.containsGluten.name() != 'UNKNOWN') or display.offGlutenHint == null or (!display.offGlutenHint.declaredAllergen and !display.offGlutenHint.declaredTrace)}"
-                      th:text="${product.containsGluten}">UNKNOWN</span>
-                <th:block th:if="${display.offGlutenHint != null and (display.offGlutenHint.declaredAllergen or display.offGlutenHint.declaredTrace)}">
-                    <span th:replace="~{fragments/off-card :: value(${display.offGlutenHint.displaySummary('Gluten')})}"></span>
+                <th:block th:if="${section.hint != null}">
+                    <span th:replace="~{fragments/off-card :: value(${section.hint})}"></span>
                 </th:block>
-            </div>
-            <div class="meta-card">
-                <strong>Alkohol</strong>
-                <span th:text="${product.containsAlcohol}">UNKNOWN</span>
-            </div>
-            <div class="meta-card">
-                <strong>Koffein</strong>
-                <span th:text="${product.containsCaffeine}">UNKNOWN</span>
+                <span th:if="${section.hasNoInformation()}">Keine Angabe</span>
             </div>
         </div>
 
-        <div class="detail-labels" th:if="${display.anyLabels}">
-            <span class="badge detail-label-badge" th:each="label : ${display.editorialLabels}" th:text="${label.displayName}">Vegan</span>
-            <th:block th:each="tag : ${display.offLabels}">
+        <th:block th:with="otherAppLabels=${@offCardPresentation.otherAppLabels(display)}, otherOffLabels=${@offCardPresentation.otherOffLabels(display)}">
+        <div class="detail-labels" th:if="${!otherAppLabels.isEmpty() or !otherOffLabels.isEmpty()}">
+            <span class="badge detail-label-badge" th:each="label : ${otherAppLabels}" th:text="${label.displayName}">Vegan</span>
+            <th:block th:each="tag : ${otherOffLabels}">
                 <span th:replace="~{fragments/off-card :: label(${tag})}">OFF-Label</span>
             </th:block>
         </div>
+        </th:block>
         <div class="detail-labels detail-labels-empty" th:unless="${display.anyLabels}">
             <span>Keine Angabe</span>
         </div>
@@ -140,6 +131,8 @@
             <a class="button secondary" th:href="@{/products/{id}/similar(id=${product.id})}">Ähnliche Produkte</a>
             <a class="button secondary" th:href="@{/products/{id}/report(id=${product.id})}">Fehlerhafte Daten melden</a>
         </div>
+
+        <div th:replace="~{fragments/cart-panel :: panel(${product.id}, ${product.name})}"></div>
 
         <div class="tag-assign-box" th:if="${userTags != null}">
             <strong>Meine Tags für dieses Produkt</strong>
@@ -239,5 +232,6 @@
 
 </main>
 <script th:src="@{/js/product-images.js}" defer></script>
+<script th:src="@{/js/cart.js}" defer></script>
 </body>
 </html>

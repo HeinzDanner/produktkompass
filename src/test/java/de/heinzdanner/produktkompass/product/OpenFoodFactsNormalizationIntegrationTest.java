@@ -187,7 +187,7 @@ class OpenFoodFactsNormalizationIntegrationTest {
 
         String bareDetail = mvc.perform(get("/products/{id}", bare.getId()))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(bareDetail).contains("Keine Marke angegeben", "UNKNOWN")
+        assertThat(bareDetail).contains("Keine Marke angegeben", "Keine Angabe", "<strong>Palmöl</strong>")
                 .doesNotContain("laut OFF (ungeprüft; redaktionell", "Widersprüchlich", "Label-Angaben laut OFF");
 
         String editorialDetail = mvc.perform(get("/products/{id}", editorial.getId()))

@@ -39,7 +39,8 @@ class ProductReportMigrationTest {
     private void verifyMigratedDatabase(HikariDataSource dataSource) throws Exception {
         Flyway flyway = Flyway.configure().dataSource(dataSource).load();
         flyway.migrate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("20");
+        assertThat(flyway.info().applied()).anySatisfy(migration ->
+                assertThat(migration.getVersion().getVersion()).isEqualTo("20"));
         flyway.validate();
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);

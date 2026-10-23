@@ -78,6 +78,8 @@ public record ProductDisplay(
         return switch (label) {
             case GLUTEN_FREE -> Set.of("en:no-gluten", "en:gluten-free").contains(tag.raw());
             case LACTOSE_FREE -> Set.of("en:no-lactose", "en:lactose-free").contains(tag.raw());
+            case ALCOHOL_FREE, CAFFEINE_FREE, PALM_OIL_FREE ->
+                    OpenFoodFactsTags.equivalentLabelTags(label).contains(tag.raw().toLowerCase(Locale.ROOT));
             default -> false;
         };
     }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warenkorb – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Mein Warenkorb</h1>
+        <p class="hint">Deine persönliche Einkaufsliste. Es werden keine Bestellungen ausgelöst.</p>
+        <p th:if="${items.isEmpty()}">Dein Warenkorb ist leer.</p>
+        <div class="cart-list">
+            <article class="cart-list-item" th:each="item : ${items}">
+                <a th:href="@{/products/{id}(id=${item.id})}" th:text="${item.name}">Produkt</a>
+                <div th:replace="~{fragments/cart-panel :: panel(${item.id}, ${item.name})}"></div>
+            </article>
+        </div>
+        <a class="button secondary" th:href="@{/products}">Zum Produktkatalog</a>
+    </section>
+</main>
+<script th:src="@{/js/cart.js}" defer></script>
+</body>
+</html>

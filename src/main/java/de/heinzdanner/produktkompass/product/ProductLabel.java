@@ -7,6 +7,7 @@ public enum ProductLabel {
     GLUTEN_FREE("Glutenfrei"),
     ALCOHOL_FREE("Alkoholfrei"),
     CAFFEINE_FREE("Koffeinfrei"),
+    PALM_OIL_FREE("Ohne Palmöl"),
     NO_ADDED_SUGAR("Ohne Zuckerzusatz"),
     BIO("Bio");
 

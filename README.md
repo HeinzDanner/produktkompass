@@ -351,9 +351,16 @@ zu allen Marken erreichbar. Zwischen Bild und Details stehen ausschließlich Lab
 einschließlich vorhandener Glutenfrei-, Laktosefrei-, Alkoholfrei- und Koffeinfrei-Labels.
 Mengen, weitere Namen, Unternehmen und Allergen-/Spurenhinweise stehen auf der
 Detailseite. Spuren oder fehlende Zutaten erzeugen niemals ein „frei von“-Label.
-Unbekannte App-Werte für Gluten/Laktose werden dort nicht zusätzlich als `UNKNOWN`
-angezeigt, wenn OFF bereits Allergene oder Spuren dazu nennt; bekannte App-Werte
-bleiben sichtbar. Lange Labellisten scrollen innerhalb ihres Bereichs,
+Die Detailseite gruppiert Inhaltslabels in fünf Feldern: Gluten, Laktose,
+Alkohol, Koffein und Palmöl. Passende App- und OFF-Labels stehen direkt im
+jeweiligen Feld und nicht nochmals unter den allgemeinen Labels.
+`PALM_OIL_FREE` („Ohne Palmöl“) ist auch als App-Label und Filter verfügbar;
+das entsprechende OFF-Label ist `en:no-palm-oil`.
+Unbekannte App-Werte werden nicht als `UNKNOWN` angezeigt: Bei vorhandenen
+Labels oder Spuren stehen diese Angaben im Feld, sonst „Keine Angabe“.
+Bekannte App-Werte und abweichende Allergen-/Spurenhinweise bleiben sichtbar.
+Palmölfreiheit wird nicht aus fehlenden Zutaten abgeleitet.
+Lange Labellisten scrollen innerhalb ihres Bereichs,
 ohne die Kachel zu vergrößern. Fehlende Bilder, Bildnachweise oder Bewertungen
 verschieben die übrigen Bereiche nicht. Bilder nutzen die feste Bildfläche proportional
 mit `object-fit: contain`: vollständig sichtbar, unverzerrt und ohne Beschnitt.
@@ -364,6 +371,23 @@ Hover und Tastaturfokus zeigen die deutsche Erklärung und Datenquelle;
 Screenreader erhalten dieselben Angaben. Abweichende App-/OFF-Werte bleiben
 als zwei Skalen sichtbar, gleiche Werte erscheinen einmal. Unbekannte Werte
 erhalten keine erfundene Bewertung; „nicht anwendbar“ bleibt eine Textangabe.
+
+### Persönlicher Warenkorb
+
+Angemeldete Benutzer können Produkte dauerhaft in ihrem Warenkorb speichern.
+Unter den Favoriten wechselt das Panel zwischen „In den Warenkorb“, einem
+Entfernen-Symbol bei Menge 1 und Minus/Menge/Plus bei größeren Mengen.
+Änderungen werden ohne Seitenwechsel gespeichert; Fehler und abgelaufene
+Sitzungen werden im Panel angezeigt. Ohne JavaScript funktionieren dieselben
+POST-Formulare mit Weiterleitung zur Warenkorbübersicht `/cart`.
+Nicht angemeldete Benutzer sehen kein Panel und keinen reservierten Leerraum.
+
+Migration V21 speichert je Benutzer/Produkt eine positive Ganzzahl mit eindeutigem
+Schlüssel und Löschkaskaden. Änderungen sind authentifiziert, CSRF-geschützt und
+werden pro Benutzer transaktional serialisiert, damit parallele Klicks keine
+Mengen verlieren. Der Besitzer wird ausschließlich aus der Anmeldung ermittelt.
+Menge 0 entfernt den Eintrag. Der Warenkorb bleibt nach Abmeldung erhalten.
+Er ist eine Einkaufsliste, kein Bestell- oder Bezahlprozess.
 
 ## Entwicklungsprofile
 

@@ -25,6 +25,7 @@
                 <div th:replace="~{fragments/product-image :: card(${product})}"></div>
                 <div th:replace="~{fragments/off-card :: metadata(${product})}"></div>
                 <div th:replace="~{fragments/off-card :: cardDetails(${product})}"></div>
+                <div th:replace="~{fragments/cart-panel :: panel(${product.id}, ${product.name})}"></div>
             </article>
         </div>
     </section>
@@ -37,11 +38,13 @@
                 <div th:replace="~{fragments/product-image :: card(${alternative})}"></div>
                 <div th:replace="~{fragments/off-card :: metadata(${alternative})}"></div>
                 <div th:replace="~{fragments/off-card :: cardDetails(${alternative})}"></div>
+                <div th:replace="~{fragments/cart-panel :: panel(${alternative.id}, ${alternative.name})}"></div>
             </article>
         </div>
         <p class="empty-state" th:if="${#lists.isEmpty(similarProducts)}">Keine ähnlichen Produkte gefunden.</p>
     </section>
 </main>
 <script th:src="@{/js/product-images.js}" defer></script>
+<script th:src="@{/js/cart.js}" defer></script>
 </body>
 </html>
