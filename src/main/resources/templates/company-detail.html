@@ -22,9 +22,10 @@
         <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
         <div class="product-grid" th:if="${!#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
-                <h3 th:text="${product.name}">Produktname</h3>
-                <p th:text="${product.description}">Beschreibung</p>
-                <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Produktdetails</a>
+                <div th:replace="~{fragments/off-card :: cardHeader(${product}, false)}"></div>
+                <div th:replace="~{fragments/product-image :: card(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: metadata(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: cardDetails(${product})}"></div>
             </article>
         </div>
         <p class="empty-state" th:if="${productPage.totalElements == 0}">Noch keine Produkte hinterlegt.</p>
@@ -42,5 +43,6 @@
         </nav>
     </section>
 </main>
+<script th:src="@{/js/product-images.js}" defer></script>
 </body>
 </html>

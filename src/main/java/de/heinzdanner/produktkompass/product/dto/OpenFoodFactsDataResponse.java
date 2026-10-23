@@ -4,6 +4,9 @@ import de.heinzdanner.produktkompass.product.OpenFoodFactsData;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Comparator;
+import de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsMetadata;
 
 public record OpenFoodFactsDataResponse(
         String barcode,
@@ -31,7 +34,10 @@ public record OpenFoodFactsDataResponse(
         LocalDateTime sourceModifiedAt,
         LocalDateTime lastImportedAt,
         String sourceRevision,
-        String productUrl
+        String productUrl,
+        OpenFoodFactsMetadata metadata,
+        OpenFoodFactsView normalized,
+        List<OpenFoodFactsLabelResponse> catalogLabels
 ) {
     public static OpenFoodFactsDataResponse fromEntity(OpenFoodFactsData data) {
         return new OpenFoodFactsDataResponse(
@@ -61,7 +67,12 @@ public record OpenFoodFactsDataResponse(
                 data.getLastImportedAt(),
                 data.getSourceRevision(),
                 UriComponentsBuilder.fromUriString("https://world.openfoodfacts.org")
-                        .pathSegment("product", data.getBarcode()).build().encode().toUriString()
+                        .pathSegment("product", data.getBarcode()).build().encode().toUriString(),
+                data.getMetadata(),
+                OpenFoodFactsView.from(data),
+                data.getCatalogLabels().stream()
+                        .sorted(Comparator.comparing(label -> label.getCanonicalTag()))
+                        .map(OpenFoodFactsLabelResponse::from).toList()
         );
     }
 }

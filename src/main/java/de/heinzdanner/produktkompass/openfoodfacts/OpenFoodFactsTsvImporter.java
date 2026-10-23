@@ -39,16 +39,22 @@ public class OpenFoodFactsTsvImporter {
         long updated = 0;
         long skipped = 0;
         List<OpenFoodFactsRecord> batch = new ArrayList<>(BATCH_SIZE);
+        OpenFoodFactsSchema.Coverage coverage;
+        if (maximumRecords < 1 || maximumRecords > 10_000) {
+            throw new IllegalArgumentException("maximumRecords muss zwischen 1 und 10000 liegen.");
+        }
 
         try (InputStream input = open(path);
-             Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             Reader reader = utf8Reader(input);
              CSVParser parser = CSVFormat.TDF.builder()
                      .setHeader()
+                     .setDuplicateHeaderMode(org.apache.commons.csv.DuplicateHeaderMode.DISALLOW)
                      .setSkipHeaderRecord(true)
                      .setIgnoreEmptyLines(true)
                      .get()
                      .parse(reader)) {
             Map<String, Integer> headers = parser.getHeaderMap();
+            coverage = OpenFoodFactsSchema.coverage(headers.keySet());
             missing.removeIf(headers::containsKey);
             if (!missing.isEmpty()) {
                 throw new IllegalArgumentException("OFF-TSV fehlt Pflichtspalten: " + String.join(", ", missing));
@@ -58,12 +64,20 @@ public class OpenFoodFactsTsvImporter {
                 throw new IllegalArgumentException(
                         "OFF-TSV fehlt eine Produktnamensspalte (product_name oder product_name_<Sprache>).");
             }
+            log.info("OFF-Importschema: {} Quellspalten; abgedeckte Felder: {}.",
+                    coverage.sourceColumnCount(), coverage.mappedFields().keySet());
+            if (!coverage.missingOptionalFields().isEmpty()) {
+                log.warn("OFF-Export enthält keine Spalten für: {}. Fehlende Angaben können nicht ergänzt werden; vorhandene Werte bleiben erhalten.",
+                        coverage.missingOptionalFields());
+            }
 
-            for (CSVRecord row : parser) {
-                if (recordsRead == maximumRecords) {
-                    break;
-                }
+            java.util.Iterator<CSVRecord> rows = parser.iterator();
+            while (recordsRead < maximumRecords && rows.hasNext()) {
+                CSVRecord row = rows.next();
                 recordsRead++;
+                if (!row.isConsistent()) {
+                    throw new IllegalArgumentException("OFF-TSV: abweichende Spaltenanzahl in Datensatz " + row.getRecordNumber());
+                }
                 OpenFoodFactsRecord record = OpenFoodFactsRecord.from(row.toMap());
                 if (record == null || !record.isSoldIn(countryTag)) {
                     skipped++;
@@ -88,7 +102,14 @@ public class OpenFoodFactsTsvImporter {
             updated += counts.updated();
             skipped += counts.skipped();
         }
-        return new ImportResult(recordsRead, inserted, updated, skipped);
+        return new ImportResult(recordsRead, inserted, updated, skipped, coverage);
+    }
+
+    private Reader utf8Reader(InputStream input) throws IOException {
+        java.io.PushbackReader reader = new java.io.PushbackReader(new InputStreamReader(input, StandardCharsets.UTF_8), 1);
+        int first = reader.read();
+        if (first != -1 && first != '\uFEFF') reader.unread(first);
+        return reader;
     }
 
     private InputStream open(Path path) throws IOException {
@@ -104,6 +125,7 @@ public class OpenFoodFactsTsvImporter {
         return input;
     }
 
-    public record ImportResult(long recordsRead, long inserted, long updated, long skipped) {
+    public record ImportResult(long recordsRead, long inserted, long updated, long skipped,
+                               OpenFoodFactsSchema.Coverage coverage) {
     }
 }

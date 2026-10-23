@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import de.heinzdanner.produktkompass.product.dto.OpenFoodFactsView;
+import de.heinzdanner.produktkompass.product.dto.ProductDisplay;
+import de.heinzdanner.produktkompass.product.dto.ProductSummary;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,6 +68,7 @@ public class ProductWebController {
                            @RequestParam(required = false) NutritionGrade nutritionGrade,
                            @RequestParam(required = false) Boolean madeInGermany,
                            @RequestParam(required = false) Long tagId,
+                           @RequestParam(defaultValue = "false") boolean includeOpenFoodFactsLabels,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "20") int size,
                            Principal principal,
@@ -73,7 +77,8 @@ public class ProductWebController {
             userTagService.requireOwnedTag(principal == null ? null : principal.getName(), tagId);
         }
         var results = productService.searchPage(query, brandId, categoryId, label, nutritionGrade,
-                madeInGermany, tagId, principal == null ? null : principal.getName(), page, size);
+                madeInGermany, tagId, principal == null ? null : principal.getName(),
+                includeOpenFoodFactsLabels, page, size);
         model.addAttribute("products", results.getContent());
         model.addAttribute("productPage", results);
         model.addAttribute("brands", brandService.getBrandOptions(
@@ -89,6 +94,7 @@ public class ProductWebController {
         model.addAttribute("selectedNutritionGrade", nutritionGrade);
         model.addAttribute("selectedMadeInGermany", madeInGermany);
         model.addAttribute("selectedTagId", tagId);
+        model.addAttribute("includeOpenFoodFactsLabels", includeOpenFoodFactsLabels);
         model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
         model.addAttribute("favoriteProductIds", principal == null ? Set.of()
                 : appUserService.getFavoriteIdsForProducts(principal.getName(),
@@ -109,6 +115,9 @@ public class ProductWebController {
         }
 
         model.addAttribute("product", product);
+        model.addAttribute("offView", OpenFoodFactsView.from(product.getOpenFoodFactsData()));
+        model.addAttribute("display", ProductDisplay.from(product));
+        model.addAttribute("image", de.heinzdanner.produktkompass.product.dto.ProductImage.from(product.getOpenFoodFactsData()));
         model.addAttribute("favoriteProductIds", principal == null ? Set.of()
                 : appUserService.getFavoriteIdsForProducts(principal.getName(), List.of(id)));
         if (principal != null) {
@@ -126,8 +135,8 @@ public class ProductWebController {
             return "redirect:/products";
         }
 
-        model.addAttribute("product", product);
-        model.addAttribute("similarProducts", productService.getAlternativeProducts(id));
+        model.addAttribute("product", ProductSummary.fromEntity(product));
+        model.addAttribute("similarProducts", productService.getAlternativeProductSummaries(id));
         return "similar-products";
     }
 

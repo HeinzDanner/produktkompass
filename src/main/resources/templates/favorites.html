@@ -23,34 +23,11 @@
 
         <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
-                <div class="product-header">
-                    <h3 th:text="${product.name}">Produktname</h3>
-                    <span class="badge" th:if="${product.brand != null}" th:text="${product.brand.name}">Marke</span>
-                    <span class="badge" th:if="${product.brand == null}">Keine redaktionelle Marke</span>
-                    <a class="badge" th:if="${product.openFoodFactsDataAvailable}"
-                       th:href="${product.openFoodFactsProductUrl}"
-                       target="_blank" rel="noopener noreferrer">Open-Food-Facts-Community-Daten</a>
-                    <span class="badge" th:if="${product.openFoodFactsBrandTags != null}"
-                          th:text="${'OFF-Marken-Tags: ' + product.openFoodFactsBrandTags}">OFF-Marken-Tags</span>
-                    <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
-                </div>
-                <p th:text="${product.description}">Beschreibung</p>
-                <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
-                    <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
-                </div>
-                <div class="meta-row" th:if="${product.company != null}">
-                    <span th:text="${product.company.name}">Unternehmen</span>
-                </div>
-                <div class="meta-row" th:if="${product.company == null}">
-                    <span>Kein redaktionell zugeordnetes Unternehmen</span>
-                    <span th:if="${product.openFoodFactsBrandOwner != null}"
-                          th:text="${'Inhaber-Angabe laut OFF: ' + product.openFoodFactsBrandOwner}">OFF-Inhaber</span>
-                </div>
-                <div class="meta-row" th:if="${product.openFoodFactsPackaging != null}">
-                    <span th:text="${'Verpackung laut OFF: ' + product.openFoodFactsPackaging}">OFF-Verpackung</span>
-                </div>
+                <div th:replace="~{fragments/off-card :: cardHeader(${product}, ${favoriteProductIds != null and favoriteProductIds.contains(product.id)})}"></div>
+                <div th:replace="~{fragments/product-image :: card(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: metadata(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: cardDetails(${product})}"></div>
                 <div class="actions">
-                    <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
                     <form th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}"
                           th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post">
                         <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
@@ -68,5 +45,6 @@
         </nav>
     </section>
 </main>
+<script th:src="@{/js/product-images.js}" defer></script>
 </body>
 </html>

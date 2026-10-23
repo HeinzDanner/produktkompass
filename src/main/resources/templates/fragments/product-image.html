@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="card(product)" class="product-media">
+    <a class="product-image-link" th:href="@{/products/{id}(id=${product.id})}"
+       th:aria-label="${'Produktdetails: ' + product.name}">
+        <th:block th:replace="~{fragments/product-image :: picture(${product.image}, ${product.name}, false)}"></th:block>
+    </a>
+    <small class="image-credit" th:if="${product.image != null}"
+           title="Das Bild wird direkt von Open Food Facts geladen. Dabei wird Ihre IP-Adresse an OFF übermittelt.">
+        Bild: <a th:href="${product.image.sourceUrl}" target="_blank" rel="noopener noreferrer">Open Food Facts</a>
+        · <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>
+    </small>
+</div>
+<div th:fragment="picture(image, name, detail)" class="product-image"
+     th:classappend="${detail ? 'product-image-detail' : ''}" data-product-image>
+    <img th:if="${image != null}" th:src="${detail ? image.detailUrl : image.cardUrl}"
+         th:alt="${'Produktbild: ' + name}" width="400" height="400"
+         loading="lazy" decoding="async" referrerpolicy="no-referrer">
+    <span class="product-image-placeholder" th:hidden="${image != null}" role="img"
+          aria-label="Kein Produktbild verfügbar">Kein Produktbild</span>
+</div>
+</body>
+</html>

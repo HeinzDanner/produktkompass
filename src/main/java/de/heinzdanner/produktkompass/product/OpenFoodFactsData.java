@@ -8,11 +8,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinTable;
+import org.hibernate.annotations.BatchSize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsJson;
+import de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsMetadata;
 
 @Entity
 @Table(name = "product_open_food_facts")
@@ -84,6 +92,24 @@ public class OpenFoodFactsData {
     @Column(name = "label_tags", columnDefinition = "TEXT")
     private String labelTags;
 
+    @ManyToMany
+    @JoinTable(name = "product_off_labels",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "label_id"))
+    @BatchSize(size = 100)
+    private Set<OpenFoodFactsLabel> catalogLabels = new LinkedHashSet<>();
+
+    public Set<OpenFoodFactsLabel> getCatalogLabels() {
+        return catalogLabels;
+    }
+
+    public void replaceCatalogLabels(Set<OpenFoodFactsLabel> labels) {
+        if (!catalogLabels.equals(labels)) {
+            catalogLabels.clear();
+            catalogLabels.addAll(labels);
+        }
+    }
+
     @Column(name = "origin_tags", columnDefinition = "TEXT")
     private String originTags;
 
@@ -108,6 +134,64 @@ public class OpenFoodFactsData {
     @Size(max = 100)
     @Column(name = "source_revision", length = 100)
     private String sourceRevision;
+
+    @Column(name = "source_row_json", columnDefinition = "TEXT")
+    private String sourceRowJson;
+
+    @Column(name = "merged_source_json", columnDefinition = "TEXT")
+    private String mergedSourceJson;
+
+    @Column(name = "metadata_json", columnDefinition = "TEXT")
+    private String metadataJson;
+
+    public void setMetadataJson(String metadataJson) { this.metadataJson = metadataJson; }
+
+    @Column(name = "serving_size", columnDefinition = "TEXT")
+    private String servingSize;
+
+    @Column(name = "nova_group")
+    private Integer novaGroup;
+
+    @Column(name = "nutriscore_score", precision = 12, scale = 4)
+    private BigDecimal nutriscoreScore;
+
+    @Column(precision = 12, scale = 4)
+    private BigDecimal completeness;
+
+    @Column(name = "source_created_at")
+    private LocalDateTime sourceCreatedAt;
+
+    public String getServingSize() { return servingSize; }
+    public void setServingSize(String value) { servingSize = value; }
+    public Integer getNovaGroup() { return novaGroup; }
+    public void setNovaGroup(Integer value) { novaGroup = value; }
+    public BigDecimal getNutriscoreScore() { return nutriscoreScore; }
+    public void setNutriscoreScore(BigDecimal value) { nutriscoreScore = value; }
+    public BigDecimal getCompleteness() { return completeness; }
+    public void setCompleteness(BigDecimal value) { completeness = value; }
+    public LocalDateTime getSourceCreatedAt() { return sourceCreatedAt; }
+    public void setSourceCreatedAt(LocalDateTime value) { sourceCreatedAt = value; }
+
+    public String getSourceRowJson() {
+        return sourceRowJson;
+    }
+
+    public void setSourceRowJson(String sourceRowJson) {
+        this.sourceRowJson = sourceRowJson;
+    }
+
+    public String getMergedSourceJson() {
+        return mergedSourceJson;
+    }
+
+    public void setMergedSourceJson(String mergedSourceJson) {
+        this.mergedSourceJson = mergedSourceJson;
+    }
+
+    public OpenFoodFactsMetadata getMetadata() {
+        return metadataJson == null ? OpenFoodFactsMetadata.from(OpenFoodFactsJson.readRow(mergedSourceJson))
+                : OpenFoodFactsJson.readMetadata(metadataJson);
+    }
 
     protected OpenFoodFactsData() {
     }

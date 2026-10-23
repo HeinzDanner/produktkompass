@@ -18,6 +18,9 @@ spring:
     enabled: true
 
 produktkompass:
+  open-food-facts:
+    cards:
+      max-labels: 3
   user-tags:
     # Maximale Anzahl eigener Tags, die ein Benutzer anlegen darf.
     max-per-user: 5

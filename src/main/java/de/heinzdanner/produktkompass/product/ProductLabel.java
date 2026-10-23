@@ -1,12 +1,22 @@
 package de.heinzdanner.produktkompass.product;
 
 public enum ProductLabel {
-    VEGAN,
-    VEGETARIAN,
-    LACTOSE_FREE,
-    GLUTEN_FREE,
-    ALCOHOL_FREE,
-    CAFFEINE_FREE,
-    NO_ADDED_SUGAR,
-    BIO
+    VEGAN("Vegan"),
+    VEGETARIAN("Vegetarisch"),
+    LACTOSE_FREE("Laktosefrei"),
+    GLUTEN_FREE("Glutenfrei"),
+    ALCOHOL_FREE("Alkoholfrei"),
+    CAFFEINE_FREE("Koffeinfrei"),
+    NO_ADDED_SUGAR("Ohne Zuckerzusatz"),
+    BIO("Bio");
+
+    private final String displayName;
+
+    ProductLabel(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
 }

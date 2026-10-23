@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meldungen prüfen – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Produktmeldungen prüfen</h1>
+        <p><a th:href="@{/admin}">Zurück zum Admin-Bereich</a></p>
+        <p>Eine Statusänderung dokumentiert nur die Prüfung. Produktdaten werden hier nicht geändert.</p>
+        <div th:if="${adminSuccess}" class="alert success" role="status" th:text="${adminSuccess}">Gespeichert.</div>
+        <form th:action="@{/admin/reports}" method="get">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">Alle</option>
+                <option th:each="state : ${reportStatuses}" th:value="${state}" th:text="${state.label}"
+                        th:selected="${state == selectedStatus}"></option>
+            </select>
+            <label for="size">Meldungen pro Seite</label>
+            <input id="size" name="size" type="number" min="1" max="50" th:value="${reportPage.size}">
+            <button type="submit">Filtern</button>
+        </form>
+        <p th:if="${reportPage.empty}">Keine Meldungen auf dieser Seite.</p>
+    </section>
+    <section class="box" th:each="report : ${reportPage.content}">
+        <h2><a th:href="@{/products/{id}(id=${report.product.id})}" th:text="${report.product.name}">Produkt</a></h2>
+        <dl>
+            <dt>Meldung / Eingangszeit</dt>
+            <dd><span th:text="${report.id}"></span> / <span th:text="${report.submittedAt}"></span></dd>
+            <dt>Betroffenes Feld</dt>
+            <dd th:text="${report.targetField != null ? report.targetField.label : 'Keine Angabe'}"></dd>
+            <dt>Datenbestand</dt>
+            <dd th:text="${report.provenance != null ? report.provenance.label : 'Keine Angabe'}"></dd>
+            <dt>Beschreibung</dt>
+            <dd th:text="${report.description}"></dd>
+            <dt>Status</dt>
+            <dd th:text="${report.status.label}"></dd>
+        </dl>
+        <p th:if="${report.moderatedAt != null}">Zuletzt bearbeitet von
+            <span th:text="${report.moderatedBy}"></span> am <span th:text="${report.moderatedAt}"></span>.
+        </p>
+        <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post">
+            <label th:for="${'status-' + report.id}">Neuer Status</label>
+            <select th:id="${'status-' + report.id}" name="status" required>
+                <option th:each="state : ${reportStatuses}" th:value="${state}" th:text="${state.label}"
+                        th:selected="${state == report.status}"></option>
+            </select>
+            <button type="submit">Status speichern</button>
+        </form>
+    </section>
+    <nav class="box" aria-label="Meldungsseiten">
+        <p th:text="${'Seite ' + (reportPage.number + 1) + ' · ' + reportPage.totalElements + ' Meldungen'}"></p>
+        <a th:if="${reportPage.hasPrevious()}"
+           th:href="@{/admin/reports(page=${reportPage.number - 1},size=${reportPage.size},status=${selectedStatus})}">Zurück</a>
+        <a th:if="${reportPage.hasNext()}"
+           th:href="@{/admin/reports(page=${reportPage.number + 1},size=${reportPage.size},status=${selectedStatus})}">Weiter</a>
+    </nav>
+</main>
+</body>
+</html>

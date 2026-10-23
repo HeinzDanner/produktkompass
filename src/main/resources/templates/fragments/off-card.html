@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="cardHeader(product, favorite)" class="product-header">
+    <h3 th:text="${product.name}" th:title="${product.name}">Produktname</h3>
+    <div class="card-brands"
+         th:with="additionalBrands=${product.display.offBrandFallback.size() + (product.brand != null ? 1 : 0) - 1}">
+        <th:block th:replace="~{fragments/off-card :: brand(${product}, true)}"></th:block>
+        <a class="more-brands" th:if="${additionalBrands > 0}"
+           th:href="@{/products/{id}(id=${product.id})}"
+           th:text="${'+' + additionalBrands}"
+           th:title="${'Alle Marken anzeigen: ' + (product.brand != null ? product.brand.name + ', ' : '') + #strings.listJoin(product.display.offBrandFallback, ', ')}"
+           th:aria-label="${additionalBrands + ' weitere Marken auf der Detailseite anzeigen'}">+2</a>
+    </div>
+    <span class="favorite-icon" th:if="${favorite}" aria-label="Als Favorit gespeichert">♥</span>
+</div>
+
+<th:block th:fragment="brand(product, linkBrand)">
+    <th:block th:replace="~{fragments/off-card :: brands(${product.brand}, ${product.display}, ${linkBrand})}"></th:block>
+</th:block>
+<th:block th:fragment="brands(brand, display, linkBrand)">
+    <div class="brand-row" aria-label="Marken">
+    <a class="badge brand-badge" th:if="${brand != null and linkBrand}"
+       th:href="@{/brands/{id}(id=${brand.id})}" th:text="${brand.name}" th:title="${brand.name}">Marke</a>
+    <span class="badge brand-badge" th:if="${brand != null and !linkBrand}" th:text="${brand.name}"
+          th:title="${brand.name}">Marke</span>
+    <span class="badge brand-badge off-brand-badge"
+          th:each="brandName : ${@offCardPresentation.brands(display)}"
+          th:title="${brandName + ' · Quelle: Open Food Facts · ' + display.offBrandsSource}">
+        <span class="brand-name" th:text="${brandName}">Marke</span>
+        <small class="off-source-marker" aria-label="Quelle: Open Food Facts">OFF</small>
+    </span>
+    <span class="badge brand-badge" th:if="${brand == null and display.offBrandFallback.isEmpty()}">Keine Marke angegeben</span>
+    </div>
+</th:block>
+
+<div th:fragment="metadata(product)" class="off-card-facts"
+     th:with="selectedOffLabels=${@offCardPresentation.labels(product.display)}">
+    <div class="meta-row" th:if="${!product.display.editorialLabels.isEmpty() or !selectedOffLabels.isEmpty()}">
+        <span class="badge detail-label-badge" th:each="label : ${product.display.editorialLabels}"
+              th:text="${label.displayName}">Label</span>
+        <th:block th:each="tag : ${selectedOffLabels}">
+            <span th:replace="~{fragments/off-card :: label(${tag})}">OFF-Label</span>
+        </th:block>
+    </div>
+</div>
+
+<div th:fragment="cardDetails(product)" class="card-details-row">
+    <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
+    <div class="card-nutri-scores">
+        <th:block th:if="${product.nutritionGrade != null and product.nutritionGrade.name() != 'UNKNOWN'}">
+            <span th:replace="~{fragments/off-card :: nutriScore(${product.nutritionGrade.name()}, false)}"></span>
+        </th:block>
+        <th:block th:if="${product.display.offNutriScoreFallback != null}">
+            <span th:replace="~{fragments/off-card :: nutriScore(${product.display.offNutriScoreFallback}, true)}"></span>
+        </th:block>
+    </div>
+</div>
+
+<span th:fragment="nutriScore(grade, off)" class="nutri-score" role="img" tabindex="0"
+      th:with="description=${@offCardPresentation.nutriScoreDescription(grade)},
+               caption=${'Nutri-Score: ' + grade + ' – ' + description + (off ? ' · Quelle: Open Food Facts' : ' · Quelle: App-Katalog')}"
+      th:attr="aria-label=${caption}">
+    <span class="nutri-score-heading" aria-hidden="true">NUTRI-SCORE</span>
+    <span class="nutri-score-scale" aria-hidden="true" th:if="${#strings.length(grade) == 1 and #strings.contains('ABCDE', grade)}">
+        <span th:each="step : ${#strings.arraySplit('A,B,C,D,E', ',')}"
+              class="nutri-score-step" th:classappend="${step == grade ? 'active' : ''}"
+              th:attr="data-grade=${step}" th:text="${step}">A</span>
+    </span>
+    <span class="nutri-score-unavailable" th:unless="${#strings.length(grade) == 1 and #strings.contains('ABCDE', grade)}"
+          th:text="${grade}">Nicht anwendbar</span>
+    <small th:if="${off}" class="nutri-score-source" aria-hidden="true">OFF</small>
+    <span class="nutri-score-tooltip" aria-hidden="true">
+        <strong th:text="${'Nutri-Score: ' + grade}">Nutri-Score: C</strong>
+        <span th:text="${description}">Mittlere Nährwertqualität</span>
+        <small th:text="${off ? 'Quelle: Open Food Facts' : 'Quelle: App-Katalog'}"></small>
+    </span>
+</span>
+
+<span th:fragment="value(text)" class="source-value">
+    <span th:text="${text}">Angabe</span>
+    <small class="off-source-marker" aria-label="Quelle: Open Food Facts">OFF</small>
+</span>
+
+<span th:fragment="label(tag)" class="badge detail-label-badge off-label-badge"
+      th:title="${'Angabe von Open Food Facts; Original-Tag: ' + tag.raw}">
+    <span th:text="${tag.display}">Label</span>
+    <small class="off-source-marker" aria-label="Quelle: Open Food Facts">OFF</small>
+</span>
+</body>
+</html>

@@ -1,5 +1,7 @@
 package de.heinzdanner.produktkompass.web;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +18,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class NavigationModelAdvice {
 
     @ModelAttribute
-    public void addNavigationAttributes(Model model) {
+    public void addNavigationAttributes(Model model, HttpServletRequest request) {
+        if (request.getAttribute(CsrfToken.class.getName()) instanceof CsrfToken token) {
+            // Large catalog pages may flush before the first form needs the deferred token.
+            token.getToken();
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean authenticated = authentication != null
                 && authentication.isAuthenticated()

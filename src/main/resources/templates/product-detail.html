@@ -9,29 +9,40 @@
 <body>
 <nav th:replace="~{fragments/nav :: nav}"></nav>
 
-<main class="container page-content">
+<main class="container page-content product-detail">
     <section class="box">
-        <span class="badge" th:if="${product.openFoodFactsData != null}">
-            Open-Food-Facts-Community-Daten
-        </span>
         <div class="section-header">
             <div>
                 <p class="eyebrow">Produktdetails</p>
                 <h1 th:text="${product.name}">Produktname</h1>
+                <th:block th:if="${display.offProductName != null}">
+                    <span th:replace="~{fragments/off-card :: value(${display.offProductName})}"></span>
+                </th:block>
             </div>
             <a class="button secondary" th:href="@{/products}">Zurück zum Katalog</a>
         </div>
 
+        <div class="product-detail-media">
+            <div th:replace="~{fragments/product-image :: picture(${image}, ${product.name}, true)}"></div>
+            <small class="image-credit" th:if="${image != null}"
+                   title="Das Bild wird direkt von Open Food Facts geladen. Dabei wird Ihre IP-Adresse an OFF übermittelt.">
+                Bild: <a th:href="${image.sourceUrl}" target="_blank" rel="noopener noreferrer">Open Food Facts</a>
+                · <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>
+            </small>
+        </div>
+
         <div class="product-header" style="display:block; margin-bottom:1rem;">
-            <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
-            <span class="badge" th:if="${product.brand == null}">Keine redaktionell zugeordnete Marke</span>
+            <th:block th:replace="~{fragments/off-card :: brands(${product.brand}, ${display}, true)}"></th:block>
         </div>
 
         <p class="lead" th:text="${product.description != null ? product.description : 'Keine Beschreibung verfügbar.'}">Beschreibung</p>
 
-        <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
+        <div class="meta-row" th:if="${!product.categories.isEmpty() or !display.offCategories.isEmpty()}">
             <strong>Kategorien:</strong>
             <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
+            <th:block th:each="category : ${display.offCategories}">
+                <span th:replace="~{fragments/off-card :: value(${category})}"></span>
+            </th:block>
         </div>
 
         <div class="meta-row" th:if="${product.company != null}">
@@ -40,21 +51,38 @@
         </div>
         <div class="meta-row" th:if="${product.company == null}">
             <strong>Unternehmen:</strong>
-            <span>Kein redaktionell zugeordnetes Unternehmen</span>
+            <span>Kein Unternehmen zugeordnet</span>
+        </div>
+        <div class="meta-row" th:if="${display.offBrandOwnerFallback != null}">
+            <strong>Markeninhaber:</strong>
+            <span th:replace="~{fragments/off-card :: value(${display.offBrandOwnerFallback})}"></span>
         </div>
 
         <div class="meta-grid">
             <div class="meta-card">
                 <strong>Nutri-Score</strong>
-                <span th:text="${product.nutritionGrade != null ? product.nutritionGrade : 'UNKNOWN'}">UNKNOWN</span>
+                <span th:if="${product.nutritionGrade != null and product.nutritionGrade.name() != 'UNKNOWN'}"
+                      th:text="${product.nutritionGrade}"></span>
+                <th:block th:if="${display.offNutriScoreFallback != null}">
+                    <span th:replace="~{fragments/off-card :: value(${display.offNutriScoreFallback})}"></span>
+                </th:block>
+                <span th:if="${(product.nutritionGrade == null or product.nutritionGrade.name() == 'UNKNOWN') and display.offNutriScoreFallback == null}">Keine Angabe</span>
             </div>
             <div class="meta-card">
                 <strong>Verpackung</strong>
-                <span th:text="${product.packagingType != null ? product.packagingType : 'Keine Angabe'}">Keine Angabe</span>
+                <span th:if="${product.packagingType != null or display.offPackagingFallback.isEmpty()}"
+                      th:text="${product.packagingType != null ? product.packagingType : 'Keine Angabe'}">Keine Angabe</span>
+                <th:block th:each="packaging : ${display.offPackagingFallback}">
+                    <span th:replace="~{fragments/off-card :: value(${packaging.display})}"></span>
+                </th:block>
             </div>
             <div class="meta-card">
                 <strong>Packungsgröße</strong>
-                <span th:text="${product.packageSize != null and !product.packageSize.isBlank() ? product.packageSize : 'Keine Angabe'}">Keine Angabe</span>
+                <span th:if="${product.packageSize != null and !product.packageSize.isBlank()}" th:text="${product.packageSize}"></span>
+                <th:block th:if="${display.offQuantityFallback != null}">
+                    <span th:replace="~{fragments/off-card :: value(${display.offQuantityFallback})}"></span>
+                </th:block>
+                <span th:if="${(product.packageSize == null or product.packageSize.isBlank()) and display.offQuantityFallback == null}">Keine Angabe</span>
             </div>
             <div class="meta-card">
                 <strong>Hersteller aus Deutschland</strong>
@@ -65,11 +93,19 @@
         <div class="meta-grid">
             <div class="meta-card">
                 <strong>Laktose</strong>
-                <span th:text="${product.containsLactose}">UNKNOWN</span>
+                <span th:if="${(product.containsLactose != null and product.containsLactose.name() != 'UNKNOWN') or display.offLactoseHint == null or (!display.offLactoseHint.declaredAllergen and !display.offLactoseHint.declaredTrace)}"
+                      th:text="${product.containsLactose}">UNKNOWN</span>
+                <th:block th:if="${display.offLactoseHint != null and (display.offLactoseHint.declaredAllergen or display.offLactoseHint.declaredTrace)}">
+                    <span th:replace="~{fragments/off-card :: value(${display.offLactoseHint.displaySummary('Milch')})}"></span>
+                </th:block>
             </div>
             <div class="meta-card">
                 <strong>Gluten</strong>
-                <span th:text="${product.containsGluten}">UNKNOWN</span>
+                <span th:if="${(product.containsGluten != null and product.containsGluten.name() != 'UNKNOWN') or display.offGlutenHint == null or (!display.offGlutenHint.declaredAllergen and !display.offGlutenHint.declaredTrace)}"
+                      th:text="${product.containsGluten}">UNKNOWN</span>
+                <th:block th:if="${display.offGlutenHint != null and (display.offGlutenHint.declaredAllergen or display.offGlutenHint.declaredTrace)}">
+                    <span th:replace="~{fragments/off-card :: value(${display.offGlutenHint.displaySummary('Gluten')})}"></span>
+                </th:block>
             </div>
             <div class="meta-card">
                 <strong>Alkohol</strong>
@@ -81,10 +117,13 @@
             </div>
         </div>
 
-        <div class="detail-labels" th:if="${product.labels != null and !product.labels.isEmpty()}">
-            <span class="badge detail-label-badge" th:each="label : ${product.labels}" th:text="${label}">VEGAN</span>
+        <div class="detail-labels" th:if="${display.anyLabels}">
+            <span class="badge detail-label-badge" th:each="label : ${display.editorialLabels}" th:text="${label.displayName}">Vegan</span>
+            <th:block th:each="tag : ${display.offLabels}">
+                <span th:replace="~{fragments/off-card :: label(${tag})}">OFF-Label</span>
+            </th:block>
         </div>
-        <div class="detail-labels detail-labels-empty" th:if="${product.labels == null or product.labels.isEmpty()}">
+        <div class="detail-labels detail-labels-empty" th:unless="${display.anyLabels}">
             <span>Keine Angabe</span>
         </div>
 
@@ -99,6 +138,7 @@
                 <button type="submit" class="secondary favorite-active favorite-toggle">♥ Favorit entfernen</button>
             </form>
             <a class="button secondary" th:href="@{/products/{id}/similar(id=${product.id})}">Ähnliche Produkte</a>
+            <a class="button secondary" th:href="@{/products/{id}/report(id=${product.id})}">Fehlerhafte Daten melden</a>
         </div>
 
         <div class="tag-assign-box" th:if="${userTags != null}">
@@ -119,28 +159,29 @@
         </div>
     </section>
 
-    <section class="box" th:if="${product.sources != null and !product.sources.isEmpty()}">
-        <h2>Quellen</h2>
-        <ul>
+    <section class="box">
+        <details class="off-details">
+        <summary>Datenquellen und Herkunft</summary>
+        <p class="hint">Angaben im App-Katalog und von Open Food Facts werden nicht unabhängig geprüft.
+            OFF kennzeichnet Open Food Facts, Angaben ohne Marker stammen aus dem App-Katalog.
+            Unterschiedliche Angaben stehen nebeneinander. Fehlende Angaben bedeuten nicht „frei von“.
+            Für Allergene und Zutaten ist die aktuelle Verpackung maßgeblich.
+            Fehler kannst du ohne Anmeldung melden.</p>
+        <ul th:if="${product.sources != null and !product.sources.isEmpty()}">
             <li th:each="source : ${product.sources}">
                 <a th:href="${source.url}" th:text="${source.title}" target="_blank" rel="noopener noreferrer">Quelle</a>
             </li>
         </ul>
-    </section>
-
-    <section class="box" th:if="${product.openFoodFactsData != null}">
-        <h2>Angaben von Open Food Facts</h2>
-        <p class="hint">
-            Diese Angaben stammen aus der Open-Food-Facts-Community und sind nicht automatisch
-            redaktionell geprüft. Das Importdatum ist kein Prüfdatum.
-        </p>
+        <th:block th:if="${product.openFoodFactsData != null}">
+        <details class="off-details">
+        <summary>Produkt, Zutaten und Herkunft laut OFF</summary>
         <dl class="detail-list">
             <dt>Barcode</dt>
             <dd th:text="${product.openFoodFactsData.barcode}">Barcode</dd>
             <dt>Produktname laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.productName ?: 'Keine Angabe'}">Produktname</dd>
             <dt>Marken laut Open Food Facts</dt>
-            <dd th:text="${product.openFoodFactsData.brands ?: 'Keine Angabe'}">Marken</dd>
+            <dd th:text="${offView.brands.isEmpty() ? 'Keine Angabe' : #strings.listJoin(offView.brands, ', ') + ' (aus OFF-Feld ' + offView.brandsSource + ')'}">Marken</dd>
             <dt>Marken-Tags laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.brandTags ?: 'Keine Angabe'}">Marken-Tags</dd>
             <dt>Markeninhaber-Angabe laut Open Food Facts</dt>
@@ -148,24 +189,40 @@
             <dt>Kategorien laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.categories ?: 'Keine Angabe'}">Kategorien</dd>
             <dt>Menge</dt>
-            <dd th:text="${product.openFoodFactsData.quantity ?: 'Keine Angabe'}">Menge</dd>
+            <dd th:text="${offView.quantity ?: 'Keine Angabe'}">Menge</dd>
             <dt>Verpackung laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.packaging ?: 'Keine Angabe'}">Verpackung</dd>
             <dt>Verpackungs-Tags laut Open Food Facts</dt>
-            <dd th:text="${product.openFoodFactsData.packagingTags ?: 'Keine Angabe'}">Verpackungs-Tags</dd>
+            <dd th:replace="~{fragments/off-detail :: tags(${offView.packagingSource == 'packaging_tags' ? offView.packaging : null})}">Verpackungs-Tags</dd>
             <dt>Zutaten laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.ingredientsText ?: 'Keine Angabe'}">Zutaten</dd>
             <dt>Allergene laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.allergens ?: 'Keine Angabe'}">Allergene</dd>
+            <dt>Allergen-Tags laut OFF</dt>
+            <dd th:replace="~{fragments/off-detail :: tags(${offView.allergens})}">Allergen-Tags</dd>
             <dt>Spurenhinweise laut Open Food Facts</dt>
             <dd th:text="${product.openFoodFactsData.traces ?: 'Keine Angabe'}">Spurenhinweise</dd>
+            <dt>Spuren-Tags laut OFF</dt>
+            <dd th:replace="~{fragments/off-detail :: tags(${offView.traces})}">Spuren-Tags</dd>
+            <dt>Kategorie-Tags laut OFF</dt>
+            <dd th:text="${product.openFoodFactsData.categoryTags ?: 'Keine Angabe'}">Kategorie-Tags</dd>
+            <dt>Verkaufsländer laut OFF (keine Herkunftsangabe)</dt>
+            <dd th:text="${product.openFoodFactsData.countries ?: product.openFoodFactsData.countryTags ?: 'Keine Angabe'}">Verkaufsländer</dd>
+            <dt>Herkunfts-Tags laut OFF</dt>
+            <dd th:text="${product.openFoodFactsData.originTags ?: 'Keine Angabe'}">Herkunft</dd>
+            <dt>Herstellungsort-Tags laut OFF</dt>
+            <dd th:text="${product.openFoodFactsData.manufacturingPlaceTags ?: 'Keine Angabe'}">Herstellungsorte</dd>
             <dt>Nutri-Score laut Open Food Facts</dt>
-            <dd th:text="${product.openFoodFactsData.nutritionGrade ?: 'Keine Angabe'}">Nutri-Score</dd>
+            <dd th:text="${offView.nutriScore ?: 'Keine Angabe'}">Nutri-Score</dd>
             <dt>Sprache der Angaben</dt>
             <dd th:text="${product.openFoodFactsData.languageCode ?: 'Keine Angabe'}">Sprache</dd>
             <dt>Zuletzt importiert (UTC)</dt>
             <dd th:text="${#temporals.format(product.openFoodFactsData.lastImportedAt, 'dd.MM.yyyy HH:mm')}">Importdatum</dd>
+            <dt>Zuletzt bei OFF geändert (UTC)</dt>
+            <dd th:text="${product.openFoodFactsData.sourceModifiedAt ?: 'Keine Angabe'}">Änderungsdatum</dd>
         </dl>
+        </details>
+        <div th:replace="~{fragments/off-detail :: metadata(${product.openFoodFactsData.metadata})}"></div>
         <p>
             Diese Seite enthält Daten von
             <a th:href="@{https://world.openfoodfacts.org/product/{barcode}(barcode=${product.openFoodFactsData.barcode})}"
@@ -176,8 +233,11 @@
             <span th:if="${product.openFoodFactsData.sourceRevision != null}"
                   th:text="${'Datensatzrevision: ' + product.openFoodFactsData.sourceRevision}">Revision</span>
         </p>
+        </th:block>
+        </details>
     </section>
 
 </main>
+<script th:src="@{/js/product-images.js}" defer></script>
 </body>
 </html>

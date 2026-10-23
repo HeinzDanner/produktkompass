@@ -41,7 +41,7 @@ class ProductControllerTest {
         product.addCategory(category);
         setField(product, "id", 10L);
 
-        when(productService.searchPage("hafer", 1L, 1L, null, null, null, null, null, 0, 20))
+        when(productService.searchPage("hafer", 1L, 1L, null, null, null, null, null, false, 0, 20))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(
                         List.of(de.heinzdanner.produktkompass.product.dto.ProductSummary.fromEntity(product))));
 

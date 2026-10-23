@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produktdaten melden – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Fehlerhafte Produktdaten melden</h1>
+        <p>Produkt: <a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">Produkt</a></p>
+        <p>Deine Meldung hilft bei der Datenpflege. Sie verändert weder den App-Katalog noch Open Food Facts automatisch.</p>
+        <p class="hint">Bitte keine Namen, Kontaktdaten oder andere personenbezogene Daten eingeben.
+            Für eine Meldung ist keine Anmeldung erforderlich; wir speichern keine Kontaktdaten oder IP-Adresse mit der Meldung.</p>
+        <div th:if="${reportSuccess}" class="alert success" role="status" th:text="${reportSuccess}">Meldung gespeichert.</div>
+        <form th:action="@{/products/{id}/report(id=${product.id})}" th:object="${reportRequest}" method="post">
+            <div class="form-row">
+                <label for="description">Was ist falsch? (Pflichtfeld, höchstens 2000 Zeichen)</label>
+                <textarea id="description" th:field="*{description}" rows="6" maxlength="2000" required></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Fehler</span>
+            </div>
+            <div class="form-row">
+                <label for="targetField">Betroffenes Feld (optional)</label>
+                <select id="targetField" th:field="*{targetField}">
+                    <option value="">Keine Angabe</option>
+                    <option th:each="field : ${reportTargetFields}" th:value="${field}" th:text="${field.label}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('targetField')}">Bitte ein Feld aus der Liste auswählen.</span>
+            </div>
+            <div class="form-row">
+                <label for="provenance">Betroffener Datenbestand (optional)</label>
+                <select id="provenance" th:field="*{provenance}">
+                    <option value="">Keine Angabe / unbekannt</option>
+                    <option th:each="origin : ${reportProvenances}" th:value="${origin}" th:text="${origin.label}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('provenance')}">Bitte einen Datenbestand aus der Liste auswählen.</span>
+            </div>
+            <button type="submit">Meldung absenden</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

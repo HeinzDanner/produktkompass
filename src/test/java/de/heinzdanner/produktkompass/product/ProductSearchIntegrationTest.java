@@ -39,6 +39,52 @@ class ProductSearchIntegrationTest {
     @Autowired private WebApplicationContext context;
 
     @Test
+    void brandFilterCombinesAppAssignmentsAndExactOffBrandsBeforePagination() throws Exception {
+        Brand brand = brands.save(new Brand("Search Test Brand", "Test"));
+        Brand otherBrand = brands.save(new Brand("Different Search Brand", "Test"));
+        Product app = products.save(new Product("Brand match A", "Test", brand));
+        Product offText = offProduct("Brand match B", "00099001", "Other, SEARCH TEST BRAND", null);
+        offText.setBrand(otherBrand);
+        Product offTags = offProduct("Brand match C", "00099002", null, "xx:other,en:search-test-brand");
+        offProduct("Brand mismatch", "00099003", "Search Test Brand Extra", "xx:search-test-brand-extra");
+
+        var result = service.searchPage(null, brand.getId(), null, null, null, null, null, null, 0, 2);
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent()).extracting("id").containsExactly(app.getId(), offText.getId());
+        assertThat(service.searchPage(null, brand.getId(), null, null, null, null, null, null, 1, 2)
+                .getContent()).extracting("id").containsExactly(offTags.getId());
+        assertThat(service.searchPage("search test brand", null, null, null, null, null, null, null, 0, 20)
+                .getContent()).extracting("id").contains(app.getId(), offText.getId(), offTags.getId());
+        assertThat(service.searchPage(null, Long.MAX_VALUE, null, null, null, null, null, null, 0, 20))
+                .isEmpty();
+
+        var mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        mvc.perform(get("/api/v1/products/search").param("brandId", brand.getId().toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
+        mvc.perform(get("/brands/{id}", brand.getId()))
+                .andExpect(status().isOk()).andExpect(content().string(
+                        org.hamcrest.Matchers.containsString("Brand match C")));
+    }
+
+    @Test
+    void brandFilterTreatsWildcardCharactersInNamesLiterally() {
+        Brand brand = brands.save(new Brand("Exact %_ Brand", "Test"));
+        Product match = offProduct("Literal brand", "00099004", "Exact %_ Brand", null);
+        offProduct("Not literal", "00099005", "Exact Other Brand", "xx:exact-other-brand");
+        assertThat(service.searchPage(null, brand.getId(), null, null, null, null, null, null, 0, 20)
+                .getContent()).extracting("id").containsExactly(match.getId());
+    }
+
+    private Product offProduct(String name, String barcode, String names, String brandTags) {
+        Product product = new Product(name, "Test");
+        var off = new OpenFoodFactsData(product, barcode, name, java.time.LocalDateTime.now());
+        off.setBrands(names);
+        off.setBrandTags(brandTags);
+        product.setOpenFoodFactsData(off);
+        return products.save(product);
+    }
+
+    @Test
     void databaseFiltersBeforePaginationAndReturnsStableDistinctPages() {
         Brand brand = brands.save(new Brand("Page test brand", "Test"));
         Category category = categories.save(new Category("Page test category", "Test"));

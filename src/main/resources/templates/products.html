@@ -34,13 +34,18 @@
                         th:selected="${category.id == selectedCategoryId}">Kategorie</option>
             </select>
 
-            <select name="label">
+            <select name="label" aria-label="Labels">
                 <option value="">Alle Labels</option>
                 <option th:each="label : ${productLabels}"
                         th:value="${label}"
-                        th:text="${label}"
+                        th:text="${label.displayName}"
                         th:selected="${label == selectedLabel}">Label</option>
             </select>
+            <label class="hint">
+                <input type="checkbox" name="includeOpenFoodFactsLabels" value="true"
+                       th:checked="${includeOpenFoodFactsLabels}">
+                Label-Filter auch auf OFF-Labels anwenden
+            </label>
 
             <select name="nutritionGrade">
                 <option value="">Alle Nutri-Scores</option>
@@ -67,43 +72,21 @@
             <button type="submit" class="button primary">Filtern</button>
             <a class="button secondary" th:href="@{/products}">Zurücksetzen</a>
         </form>
+        <p class="hint">
+            Suche und Markenfilter berücksichtigen App- und OFF-Marken.
+            OFF-Labels werden über die Freitextsuche oder die Option oben berücksichtigt.
+        </p>
 
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">Keine Produkte gefunden.</div>
         <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
 
         <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
             <article class="product-card" th:each="product : ${products}">
-                <div class="product-header">
-                    <h3 th:text="${product.name}">Produktname</h3>
-                    <a class="badge" th:if="${product.openFoodFactsDataAvailable}"
-                       th:href="${product.openFoodFactsProductUrl}"
-                       target="_blank" rel="noopener noreferrer">
-                        Open-Food-Facts-Community-Daten
-                    </a>
-                    <a class="badge" th:if="${product.brand != null}" th:href="@{/brands/{id}(id=${product.brand.id})}" th:text="${product.brand.name}">Marke</a>
-                    <span class="badge" th:if="${product.brand == null}">Keine redaktionelle Marke</span>
-                    <a class="badge" th:if="${product.openFoodFactsBrandTags != null}"
-                       th:href="${product.openFoodFactsProductUrl}" target="_blank" rel="noopener noreferrer"
-                       th:text="${'OFF-Marken-Tags: ' + product.openFoodFactsBrandTags}">OFF-Marken-Tags</a>
-                    <span class="favorite-icon" th:if="${favoriteProductIds != null and favoriteProductIds.contains(product.id)}">♥</span>
-                </div>
-                <p th:text="${product.description}">Beschreibung</p>
-                <div class="meta-row" th:if="${product.categories != null and !product.categories.isEmpty()}">
-                    <span th:each="category : ${product.categories}" th:text="${category.name}">Kategorie</span>
-                </div>
-                <div class="meta-row" th:if="${product.company != null}">
-                    <a th:href="@{/companies/{id}(id=${product.company.id})}" th:text="${product.company.name}">Unternehmen</a>
-                </div>
-                <div class="meta-row" th:if="${product.company == null}">
-                    <span>Kein redaktionell zugeordnetes Unternehmen</span>
-                    <span th:if="${product.openFoodFactsBrandOwner != null}"
-                          th:text="${'Inhaber-Angabe laut OFF: ' + product.openFoodFactsBrandOwner}">OFF-Inhaber</span>
-                </div>
-                <div class="meta-row" th:if="${product.openFoodFactsPackaging != null}">
-                    <span th:text="${'Verpackung laut OFF: ' + product.openFoodFactsPackaging}">OFF-Verpackung</span>
-                </div>
+                <div th:replace="~{fragments/off-card :: cardHeader(${product}, ${favoriteProductIds != null and favoriteProductIds.contains(product.id)})}"></div>
+                <div th:replace="~{fragments/product-image :: card(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: metadata(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: cardDetails(${product})}"></div>
                 <div class="actions">
-                    <a class="button secondary" th:href="@{/products/{id}(id=${product.id})}">Details</a>
                     <a class="button secondary" th:if="${hasActiveFilter}" th:href="@{/products/{id}/similar(id=${product.id})}">Ähnliche Produkte</a>
                     <form th:if="${favoriteProductIds == null or !favoriteProductIds.contains(product.id)}"
                           th:action="@{/favorites/add/{id}(id=${product.id})}" method="post">
@@ -118,14 +101,15 @@
         </div>
         <nav aria-label="Ergebnisseiten" class="actions">
             <a th:if="${productPage.hasPrevious()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
             <span th:if="${productPage.totalPages > 0}"
                   th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
             <a th:if="${productPage.hasNext()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
         </nav>
     </section>
 </main>
 <script th:src="@{/js/lookup-picker.js}" defer></script>
+<script th:src="@{/js/product-images.js}" defer></script>
 </body>
 </html>

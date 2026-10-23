@@ -3,6 +3,8 @@ package de.heinzdanner.produktkompass.openfoodfacts;
 import java.util.Map;
 import de.heinzdanner.produktkompass.product.NutritionGrade;
 import de.heinzdanner.produktkompass.product.OpenFoodFactsDataRepository;
+import de.heinzdanner.produktkompass.product.OpenFoodFactsLabel;
+import de.heinzdanner.produktkompass.product.OpenFoodFactsLabelRepository;
 import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.product.ProductRepository;
 import de.heinzdanner.produktkompass.user.AppUserRepository;
@@ -25,6 +27,83 @@ class OpenFoodFactsImportBatchServiceTest {
     @Autowired private ProductRepository productRepository;
     @Autowired private AppUserRepository users;
     @Autowired private UserTagRepository tags;
+    @Autowired private OpenFoodFactsLabelRepository labels;
+    @Autowired private jakarta.persistence.EntityManager entityManager;
+
+    @Test
+    void importsAHundredRowsWithOneBatchedCatalogLookup() {
+        var statistics = entityManager.getEntityManagerFactory()
+                .unwrap(org.hibernate.SessionFactory.class).getStatistics();
+        boolean enabled = statistics.isStatisticsEnabled();
+        statistics.setStatisticsEnabled(true);
+        statistics.clear();
+        try {
+            var records = java.util.stream.IntStream.range(0, 100).mapToObj(i ->
+                    OpenFoodFactsRecord.from(Map.of("code", "00909" + i, "product_name", "Batch label " + i,
+                            "labels_tags", "xx:batch-shared,en:batch-" + i))).toList();
+            assertThat(importer.importPage(records).inserted()).isEqualTo(100);
+            entityManager.flush();
+            assertThat(statistics.getQueryExecutionCount()).isEqualTo(2);
+            entityManager.clear();
+            assertThat(labels.findAllByCanonicalTagIn(List.of("xx:batch-shared"))).hasSize(1);
+            assertThat(dataRepository.findAllByBarcodeIn(records.stream().map(OpenFoodFactsRecord::barcode).toList()))
+                    .hasSize(100).allSatisfy(row -> assertThat(row.getCatalogLabels()).hasSize(2));
+        } finally {
+            statistics.setStatisticsEnabled(enabled);
+        }
+    }
+
+    @Test
+    void catalogsEveryExactTagOnceAcrossRowsAndReimportsAndKeepsCurrentLinksExact() {
+        long before = labels.count();
+        var first = OpenFoodFactsRecord.from(Map.of("code", "00090901", "product_name", "Labels one",
+                "labels_tags", " en:unique-label, ,de:unique-label,en:unique-label,fr:étiquette,EN:unique-label, "));
+        var second = OpenFoodFactsRecord.from(Map.of("code", "00090902", "product_name", "Labels two",
+                "labels_tags", "fr:étiquette,en:unique-label,xx:custom"));
+        var records = List.of(first, second);
+        assertThat(importer.importPage(records).inserted()).isEqualTo(2);
+        entityManager.flush();
+        entityManager.clear();
+        var catalog = labels.findAll();
+        assertThat(catalog).hasSize((int) before + 5);
+        assertThat(catalog).extracting(OpenFoodFactsLabel::getCanonicalTag).doesNotHaveDuplicates();
+        assertThat(catalog).filteredOn(label -> label.getCanonicalTag().equals("fr:étiquette"))
+                .extracting(OpenFoodFactsLabel::getLocaleKey).containsExactly("fr");
+        var ids = catalog.stream().collect(java.util.stream.Collectors.toMap(
+                OpenFoodFactsLabel::getCanonicalTag, OpenFoodFactsLabel::getId));
+        assertThat(importer.importPage(records).updated()).isEqualTo(2);
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(labels.count()).isEqualTo(before + 5);
+        assertThat(labels.findAll()).allSatisfy(label ->
+                assertThat(label.getId()).isEqualTo(ids.get(label.getCanonicalTag())));
+        var rows = dataRepository.findAllByBarcodeIn(List.of("00090901", "00090902"));
+        assertThat(rows).filteredOn(row -> row.getBarcode().equals("00090901")).singleElement()
+                .satisfies(row -> assertThat(row.getCatalogLabels()).extracting(OpenFoodFactsLabel::getCanonicalTag)
+                        .containsExactlyInAnyOrder("en:unique-label", "de:unique-label", "fr:étiquette", "EN:unique-label"));
+        assertThat(rows).filteredOn(row -> row.getBarcode().equals("00090902")).singleElement()
+                .satisfies(row -> assertThat(row.getCatalogLabels()).extracting(OpenFoodFactsLabel::getCanonicalTag)
+                        .containsExactlyInAnyOrder("fr:étiquette", "en:unique-label", "xx:custom"));
+
+        importer.importPage(List.of(OpenFoodFactsRecord.from(Map.of(
+                "code", "00090901", "product_name", "Labels omitted"))));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(dataRepository.findAllByBarcodeIn(List.of("00090901")).getFirst().getCatalogLabels()).hasSize(4);
+        importer.importPage(List.of(OpenFoodFactsRecord.from(Map.of(
+                "code", "00090901", "product_name", "Labels replaced", "labels_tags", "xx:custom"))));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(dataRepository.findAllByBarcodeIn(List.of("00090901")).getFirst().getCatalogLabels())
+                .extracting(OpenFoodFactsLabel::getCanonicalTag).containsExactly("xx:custom");
+        importer.importPage(List.of(OpenFoodFactsRecord.from(Map.of(
+                "code", "00090902", "product_name", "Labels cleared", "labels_tags", " , "))));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(dataRepository.findAllByBarcodeIn(List.of("00090902")).getFirst().getCatalogLabels()).isEmpty();
+        assertThat(labels.count()).isEqualTo(before + 5);
+    }
+
     @Test
     void importIsRepeatableAndOnlyRefreshesOpenFoodFactsFields() {
         OpenFoodFactsRecord first = OpenFoodFactsRecord.from(Map.of(

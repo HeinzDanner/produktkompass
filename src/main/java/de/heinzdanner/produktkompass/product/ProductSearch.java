@@ -1,6 +1,11 @@
 package de.heinzdanner.produktkompass.product;
 
 import de.heinzdanner.produktkompass.usertag.UserTag;
+import de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsTags;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -16,8 +21,21 @@ public final class ProductSearch {
     public static Specification<Product> matching(String text, Long brandId, Long categoryId,
                                                   ProductLabel label, NutritionGrade grade,
                                                   Boolean madeInGermany, Long tagId, String username) {
+        return matching(text, brandId, categoryId, label, grade, madeInGermany, tagId, username, false);
+    }
+
+    /**
+     * {@code brandId} matches app assignments and exact OFF brand names/tags. With
+     * {@code includeOpenFoodFactsLabels} the label filter additionally matches exact equivalent OFF label tags
+     * (unverified). Free text also matches stored OFF brand/label values and known human label terms.
+     */
+    public static Specification<Product> matching(String text, Long brandId, Long categoryId,
+                                                  ProductLabel label, NutritionGrade grade,
+                                                  Boolean madeInGermany, Long tagId, String username,
+                                                  boolean includeOpenFoodFactsLabels) {
         return (product, query, builder) -> {
             var predicates = new ArrayList<Predicate>();
+            Join<Product, OpenFoodFactsData> openFoodFacts = null;
             if (text != null && !text.isBlank()) {
                 String term = text.trim().toLowerCase(Locale.ROOT);
                 String pattern = "%" + term.replace("\\", "\\\\").replace("%", "\\%")
@@ -34,10 +52,18 @@ public final class ProductSearch {
                         .get("name")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(product.join("company", jakarta.persistence.criteria.JoinType.LEFT)
                         .get("name")), pattern, '\\'));
-                var openFoodFacts = product.join("openFoodFactsData", jakarta.persistence.criteria.JoinType.LEFT);
+                openFoodFacts = product.join("openFoodFactsData", JoinType.LEFT);
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("productName")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("brands")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("brandTags")), pattern, '\\'));
+                if (term.contains(" ")) {
+                    // OFF brand slugs such as "xx:la-baleine" use hyphens instead of spaces.
+                    textMatches.add(builder.like(builder.lower(openFoodFacts.get("brandTags")),
+                            pattern.replace(' ', '-'), '\\'));
+                }
+                for (String tag : OpenFoodFactsTags.labelTagsMatchingText(term)) {
+                    textMatches.add(containsTag(builder, openFoodFacts.get("labelTags"), tag));
+                }
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("brandOwner")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("categories")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("categoryTags")), pattern, '\\'));
@@ -48,14 +74,30 @@ public final class ProductSearch {
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("manufacturingPlaceTags")), pattern, '\\'));
                 textMatches.add(builder.exists(categorySearch));
                 for (ProductLabel value : ProductLabel.values()) {
-                    if (value.name().toLowerCase(Locale.ROOT).replace('_', ' ').contains(term)) {
+                    if (value.name().toLowerCase(Locale.ROOT).replace('_', ' ').contains(term)
+                            || value.getDisplayName().toLowerCase(Locale.ROOT).contains(term)) {
                         textMatches.add(builder.isMember(value, product.get("labels")));
                     }
                 }
                 predicates.add(builder.or(textMatches.toArray(Predicate[]::new)));
             }
             if (brandId != null) {
-                predicates.add(builder.equal(product.get("brand").get("id"), brandId));
+                if (openFoodFacts == null) {
+                    openFoodFacts = product.join("openFoodFactsData", JoinType.LEFT);
+                }
+                var brandFilter = query.subquery(Long.class);
+                var selectedBrand = brandFilter.from(Brand.class);
+                Expression<String> name = builder.lower(builder.trim(selectedBrand.get("name")));
+                Expression<String> slug = builder.function("REPLACE", String.class, name,
+                        builder.literal(" "), builder.literal("-"));
+                brandFilter.select(selectedBrand.get("id")).where(
+                        builder.equal(selectedBrand.get("id"), brandId),
+                        builder.or(containsBrand(builder, openFoodFacts.get("brands"), name, false),
+                                containsBrand(builder, openFoodFacts.get("brandTags"), slug, false),
+                                containsBrand(builder, openFoodFacts.get("brandTags"), slug, true)));
+                predicates.add(builder.or(
+                        builder.equal(product.join("brand", JoinType.LEFT).get("id"), brandId),
+                        builder.exists(brandFilter)));
             }
             if (categoryId != null) {
                 var categoryFilter = query.subquery(Long.class);
@@ -66,7 +108,17 @@ public final class ProductSearch {
                 predicates.add(builder.exists(categoryFilter));
             }
             if (label != null) {
-                predicates.add(builder.isMember(label, product.get("labels")));
+                var labelMatches = new ArrayList<Predicate>();
+                labelMatches.add(builder.isMember(label, product.get("labels")));
+                if (includeOpenFoodFactsLabels) {
+                    if (openFoodFacts == null) {
+                        openFoodFacts = product.join("openFoodFactsData", JoinType.LEFT);
+                    }
+                    for (String tag : OpenFoodFactsTags.equivalentLabelTags(label)) {
+                        labelMatches.add(containsTag(builder, openFoodFacts.get("labelTags"), tag));
+                    }
+                }
+                predicates.add(builder.or(labelMatches.toArray(Predicate[]::new)));
             }
             if (grade != null) {
                 predicates.add(builder.equal(product.get("nutritionGrade"), grade));
@@ -86,5 +138,30 @@ public final class ProductSearch {
             }
             return builder.and(predicates.toArray(Predicate[]::new));
         };
+    }
+
+    private static Predicate containsBrand(CriteriaBuilder builder, Expression<String> column,
+                                           Expression<String> name, boolean languagePrefix) {
+        Expression<String> normalized = builder.function("REPLACE", String.class, builder.lower(builder.trim(column)),
+                builder.literal(", "), builder.literal(","));
+        normalized = builder.function("REPLACE", String.class, normalized,
+                builder.literal(" ,"), builder.literal(","));
+        Expression<String> escaped = name;
+        for (String character : new String[]{"\\", "%", "_"}) {
+            escaped = builder.function("REPLACE", String.class, escaped,
+                    builder.literal(character), builder.literal("\\" + character));
+        }
+        Expression<String> pattern = builder.concat(
+                builder.concat(languagePrefix ? "%,__:" : "%,", escaped), ",%");
+        return builder.like(builder.concat(builder.concat(",", normalized), ","), pattern, '\\');
+    }
+
+    /** Exact, case-insensitive match of one entry in a comma-separated OFF tag column. */
+    private static Predicate containsTag(CriteriaBuilder builder, Expression<String> column, String tag) {
+        Expression<String> normalized = builder.function("REPLACE", String.class, builder.lower(column),
+                builder.literal(", "), builder.literal(","));
+        Expression<String> delimited = builder.concat(builder.concat(",", normalized), ",");
+        String escaped = tag.toLowerCase(Locale.ROOT).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return builder.like(delimited, "%," + escaped + ",%", '\\');
     }
 }

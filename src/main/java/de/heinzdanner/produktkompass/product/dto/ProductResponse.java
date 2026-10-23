@@ -27,7 +27,9 @@ public record ProductResponse(
         List<CategoryResponse> categories,
         List<SourceResponse> sources,
         List<Long> alternativeProductIds,
-        OpenFoodFactsDataResponse openFoodFactsData
+        OpenFoodFactsDataResponse openFoodFactsData,
+        ProductDisplay display,
+        ProductImage image
 ) {
     public static ProductResponse fromEntity(Product product) {
         BrandResponse brandResponse = product.getBrand() == null
@@ -76,7 +78,9 @@ public record ProductResponse(
                 alternativeProductIds,
                 product.getOpenFoodFactsData() == null
                         ? null
-                        : OpenFoodFactsDataResponse.fromEntity(product.getOpenFoodFactsData())
+                        : OpenFoodFactsDataResponse.fromEntity(product.getOpenFoodFactsData()),
+                ProductDisplay.from(product),
+                ProductImage.from(product.getOpenFoodFactsData())
         );
     }
 }

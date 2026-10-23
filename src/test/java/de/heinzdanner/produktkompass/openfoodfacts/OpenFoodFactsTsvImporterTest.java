@@ -23,6 +23,7 @@ class OpenFoodFactsTsvImporterTest {
     @Autowired private OpenFoodFactsTsvImporter importer;
     @Autowired private OpenFoodFactsDataRepository dataRepository;
     @Autowired private ProductRepository productRepository;
+    @Autowired private jakarta.persistence.EntityManager entityManager;
     @TempDir Path temporaryDirectory;
 
     @Test
@@ -73,5 +74,57 @@ class OpenFoodFactsTsvImporterTest {
         assertThat(result.recordsRead()).isEqualTo(1);
         assertThat(result.inserted()).isEqualTo(1);
         assertThat(dataRepository.findAllByBarcodeIn(java.util.List.of("0001000000004"))).hasSize(1);
+    }
+
+    @Test
+    void persistsCompleteSourceAndTypedMetadataAndPreservesAbsentFieldsAcrossNarrowExports() throws Exception {
+        Path file = temporaryDirectory.resolve("rich.tsv");
+        Files.writeString(file, "\uFEFFcode\tproduct_name\tcountries_tags\tbrands\tserving_size\tnova_group\tcreated_t\tfat_100g\tfat_unit\tfuture_field\n"
+                + "0001000000006\tProduct\ten:germany\tReal brand\t250 ml\t3\t1790264955\t2.5\tg\t\"Quoted\tvalue\nsecond line\"\n");
+        var result = importer.importFile(file, "en:germany", 10);
+        assertThat(result.coverage().missingOptionalFields()).contains("imageFrontUrl");
+        assertThat(result.recordsRead()).isEqualTo(1);
+        entityManager.flush();
+        entityManager.clear();
+        var saved = dataRepository.findAllByBarcodeIn(java.util.List.of("0001000000006")).getFirst();
+        assertThat(saved.getNovaGroup()).isEqualTo(3);
+        assertThat(saved.getServingSize()).isEqualTo("250 ml");
+        assertThat(saved.getSourceCreatedAt()).isNotNull();
+        assertThat(saved.getMetadata().sourceCreatedAt()).isEqualTo(saved.getSourceCreatedAt());
+        assertThat(OpenFoodFactsJson.readRow(saved.getSourceRowJson()))
+                .containsEntry("future_field", "Quoted\tvalue\nsecond line");
+
+        Files.writeString(file, "code\tproduct_name_en\tcountries_tags\tserving_size\n0001000000006\tNew name\ten:germany\t\n");
+        var replay = importer.importFile(file, "en:germany", 10);
+        assertThat(replay.updated()).isEqualTo(1);
+        assertThat(replay.inserted()).isZero();
+        entityManager.flush();
+        entityManager.clear();
+        saved = dataRepository.findAllByBarcodeIn(java.util.List.of("0001000000006")).getFirst();
+        assertThat(saved.getBrands()).isEqualTo("Real brand");
+        assertThat(saved.getServingSize()).isNull();
+        assertThat(saved.getMetadata().servingSize()).isNull();
+        assertThat(saved.getMetadata().nutrition().get("fat_100g").value()).isEqualByComparingTo("2.5");
+        assertThat(OpenFoodFactsJson.readRow(saved.getMergedSourceJson())).containsKey("future_field");
+    }
+
+    @Test
+    void rejectsDuplicateHeadersAndInconsistentRows() throws Exception {
+        Path file = temporaryDirectory.resolve("invalid.tsv");
+        Files.writeString(file, "code\tcode\tproduct_name\tcountries_tags\n123\t123\tProduct\ten:germany\n");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> importer.importFile(file, "en:germany", 10))
+                .isInstanceOf(IllegalArgumentException.class);
+        Files.writeString(file, "code\tproduct_name\tcountries_tags\n123\tProduct\ten:germany\textra\n");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> importer.importFile(file, "en:germany", 10))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Datensatz 1");
+    }
+
+    @Test
+    void doesNotParseAnotherRecordAfterTheConfiguredLimit() throws Exception {
+        Path file = temporaryDirectory.resolve("bounded.tsv");
+        Files.writeString(file, "code\tproduct_name\tcountries_tags\n0001000000007\tProduct\ten:germany\n\"unfinished");
+        var result = importer.importFile(file, "en:germany", 1);
+        assertThat(result.recordsRead()).isEqualTo(1);
+        assertThat(result.inserted()).isEqualTo(1);
     }
 }

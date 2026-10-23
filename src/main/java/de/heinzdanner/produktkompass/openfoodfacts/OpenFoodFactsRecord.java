@@ -3,7 +3,6 @@ package de.heinzdanner.produktkompass.openfoodfacts;
 import de.heinzdanner.produktkompass.product.OpenFoodFactsData;
 import de.heinzdanner.produktkompass.product.Product;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -34,7 +33,8 @@ record OpenFoodFactsRecord(
         String nutritionGrade,
         String languageCode,
         LocalDateTime sourceModifiedAt,
-        String sourceRevision
+        String sourceRevision,
+        Map<String, String> source
 ) {
     static OpenFoodFactsRecord from(Map<String, String> source) {
         String barcode = text(source, "code");
@@ -49,29 +49,30 @@ record OpenFoodFactsRecord(
                     .findFirst()
                     .orElse(null);
         }
-        String nutritionGrade = firstText(source, "nutrition_grade_fr", "nutriscore_grade");
-        String languageCode = text(source, "lang");
-        if (barcode == null || barcode.length() > 32 || name == null || name.length() > 500
+        String nutritionGrade = OpenFoodFactsSchema.value(source, "nutritionGrade");
+        String languageCode = OpenFoodFactsSchema.value(source, "languageCode");
+        if (barcode == null || !barcode.matches("[0-9]{1,32}") || name == null || name.length() > 500
                 || nutritionGrade != null && nutritionGrade.length() > 20
                 || languageCode != null && languageCode.length() > 35) {
             return null;
         }
         String quantity = text(source, "quantity");
-        long revision = parseLong(text(source, "last_modified_t"));
+        LocalDateTime modified = OpenFoodFactsMetadata.timestamp(OpenFoodFactsSchema.value(source, "sourceModifiedAt"));
         return new OpenFoodFactsRecord(
                 barcode, name, text(source, "brands"), text(source, "brands_tags"),
                 text(source, "brand_owner"), text(source, "categories"),
                 text(source, "categories_tags"), quantity, text(source, "packaging"),
                 text(source, "packaging_tags"),
-                firstText(source, "ingredients_text_de", "ingredients_text"),
+                OpenFoodFactsSchema.value(source, "ingredientsText"),
                 text(source, "allergens"), text(source, "allergens_tags"),
                 text(source, "traces"), text(source, "traces_tags"),
                 text(source, "countries"), text(source, "countries_tags"),
                 text(source, "labels_tags"), text(source, "origins_tags"),
                 text(source, "manufacturing_places_tags"),
                 nutritionGrade, languageCode,
-                revision > 0 ? LocalDateTime.ofInstant(Instant.ofEpochSecond(revision), ZoneOffset.UTC) : null,
-                revision > 0 ? Long.toString(revision) : null
+                modified,
+                modified == null ? null : Long.toString(modified.toEpochSecond(ZoneOffset.UTC)),
+                java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(source))
         );
     }
 
@@ -84,30 +85,45 @@ record OpenFoodFactsRecord(
 
     void update(OpenFoodFactsData target, LocalDateTime importedAt) {
         target.setBarcode(barcode);
-        target.setProductName(productName);
-        target.setBrands(brands);
-        target.setBrandTags(brandTags);
-        target.setBrandOwner(brandOwner);
-        target.setCategories(categories);
-        target.setCategoryTags(categoryTags);
-        target.setQuantity(quantity);
-        target.setPackaging(packaging);
-        target.setPackagingTags(packagingTags);
-        target.setIngredientsText(ingredientsText);
-        target.setAllergens(allergens);
-        target.setAllergenTags(allergenTags);
-        target.setTraces(traces);
-        target.setTraceTags(traceTags);
-        target.setCountries(countries);
-        target.setCountryTags(countryTags);
-        target.setLabelTags(labelTags);
-        target.setOriginTags(originTags);
-        target.setManufacturingPlaceTags(manufacturingPlaceTags);
-        target.setNutritionGrade(nutritionGrade);
-        target.setLanguageCode(languageCode);
-        target.setSourceModifiedAt(sourceModifiedAt);
+        if (present("productName")) target.setProductName(productName);
+        if (present("brands")) target.setBrands(brands);
+        if (present("brandTags")) target.setBrandTags(brandTags);
+        if (present("brandOwner")) target.setBrandOwner(brandOwner);
+        if (present("categories")) target.setCategories(categories);
+        if (present("categoryTags")) target.setCategoryTags(categoryTags);
+        if (present("quantity")) target.setQuantity(quantity);
+        if (present("packaging")) target.setPackaging(packaging);
+        if (present("packagingTags")) target.setPackagingTags(packagingTags);
+        if (present("ingredientsText")) target.setIngredientsText(ingredientsText);
+        if (present("allergens")) target.setAllergens(allergens);
+        if (present("allergenTags")) target.setAllergenTags(allergenTags);
+        if (present("traces")) target.setTraces(traces);
+        if (present("traceTags")) target.setTraceTags(traceTags);
+        if (present("countries")) target.setCountries(countries);
+        if (present("countryTags")) target.setCountryTags(countryTags);
+        if (present("labelTags")) target.setLabelTags(labelTags);
+        if (present("originTags")) target.setOriginTags(originTags);
+        if (present("manufacturingPlaceTags")) target.setManufacturingPlaceTags(manufacturingPlaceTags);
+        if (present("nutritionGrade")) target.setNutritionGrade(nutritionGrade);
+        if (present("languageCode")) target.setLanguageCode(languageCode);
+        if (present("sourceModifiedAt")) target.setSourceModifiedAt(sourceModifiedAt);
         target.setLastImportedAt(importedAt);
-        target.setSourceRevision(sourceRevision);
+        if (present("sourceModifiedAt")) target.setSourceRevision(sourceRevision);
+        OpenFoodFactsMetadata metadata = OpenFoodFactsMetadata.merge(source, target.getMetadata());
+        target.setMetadataJson(OpenFoodFactsJson.write(metadata));
+        target.setSourceRowJson(OpenFoodFactsJson.write(source));
+        Map<String, String> merged = OpenFoodFactsJson.readRow(target.getMergedSourceJson());
+        merged.putAll(source);
+        target.setMergedSourceJson(OpenFoodFactsJson.write(merged));
+        if (present("servingSize")) target.setServingSize(metadata.servingSize());
+        if (present("novaGroup")) target.setNovaGroup(metadata.novaGroup());
+        if (present("nutriscoreScore")) target.setNutriscoreScore(boundedDecimal(metadata.nutriscoreScore()));
+        if (present("completeness")) target.setCompleteness(boundedDecimal(metadata.completeness()));
+        if (present("sourceCreatedAt")) target.setSourceCreatedAt(metadata.sourceCreatedAt());
+    }
+
+    private boolean present(String field) {
+        return OpenFoodFactsSchema.present(source, field);
     }
 
     Product newProduct(LocalDateTime importedAt) {
@@ -137,15 +153,9 @@ record OpenFoodFactsRecord(
         return value == null || value.isBlank() ? null : value.trim();
     }
 
-    private static long parseLong(String value) {
-        if (value == null) {
-            return 0;
-        }
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException ignored) {
-            return 0;
-        }
+    private static java.math.BigDecimal boundedDecimal(java.math.BigDecimal value) {
+        if (value == null || value.abs().compareTo(new java.math.BigDecimal("100000000")) >= 0) return null;
+        return value.setScale(4, java.math.RoundingMode.HALF_UP);
     }
 
 }

@@ -52,9 +52,20 @@ public class ProductService {
     public Page<ProductSummary> searchPage(String text, Long brandId, Long categoryId, ProductLabel label,
                                            NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                            String username, int page, int size) {
-        Page<Product> results = findSearchPage(text, brandId, categoryId, label, grade,
-                madeInGermany, tagId, username, page, size);
-        return results.map(ProductSummary::fromEntity);
+        return searchPage(text, brandId, categoryId, label, grade, madeInGermany, tagId, username,
+                false, page, size);
+    }
+
+    /**
+     * @param includeOpenFoodFactsLabels when {@code true}, a label filter also matches products whose unverified
+     *                                   OFF label tags contain an exact equivalent tag; editorial labels still match.
+     */
+    public Page<ProductSummary> searchPage(String text, Long brandId, Long categoryId, ProductLabel label,
+                                           NutritionGrade grade, Boolean madeInGermany, Long tagId,
+                                           String username, boolean includeOpenFoodFactsLabels,
+                                           int page, int size) {
+        return findPage(ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId,
+                username, includeOpenFoodFactsLabels), page, size).map(ProductSummary::fromEntity);
     }
 
     public Page<Product> getAdminProductPage(String text, int page, int size) {
@@ -94,7 +105,7 @@ public class ProductService {
                                          NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                          String username, int page, int size) {
         return findPage(ProductSearch.matching(text, brandId, categoryId, label, grade,
-                madeInGermany, tagId, username), page, size);
+                madeInGermany, tagId, username, false), page, size);
     }
 
     private Page<Product> findPage(Specification<Product> filter, int page, int size) {
@@ -116,7 +127,15 @@ public class ProductService {
     }
 
     public Optional<Product> getProductById(Long id) {
-        return productRepository.findByIdWithDetails(id);
+        Optional<Product> product = productRepository.findByIdWithDetails(id);
+        product.ifPresent(this::initializeOffLabels);
+        return product;
+    }
+
+    private void initializeOffLabels(Product product) {
+        if (product.getOpenFoodFactsData() != null) {
+            product.getOpenFoodFactsData().getCatalogLabels().size();
+        }
     }
 
     public List<Product> getAlternativeProducts(Long productId) {
@@ -150,6 +169,10 @@ public class ProductService {
 
     public List<ProductResponse> getAlternativeProductResponses(Long productId) {
         return getAlternativeProducts(productId).stream().map(ProductResponse::fromEntity).toList();
+    }
+
+    public List<ProductSummary> getAlternativeProductSummaries(Long productId) {
+        return getAlternativeProducts(productId).stream().map(ProductSummary::fromEntity).toList();
     }
 
     public List<Product> getProductsWithAlternatives() {
@@ -300,6 +323,7 @@ public class ProductService {
                     existingProduct.setSources(new HashSet<>(resolveSources(request.sourceIds())));
                     existingProduct.setAlternativeProducts(new HashSet<>(resolveAlternatives(request.alternativeProductIds())));
                     Product updatedProduct = productRepository.save(existingProduct);
+                    initializeOffLabels(updatedProduct);
                     auditLogService.logAction("Product", updatedProduct.getId(), "UPDATE", "Updated product: " + updatedProduct.getName());
                     return updatedProduct;
                 });

@@ -83,6 +83,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/*/report").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products/*/report").permitAll()
                         .requestMatchers("/", "/products", "/products/**", "/brands/**", "/companies/**",
                                 "/login", "/register", "/error", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/register").permitAll()

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Normalized OFF tags; the stored raw tag stays visible, untranslated tags are marked as such. */-->
+<dd th:fragment="tags(tags)">
+    <th:block th:if="${tags == null or tags.isEmpty()}">Keine Angabe</th:block>
+    <ul class="off-tag-list" th:unless="${tags == null or tags.isEmpty()}">
+        <li th:each="tag : ${tags}">
+            <span th:text="${tag.display}">Anzeige</span>
+            <span class="off-tag-raw" th:text="${'(' + tag.raw + (tag.known ? ')' : '; nicht übersetzt)')}">(Tag)</span>
+        </li>
+    </ul>
+</dd>
+<div th:fragment="metadata(data)">
+    <details class="off-details">
+    <summary>Weitere Community- und Quellenangaben laut OFF</summary>
+    <p class="hint">Fehlende Angaben bedeuten nicht, dass ein Produkt frei von Allergenen oder Zusatzstoffen ist.
+        Diese Angaben ersetzen keine Prüfung der Verpackung. OFF-Angaben sind keine redaktionelle Unternehmenszuordnung.</p>
+    <dl class="detail-list">
+        <dt>Allgemeine Produktbezeichnung</dt><dd th:text="${data.genericName ?: 'Keine Angabe'}"></dd>
+        <dt>Portionsgröße</dt><dd th:text="${data.servingSize ?: 'Keine Angabe'}"></dd>
+        <dt>Label-Angaben</dt><dd th:text="${data.labels ?: 'Keine Angabe'}"></dd>
+        <dt>Herkunftsangaben</dt><dd th:text="${data.origins ?: 'Keine Angabe'}"></dd>
+        <dt>Herstellungsorte</dt><dd th:text="${data.manufacturingPlaces ?: 'Keine Angabe'}"></dd>
+        <dt>Verpackungshinweise</dt><dd th:text="${data.packagingText ?: 'Keine Angabe'}"></dd>
+        <dt>Geschäfte</dt><dd th:text="${data.stores ?: 'Keine Angabe'}"></dd>
+        <dt>Kauforte</dt><dd th:text="${data.purchasePlaces ?: 'Keine Angabe'}"></dd>
+        <dt>Zusatzstoff-Tags</dt><dd th:text="${data.additiveTags ?: 'Keine Angabe'}"></dd>
+        <dt>Zutatenanalyse-Tags</dt><dd th:text="${data.ingredientAnalysisTags ?: 'Keine Angabe'}"></dd>
+        <dt>NOVA-Gruppe</dt><dd th:text="${data.novaGroup ?: 'Keine Angabe'}"></dd>
+        <dt>Nutri-Score-Punktzahl</dt><dd th:text="${data.nutriscoreScore ?: 'Keine Angabe'}"></dd>
+        <dt>Umweltbewertung</dt><dd th:text="${data.environmentGrade ?: 'Keine Angabe'}"></dd>
+        <dt>Datenqualitäts-Tags (kein Prüfsiegel)</dt><dd th:text="${data.qualityTags ?: 'Keine Angabe'}"></dd>
+        <dt>Vollständigkeit laut OFF</dt><dd th:text="${data.completeness ?: 'Keine Angabe'}"></dd>
+        <dt>Datenquellen laut OFF</dt><dd th:text="${data.dataSources ?: 'Keine Angabe'}"></dd>
+        <dt>Datensatz angelegt von</dt><dd th:text="${data.creator ?: 'Keine Angabe'}"></dd>
+        <dt>Bei OFF angelegt (UTC)</dt><dd th:text="${data.sourceCreatedAt ?: 'Keine Angabe'}"></dd>
+        <dt>Bei OFF zuletzt geprüft (UTC; keine eigene Prüfung)</dt><dd th:text="${data.sourceCheckedAt ?: 'Keine Angabe'}"></dd>
+    </dl>
+    </details>
+    <details class="off-details">
+    <summary>Nährwerte laut OFF</summary>
+    <p class="hint">Bezugsmenge, Zubereitung und Quelle bleiben getrennt.
+        Fehlende Einheiten werden nicht erraten; Schätzwerte sind als „estimate“ gekennzeichnet.
+        „as_sold“ = verkauft, „prepared“ = zubereitet, „serving“ = Portion.</p>
+    <p th:if="${data.nutrition.isEmpty()}">Keine auswertbaren Nährwertangaben im importierten Export.</p>
+    <ul class="off-nutrition" th:unless="${data.nutrition.isEmpty()}">
+        <li th:each="entry : ${data.nutrition}">
+            <strong th:text="${entry.value.name}">Nährstoff</strong>:
+            <span th:text="${entry.value.modifier ?: ''}"></span>
+            <span th:text="${entry.value.value}">Wert</span>
+            <span th:text="${entry.value.unit ?: '(Einheit nicht angegeben)'}">Einheit</span>
+            <span th:text="${' / ' + entry.value.basis + ' · ' + entry.value.preparation + ' · Quelle: ' + entry.value.source}"></span>
+        </li>
+    </ul>
+    </details>
+    <details class="off-details">
+    <summary>Bild-URLs laut OFF</summary>
+    <p class="hint">Produktbilder werden direkt von Open Food Facts geladen.
+        Dabei wird die IP-Adresse des Browsers an OFF übermittelt, aber keine ProduktKompass-Seitenadresse.
+        Bildlizenz: <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>,
+        getrennt von der Datenbanklizenz ODbL. Die folgenden Links enthalten auch zusätzliche Bildansichten.</p>
+    <p th:if="${data.imageUrls.isEmpty()}">Keine verwendbaren Bild-URLs im importierten Export.</p>
+    <ul th:unless="${data.imageUrls.isEmpty()}">
+        <li th:each="entry : ${data.imageUrls}">
+            <a th:href="${entry.value}" th:text="${entry.key}" target="_blank" rel="noopener noreferrer">Bild-URL</a>
+        </li>
+    </ul>
+    </details>
+</div>
+</body>
+</html>

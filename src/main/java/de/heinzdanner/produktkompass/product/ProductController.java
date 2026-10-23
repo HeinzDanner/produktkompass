@@ -44,10 +44,12 @@ public class ProductController {
             @RequestParam(required = false) ProductLabel label,
             @RequestParam(required = false) NutritionGrade nutritionGrade,
             @RequestParam(required = false) Boolean madeInGermany,
+            @RequestParam(defaultValue = "false") boolean includeOpenFoodFactsLabels,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ProductPage.from(productService.searchPage(
-                name, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null, page, size)));
+                name, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null,
+                includeOpenFoodFactsLabels, page, size)));
     }
 
     @GetMapping("/{id}/alternatives")
