@@ -52,8 +52,7 @@ class CartIntegrationTest {
         mvc.perform(get("/cart").with(user("max")).session(new MockHttpSession()))
                 .andExpect(status().isOk()).andExpect(content().string(containsString("Cart fixture")));
         mvc.perform(get("/cart").with(user("admin")))
-                .andExpect(status().isOk()).andExpect(content().string(
-                        org.hamcrest.Matchers.not(containsString("Cart fixture"))));
+                .andExpect(status().isOk()).andExpect(model().attribute("items", org.hamcrest.Matchers.empty()));
     }
 
     @Test
@@ -63,7 +62,10 @@ class CartIntegrationTest {
             mvc.perform(post(url()).with(user("max")).with(csrf())
                             .param("ajax", "true").param("action", "INCREMENT"))
                     .andExpect(status().isOk()).andExpect(jsonPath("$.quantity").value(quantity))
-                    .andExpect(jsonPath("$.productId").value(product.getId()));
+                    .andExpect(jsonPath("$.productId").value(product.getId()))
+                    .andExpect(jsonPath("$.items.length()").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(product.getId()))
+                    .andExpect(jsonPath("$.items[0].quantity").value(quantity));
         }
         assertThat(service.quantities("max")).containsEntry(product.getId(), 2);
         mvc.perform(post(url()).with(user("max")).with(csrf())

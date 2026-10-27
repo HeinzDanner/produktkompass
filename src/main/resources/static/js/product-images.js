@@ -11,7 +11,11 @@
         if (event.target instanceof HTMLImageElement) showPlaceholder(event.target);
     }, true);
 
-    document.querySelectorAll('[data-product-image] img').forEach(image => {
-        if (image.complete && image.naturalWidth === 0) showPlaceholder(image);
-    });
+    function checkImages() {
+        document.querySelectorAll('[data-product-image] img').forEach(image => {
+            if (image.complete && image.naturalWidth === 0) showPlaceholder(image);
+        });
+    }
+    document.addEventListener('product-images:refresh', checkImages);
+    checkImages();
 })();

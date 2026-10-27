@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="chip(selection)" class="search-tag" draggable="true"
+     th:attr="data-tag-key=${selection.tag.key},data-tag-state=${selection.state},data-tag-name=${selection.tag.name},data-tag-search=${selection.tag.searchText()}">
+    <strong th:text="${selection.tag.name}">Bio</strong>
+    <small th:text="${selection.tag.source}">Produkt / OFF</small>
+    <label>
+        <span class="sr-only" th:text="${'Suchwirkung für ' + selection.tag.name}">Suchwirkung</span>
+        <select form="cart-search-form" th:name="${'tag.' + selection.tag.key}" data-tag-select
+                th:aria-label="${'Suchwirkung für ' + selection.tag.name}">
+            <option value="neutral" th:selected="${selection.state == 'neutral'}">Neutral</option>
+            <option value="preferred" th:selected="${selection.state == 'preferred'}">Bevorzugen</option>
+            <option value="excluded" th:selected="${selection.state == 'excluded'}">Ausschließen</option>
+        </select>
+    </label>
+    <button type="button" class="secondary" data-tag-clear th:hidden="${selection.state == 'neutral'}"
+            th:aria-label="${selection.tag.name + ' auf neutral zurücksetzen'}">×</button>
+</div>
+</body>
+</html>

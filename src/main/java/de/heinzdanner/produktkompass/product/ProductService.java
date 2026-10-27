@@ -109,9 +109,17 @@ public class ProductService {
     }
 
     private Page<Product> findPage(Specification<Product> filter, int page, int size) {
+        return findPage(filter, page, size, Sort.by("name").ascending().and(Sort.by("id")));
+    }
+
+    public Page<ProductSummary> searchRankedPage(Specification<Product> filter, int page, int size) {
+        return findPage(filter, page, size, Sort.unsorted()).map(ProductSummary::fromEntity);
+    }
+
+    private Page<Product> findPage(Specification<Product> filter, int page, int size, Sort sort) {
         validatePage(page, size);
         Page<Product> results = productRepository.findAll(filter,
-                PageRequest.of(page, size, Sort.by("name").ascending().and(Sort.by("id"))));
+                PageRequest.of(page, size, sort));
         // Load collection data only for the bounded page, never in the paginated query.
         if (!results.isEmpty()) {
             productRepository.findPageCategories(results.getContent().stream().map(Product::getId).toList());

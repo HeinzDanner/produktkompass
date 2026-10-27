@@ -13,6 +13,11 @@
         panel.querySelector('.cart-decrease').setAttribute('aria-label',
             `${quantity === 1 ? 'Aus dem Warenkorb entfernen' : 'Menge verringern'}: ${panel.dataset.cartName}`);
     }
+    document.addEventListener('cart:sync', event => {
+        const quantities = new Map(event.detail.items.map(item => [String(item.id), item.quantity]));
+        document.querySelectorAll('[data-cart-product]').forEach(panel =>
+            render(panel, quantities.get(panel.dataset.cartProduct) ?? 0));
+    });
     document.addEventListener('submit', async event => {
         const form = event.target;
         if (!(form instanceof HTMLFormElement) || !form.matches('[data-cart-form]')) return;
@@ -49,10 +54,12 @@
                 item.querySelector('[data-cart-feedback]').textContent = result.quantity === 0
                     ? 'Aus dem Warenkorb entfernt.' : `Gespeichert: ${result.quantity} im Warenkorb.`;
             });
+            document.dispatchEvent(new CustomEvent('cart:changed', { detail: result }));
             const target = panel.querySelector(result.quantity === 0 ? '.cart-add'
                 : action === 'INCREMENT' ? '.cart-increase' : '.cart-decrease');
             target.disabled = false;
-            target.focus();
+            if (target.isConnected) target.focus();
+            else document.querySelector('[data-cart-summary]')?.focus();
         } catch (error) {
             panels(id).forEach(item => item.querySelector('[data-cart-feedback]').textContent =
                 error instanceof Error ? error.message : 'Warenkorb konnte nicht gespeichert werden.');

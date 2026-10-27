@@ -38,8 +38,7 @@ public final class ProductSearch {
             Join<Product, OpenFoodFactsData> openFoodFacts = null;
             if (text != null && !text.isBlank()) {
                 String term = text.trim().toLowerCase(Locale.ROOT);
-                String pattern = "%" + term.replace("\\", "\\\\").replace("%", "\\%")
-                        .replace("_", "\\_") + "%";
+                String pattern = "%" + escapeLike(term) + "%";
                 var categorySearch = query.subquery(Long.class);
                 var categoryProduct = categorySearch.from(Product.class);
                 categorySearch.select(categoryProduct.get("id")).where(
@@ -157,11 +156,15 @@ public final class ProductSearch {
     }
 
     /** Exact, case-insensitive match of one entry in a comma-separated OFF tag column. */
-    private static Predicate containsTag(CriteriaBuilder builder, Expression<String> column, String tag) {
+    public static Predicate containsTag(CriteriaBuilder builder, Expression<String> column, String tag) {
         Expression<String> normalized = builder.function("REPLACE", String.class, builder.lower(column),
                 builder.literal(", "), builder.literal(","));
         Expression<String> delimited = builder.concat(builder.concat(",", normalized), ",");
-        String escaped = tag.toLowerCase(Locale.ROOT).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        String escaped = escapeLike(tag.toLowerCase(Locale.ROOT));
         return builder.like(delimited, "%," + escaped + ",%", '\\');
+    }
+
+    public static String escapeLike(String text) {
+        return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 }

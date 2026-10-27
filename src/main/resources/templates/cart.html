@@ -8,20 +8,110 @@
 </head>
 <body>
 <nav th:replace="~{fragments/nav :: nav}"></nav>
-<main class="container page-content">
-    <section class="box">
-        <h1>Mein Warenkorb</h1>
+<main class="container page-content cart-workspace">
+    <section class="box cart-sidebar" aria-labelledby="cart-heading">
+        <h1 id="cart-heading">Mein Warenkorb</h1>
         <p class="hint">Deine persönliche Einkaufsliste. Es werden keine Bestellungen ausgelöst.</p>
-        <p th:if="${items.isEmpty()}">Dein Warenkorb ist leer.</p>
-        <div class="cart-list">
-            <article class="cart-list-item" th:each="item : ${items}">
-                <a th:href="@{/products/{id}(id=${item.id})}" th:text="${item.name}">Produkt</a>
+        <p data-cart-empty th:hidden="${!items.isEmpty()}">Dein Warenkorb ist leer.</p>
+        <div class="cart-list" data-cart-list>
+            <article class="cart-list-item" th:each="item : ${items}" th:attr="data-cart-row=${item.id}">
+                <a data-cart-item-link th:href="@{/products/{id}(id=${item.id})}" th:text="${item.name}">Produkt</a>
                 <div th:replace="~{fragments/cart-panel :: panel(${item.id}, ${item.name})}"></div>
             </article>
         </div>
+        <p data-cart-summary tabindex="-1" th:text="${items.size() + ' Artikel'}">0 Artikel</p>
         <a class="button secondary" th:href="@{/products}">Zum Produktkatalog</a>
+        <template data-cart-row-template>
+            <article class="cart-list-item">
+                <a data-cart-item-link th:href="@{/products/0}">Produkt</a>
+                <div th:replace="~{fragments/cart-panel :: panel(${0}, 'Produkt')}"></div>
+            </article>
+        </template>
+    </section>
+    <section class="box cart-search" aria-label="Produktsuche für den Warenkorb">
+        <form method="post" th:action="@{/cart}" th:attr="data-results-url=@{/cart/results}"
+              id="cart-search-form" class="cart-main-search" th:attrappend="data-search-owner=${navUsername}">
+            <input type="hidden" name="tagsExplicit" value="true">
+            <label for="cart-query">Produktname oder Stichwort</label>
+            <div class="cart-search-input">
+                <input id="cart-query" type="search" name="query" th:value="${selectedQuery}"
+                       placeholder="Produktname oder Stichwort">
+                <button type="submit">Suchen</button>
+            </div>
+            <p data-search-status role="status" aria-live="polite"></p>
+        </form>
+        <details class="cart-tag-search" open>
+            <summary th:text="${'Tag-Suche · ' + preferred.size() + ' bevorzugt · ' + excluded.size() + ' ausgeschlossen'}">Tag-Suche</summary>
+            <p class="hint">Bevorzugte Tags verbessern die Reihenfolge. Ausschlüsse gelten nur für Suchtreffer, nie für deinen Warenkorb.</p>
+            <p class="hint">Deine Tag-Auswahl wird automatisch gespeichert. Mit „Suchen“ aktualisierst du die Treffer.</p>
+            <p class="hint" data-tag-notice role="status" aria-live="polite"></p>
+            <div class="tag-zone" data-tag-zone="preferred">
+                <h3>↑ Bevorzugt</h3>
+                <p class="tag-zone-description">Hier abgelegte Tags bringen passende Produkte weiter nach oben.</p>
+                <div class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'preferred'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+            <div class="tag-zone" data-tag-zone="neutral">
+                <h3>Verfügbare Tags · Neutral</h3>
+                <label for="cart-tag-query">Tags finden …</label>
+                <input id="cart-tag-query" type="search" list="cart-tag-names" autocomplete="off"
+                       placeholder="Tags finden …">
+                <datalist id="cart-tag-names">
+                    <option th:each="selection : ${searchTags}" th:value="${selection.tag.name}"
+                            th:label="${selection.tag.source}"></option>
+                </datalist>
+                <div id="cart-tag-options" class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'neutral'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+            <div class="tag-zone" data-tag-zone="excluded">
+                <h3>− Ausgeschlossen</h3>
+                <p class="tag-zone-description">Produkte mit diesen Tags werden aus den Suchtreffern entfernt.</p>
+                <div class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'excluded'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+        </details>
+        <form th:action="@{/cart/preferences}" method="post" data-tag-preferences hidden></form>
+        <div class="cart-tag-reset">
+            <button type="button" class="secondary" data-tags-reset hidden>Alle zurücksetzen</button>
+            <form data-tags-reset-link th:action="@{/cart/preferences/reset}" method="post">
+                <input type="hidden" name="query" th:value="${selectedQuery}">
+                <button type="submit" class="secondary">Alle zurücksetzen</button>
+            </form>
+        </div>
+    </section>
+    <section th:fragment="results" class="box cart-results" tabindex="0" aria-labelledby="cart-results-heading"
+             th:hidden="${productPage.totalElements == 0}">
+        <h2 id="cart-results-heading" th:text="${'Gefundene Produkte · ' + productPage.totalElements + ' Treffer'}">Gefundene Produkte</h2>
+        <div class="product-grid">
+            <article class="product-card" th:each="product : ${productPage.content}">
+                <div th:replace="~{fragments/off-card :: cardHeader(${product}, false)}"></div>
+                <div th:replace="~{fragments/product-image :: card(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: metadata(${product})}"></div>
+                <div th:replace="~{fragments/off-card :: cardDetails(${product})}"></div>
+                <div th:replace="~{fragments/cart-panel :: panel(${product.id}, ${product.name})}"></div>
+            </article>
+        </div>
+        <nav aria-label="Ergebnisseiten" class="actions">
+            <a th:if="${productPage.hasPrevious()}" class="button secondary"
+               th:href="@{/cart(query=${selectedQuery},preferred=${preferred},excluded=${excluded},page=${productPage.number - 1})}">Zurück</a>
+            <span th:if="${productPage.totalPages > 0}"
+                  th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
+            <a th:if="${productPage.hasNext()}" class="button secondary"
+               th:href="@{/cart(query=${selectedQuery},preferred=${preferred},excluded=${excluded},page=${productPage.number + 1})}">Weiter</a>
+        </nav>
     </section>
 </main>
+<script th:src="@{/js/product-images.js}" defer></script>
 <script th:src="@{/js/cart.js}" defer></script>
+<script th:src="@{/js/cart-search.js}" defer></script>
 </body>
 </html>

@@ -389,6 +389,64 @@ Mengen verlieren. Der Besitzer wird ausschließlich aus der Anmeldung ermittelt.
 Menge 0 entfernt den Eintrag. Der Warenkorb bleibt nach Abmeldung erhalten.
 Er ist eine Einkaufsliste, kein Bestell- oder Bezahlprozess.
 
+Die Warenkorbübersicht enthält links die Einkaufsliste, in der Mitte das Suchfeld
+mit der Tag-Suche direkt darunter und rechts die serverseitig paginierten
+Produkttreffer (12 je Seite). Die Treffer scrollen eigenständig. Bei weniger Platz
+stehen sie unter Warenkorb und Suchsteuerung; auf kleinen Bildschirmen stehen
+alle drei Bereiche untereinander.
+Mengenänderungen synchronisieren Einkaufsliste und Trefferkarten ohne Seitenwechsel.
+
+Die einklappbare **Tag-Suche** unterscheidet bevorzugte, neutrale und ausgeschlossene
+Tags. Produktlabels und gleichbedeutende OFF-Tags werden gemeinsam ausgewertet;
+weitere OFF-Tags aus dem importierten Tag-Katalog und eigene persönliche Tags
+(einschließlich Markenzuordnungen) bleiben eigenständig. Die Herkunft steht am Chip.
+Ausgeschlossene Tags entfernen passende Produkte nur aus den Suchtreffern, niemals
+aus dem Warenkorb. Jeder erfüllte bevorzugte Tag zählt einmal für die Rangfolge;
+danach entscheidet die Textrelevanz: exakter Produktname (App oder OFF), Name
+beginnt mit dem Suchtext, Name enthält den Suchtext, Anzahl der Suchwörter im
+Namen und anschließend in der Marke. Produktname und ID lösen Gleichstände stabil auf.
+Mehrere Suchwörter müssen alle vorkommen, dürfen aber unterschiedliche Felder
+treffen (z. B. „Bio Schokolade“: Bio-Tag und Produktname). Groß-/Kleinschreibung,
+Reihenfolge der Wörter und zusätzliche Leerzeichen verhindern solche Treffer nicht.
+
+„Tags finden …“ filtert ausschließlich die verfügbare Tag-Liste nach Namen,
+Herkunft und bekannten Aliasbegriffen, nicht nach den Texten der Bedienelemente.
+Zustände werden
+per Auswahl am Chip oder Drag-and-drop geändert. „×“ setzt nur den Suchzustand
+auf neutral; „Alle zurücksetzen“ lässt Suchtext, Warenkorb und Mengen unverändert.
+Suchzustände stehen in der URL und werden zusätzlich dauerhaft pro Benutzer
+gespeichert (Migration V22). Beim Öffnen ohne explizite Tag-Auswahl werden die
+gespeicherten Präferenzen geladen, auch nach Abmeldung oder auf anderen Geräten.
+„×“ und „Alle zurücksetzen“ aktualisieren ebenfalls die gespeicherte Auswahl.
+Produkte und Tag-Zuordnungen werden dabei nicht verändert. Schreibzugriffe sind
+CSRF-geschützt; persönliche Tags werden auf Besitz geprüft. Gelöschte persönliche
+Tags werden beim Laden ignoriert. Ohne JavaScript speichert „Suchen“ die
+Auswahl ebenfalls; der Suchtext bleibt bei Anwendung und Zurücksetzen erhalten.
+Die Produktsuche startet über „Suchen“ (auch per Enter),
+nicht automatisch beim Tippen oder Ändern der Tags. Jeder Suchaufruf verwendet
+den aktuellen Text und die ausgewählten Tags, auch bei unveränderter Eingabe.
+Tag-Änderungen werden unabhängig davon automatisch gespeichert und bleiben
+beim Navigieren zu Details, Katalog und zurück zum Warenkorb erhalten.
+Interne Links warten nötigenfalls auf noch laufende Speichervorgänge.
+Der zuletzt ausgeführte Suchtext bleibt in der Anmeldungssitzung erhalten;
+noch nicht abgesendete Eingaben werden zusätzlich je Benutzer im Browser-Tab
+zwischengespeichert. Bei null Treffern bleibt die Ergebnisfläche ausgeblendet.
+Bevorzugte und ausgeschlossene Zonen sind durch Rahmen, Hintergrund, Symbole
+und Erklärungstexte hervorgehoben.
+Der gemeinsame Such-Tag „Milch (einschließlich Spuren)“ wertet bekannte
+Milch-Labelvarianten sowie explizite Milch-Einträge in OFF-Allergen- und
+Spurenfeldern aus. Bestehende Auswahlen wie „contains milk“ oder „enthält Milch“
+werden diesem Tag zugeordnet und zählen nur einmal. Laktosefreiheit wird nicht
+mit Milchfreiheit gleichgesetzt; fehlende Angaben bleiben unbekannt.
+Die Such-Tags „Nutri-Score A“ bis „Nutri-Score E“ berücksichtigen sowohl den
+App-Score als auch den OFF-Score und entsprechende Verpackungstags. Bei
+widersprüchlichen Angaben genügt jeder passende Wert für einen Ausschluss.
+Diese fachlichen Zuordnungen gelten gleichermaßen für Ausschluss und Boost;
+persönliche Tags bleiben unabhängig davon.
+Die Suche lädt ausschließlich das HTML-Trefferfragment über `/cart/results`.
+Dabei wird nicht die ganze Seite gerendert oder der gesamte
+OFF-Tag-Katalog geladen; ausgewählte Tags werden weiterhin serverseitig validiert.
+
 ## Entwicklungsprofile
 
 - `local`: Standardprofil, verbindet sich mit einer lokal installierten
