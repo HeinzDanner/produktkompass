@@ -374,6 +374,21 @@ erhalten keine erfundene Bewertung; „nicht anwendbar“ bleibt eine Textangabe
 
 ### Persönlicher Warenkorb
 
+Der bisherige Such-/Filterblock im Produktkatalog ist vorerst entfernt; die
+Suchparameter und API-Filter bleiben verfügbar. Bei angemeldeten Benutzern stehen
+passende eigene Favoriten im Katalog und in der Warenkorb-Suche zuerst, bereits
+vor der Seiteneinteilung. In der Warenkorb-Suche folgen Tag-Boost und Textrelevanz.
+Suchbedingungen und harte Ausschlüsse gelten weiterhin auch für Favoriten.
+
+Der Warenkorbbereich trennt HTTP/Session-/Model-Aufgaben (`CartController`),
+Anwendungsabläufe (`CartService`, `CartSearchService`, `CartSearchPreferences`)
+und JDBC-Datenzugriff (`CartRepository`, `CartSearchPreferencesRepository`).
+`CartTagCatalog` übernimmt Tag-Katalog, Aliasauflösung und Auswahlvalidierung;
+`CartSearchSpecifications` kapselt Filter und Ranking. `TagState` definiert die
+Zustände zentral; HTML, JavaScript und gespeicherte Werte bleiben kompatibel.
+Das Speichern einer Tag-Auswahl validiert nur die Tags und führt keine Produktsuche
+aus. Transaktionen und die benutzerbezogenen Sperren bleiben auf Service-Ebene wirksam.
+
 Angemeldete Benutzer können Produkte dauerhaft in ihrem Warenkorb speichern.
 Unter den Favoriten wechselt das Panel zwischen „In den Warenkorb“, einem
 Entfernen-Symbol bei Menge 1 und Minus/Menge/Plus bei größeren Mengen.

@@ -49,7 +49,7 @@
                 <h3>↑ Bevorzugt</h3>
                 <p class="tag-zone-description">Hier abgelegte Tags bringen passende Produkte weiter nach oben.</p>
                 <div class="tag-zone-chips">
-                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'preferred'}">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'preferred'}">
                         <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
                     </th:block>
                 </div>
@@ -64,7 +64,7 @@
                             th:label="${selection.tag.source}"></option>
                 </datalist>
                 <div id="cart-tag-options" class="tag-zone-chips">
-                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'neutral'}">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'neutral'}">
                         <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
                     </th:block>
                 </div>
@@ -73,7 +73,7 @@
                 <h3>− Ausgeschlossen</h3>
                 <p class="tag-zone-description">Produkte mit diesen Tags werden aus den Suchtreffern entfernt.</p>
                 <div class="tag-zone-chips">
-                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state == 'excluded'}">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'excluded'}">
                         <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
                     </th:block>
                 </div>

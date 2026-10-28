@@ -18,6 +18,25 @@ public final class ProductSearch {
     private ProductSearch() {
     }
 
+    public static Expression<Integer> favoritePriority(jakarta.persistence.criteria.Root<Product> product,
+            jakarta.persistence.criteria.CriteriaQuery<?> query, CriteriaBuilder builder, String username) {
+        var favorites = query.subquery(Long.class);
+        var owner = favorites.from(de.heinzdanner.produktkompass.user.AppUser.class);
+        favorites.select(owner.get("id")).where(builder.equal(owner.get("username"), username),
+                builder.<Product, Set<Product>>isMember(product, owner.get("favoriteProducts")));
+        return builder.<Integer>selectCase().when(builder.exists(favorites), 1).otherwise(0);
+    }
+
+    public static Specification<Product> favoritesFirst(String username) {
+        return (product, query, builder) -> {
+            if (query.getResultType() != Long.class) {
+                query.orderBy(builder.desc(favoritePriority(product, query, builder, username)),
+                        builder.asc(product.get("name")), builder.asc(product.get("id")));
+            }
+            return builder.conjunction();
+        };
+    }
+
     public static Specification<Product> matching(String text, Long brandId, Long categoryId,
                                                   ProductLabel label, NutritionGrade grade,
                                                   Boolean madeInGermany, Long tagId, String username) {

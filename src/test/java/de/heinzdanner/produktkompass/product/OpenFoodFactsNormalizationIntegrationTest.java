@@ -158,8 +158,7 @@ class OpenFoodFactsNormalizationIntegrationTest {
         assertThat(list).contains("Barilla", "hela", "Fremdmarke", "K-Classic", "la-baleine",
                         "off-label-badge", "Quelle: Open Food Facts", "Ohne Gluten", "Bio",
                         "Nutri-Score: D", "Nutri-Score: E",
-                        "Normtest Redaktionsmarke", "Nutri-Score: B", "Vegan",
-                        "Suche und Markenfilter berücksichtigen App- und OFF-Marken")
+                        "Normtest Redaktionsmarke", "Nutri-Score: B", "Vegan")
                 .doesNotContain("ungeprüft", "Widersprüchlich", "OFF-Marken-Tags",
                         "glutenfrei laut", "allergenfrei",
                         "Adapté au moulin", "Ohne Konservierungsstoffe", "Verpackung laut OFF:",

@@ -64,8 +64,12 @@ public class ProductService {
                                            NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                            String username, boolean includeOpenFoodFactsLabels,
                                            int page, int size) {
-        return findPage(ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId,
-                username, includeOpenFoodFactsLabels), page, size).map(ProductSummary::fromEntity);
+        var filter = ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId,
+                username, includeOpenFoodFactsLabels);
+        if (username != null) {
+            return searchRankedPage(filter.and(ProductSearch.favoritesFirst(username)), page, size);
+        }
+        return findPage(filter, page, size).map(ProductSummary::fromEntity);
     }
 
     public Page<Product> getAdminProductPage(String text, int page, int size) {

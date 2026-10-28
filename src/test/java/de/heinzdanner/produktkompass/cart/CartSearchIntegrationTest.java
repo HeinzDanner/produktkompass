@@ -389,4 +389,28 @@ class CartSearchIntegrationTest {
         em.persist(data);
         return product;
     }
+
+    @Test
+    void favoritesLeadCartAndCatalogAcrossPagesButNeverBypassFilters() throws Exception {
+        var owner = users.findByUsername("max").orElseThrow();
+        owner.getFavoriteProducts().add(off);
+        users.saveAndFlush(owner);
+        assertThat(search.search("max", "CartSearch", List.of("label:BIO", "label:VEGAN"), List.of(), 0)
+                .page().getContent()).extracting("id")
+                .containsExactly(off.getId(), both.getId(), own.getId(), neutral.getId());
+        var productService = context.getBean(ProductService.class);
+        assertThat(productService.searchPage("CartSearch", null, null, null, null, null, null, "max", 0, 1)
+                .getContent()).extracting("id").containsExactly(off.getId());
+        assertThat(productService.searchPage("CartSearch", null, null, null, null, null, null, "admin", 0, 1)
+                .getContent()).extracting("id").containsExactly(neutral.getId());
+        owner.getFavoriteProducts().add(both);
+        users.saveAndFlush(owner);
+        assertThat(search.search("max", "CartSearch", List.of(), List.of("label:BIO"), 0).page().getContent())
+                .extracting("id").containsExactly(neutral.getId());
+        assertThat(productService.searchPage("CartSearch C", null, null, null, null, null, null, "max", 0, 12)
+                .getContent()).extracting("id").containsExactly(off.getId());
+        mvc.perform(get("/products").with(user("max")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("class=\"product-search\""))));
+    }
 }

@@ -65,9 +65,20 @@ public class CartController {
         return saved instanceof String text ? text : "";
     }
 
-    private CartSearchService.Results addSearchModel(String username, Model model, String query, List<String> preferred,
+    private void addSearchModel(String username, Model model, String query, List<String> preferred,
                                 List<String> excluded, int page, Map<String, String> parameters,
                                 boolean includeTagOptions) {
+        var selection = requestedSelection(username, preferred, excluded, parameters);
+        var result = search.search(username, query, selection.preferred(), selection.excluded(), page, includeTagOptions);
+        model.addAttribute("productPage", result.page());
+        model.addAttribute("searchTags", result.tags());
+        model.addAttribute("preferred", result.preferred());
+        model.addAttribute("excluded", result.excluded());
+        model.addAttribute("selectedQuery", query);
+    }
+
+    private CartSearchPreferences.Selection requestedSelection(String username, List<String> preferred,
+                                                               List<String> excluded, Map<String, String> parameters) {
         if (!parameters.containsKey("tagsExplicit") && !parameters.containsKey("preferred")
                 && !parameters.containsKey("excluded")
                 && parameters.keySet().stream().noneMatch(key -> key.startsWith("tag."))) {
@@ -80,28 +91,27 @@ public class CartController {
             excluded = new ArrayList<>();
             for (var entry : parameters.entrySet()) {
                 if (!entry.getKey().startsWith("tag.")) continue;
-                switch (entry.getValue()) {
-                    case "preferred" -> preferred.add(entry.getKey().substring(4));
-                    case "excluded" -> excluded.add(entry.getKey().substring(4));
-                    case "neutral" -> { }
-                    default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ungültiger Tag-Zustand.");
+                TagState state;
+                try {
+                    state = TagState.fromValue(entry.getValue());
+                } catch (IllegalArgumentException exception) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ungültiger Tag-Zustand.", exception);
+                }
+                switch (state) {
+                    case PREFERRED -> preferred.add(entry.getKey().substring(4));
+                    case EXCLUDED -> excluded.add(entry.getKey().substring(4));
+                    case NEUTRAL -> { }
                 }
             }
         }
-        var result = search.search(username, query, preferred, excluded, page, includeTagOptions);
-        model.addAttribute("productPage", result.page());
-        model.addAttribute("searchTags", result.tags());
-        model.addAttribute("preferred", result.preferred());
-        model.addAttribute("excluded", result.excluded());
-        model.addAttribute("selectedQuery", query);
-        return result;
+        return new CartSearchPreferences.Selection(preferred, excluded);
     }
 
     @PostMapping
-    public String applyPreferences(Principal principal, Model model,
+    public String applyPreferences(Principal principal,
             @RequestParam(defaultValue = "") String query, @RequestParam Map<String, String> parameters) {
-        var result = addSearchModel(principal.getName(), model, query, List.of(), List.of(), 0, parameters, false);
-        preferences.save(principal.getName(), result.preferred(), result.excluded());
+        var selection = requestedSelection(principal.getName(), List.of(), List.of(), parameters);
+        preferences.save(principal.getName(), selection.preferred(), selection.excluded());
         return cartRedirect(query);
     }
 
@@ -121,9 +131,7 @@ public class CartController {
     public CartSearchPreferences.Selection savePreferences(Principal principal,
             @RequestParam(defaultValue = "") List<String> preferred,
             @RequestParam(defaultValue = "") List<String> excluded) {
-        var validated = search.search(principal.getName(), "", preferred, excluded, 0, false);
-        preferences.save(principal.getName(), validated.preferred(), validated.excluded());
-        return new CartSearchPreferences.Selection(validated.preferred(), validated.excluded());
+        return preferences.save(principal.getName(), preferred, excluded);
     }
 
     @PostMapping(value = "/items/{id}", params = "ajax=true")

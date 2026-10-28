@@ -15,68 +15,6 @@
             <a class="button" th:href="@{/}">Zur Startseite</a>
         </div>
 
-        <form method="get" th:action="@{/products}" class="product-search">
-            <input type="text" name="query" th:value="${selectedQuery}" placeholder="Produktname oder Stichwort">
-
-            <select name="brandId" th:data-lookup-url="@{/api/v1/brands}" aria-label="Marken">
-                <option value="">Alle Marken</option>
-                <option th:each="brand : ${brands}"
-                        th:value="${brand.id}"
-                        th:text="${brand.name}"
-                        th:selected="${brand.id == selectedBrandId}">Marke</option>
-            </select>
-
-            <select name="categoryId" th:data-lookup-url="@{/api/v1/categories}" aria-label="Kategorien">
-                <option value="">Alle Kategorien</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:text="${category.name}"
-                        th:selected="${category.id == selectedCategoryId}">Kategorie</option>
-            </select>
-
-            <select name="label" aria-label="Labels">
-                <option value="">Alle Labels</option>
-                <option th:each="label : ${productLabels}"
-                        th:value="${label}"
-                        th:text="${label.displayName}"
-                        th:selected="${label == selectedLabel}">Label</option>
-            </select>
-            <label class="hint">
-                <input type="checkbox" name="includeOpenFoodFactsLabels" value="true"
-                       th:checked="${includeOpenFoodFactsLabels}">
-                Label-Filter auch auf OFF-Labels anwenden
-            </label>
-
-            <select name="nutritionGrade">
-                <option value="">Alle Nutri-Scores</option>
-                <option th:each="grade : ${nutritionGrades}"
-                        th:value="${grade}"
-                        th:text="${grade}"
-                        th:selected="${grade == selectedNutritionGrade}">Nutri-Score</option>
-            </select>
-
-            <select name="madeInGermany">
-                <option value="">Alle Herstellerländer</option>
-                <option value="true" th:selected="${selectedMadeInGermany == true}">Hersteller aus Deutschland</option>
-                <option value="false" th:selected="${selectedMadeInGermany == false}">Nicht aus Deutschland</option>
-            </select>
-
-            <select name="tagId" th:if="${userTagOptions != null and !userTagOptions.isEmpty()}">
-                <option value="">Alle meine Tags</option>
-                <option th:each="tag : ${userTagOptions}"
-                        th:value="${tag.id}"
-                        th:text="${tag.name}"
-                        th:selected="${tag.id == selectedTagId}">Tag</option>
-            </select>
-
-            <button type="submit" class="button primary">Filtern</button>
-            <a class="button secondary" th:href="@{/products}">Zurücksetzen</a>
-        </form>
-        <p class="hint">
-            Suche und Markenfilter berücksichtigen App- und OFF-Marken.
-            OFF-Labels werden über die Freitextsuche oder die Option oben berücksichtigt.
-        </p>
-
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">Keine Produkte gefunden.</div>
         <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
 
@@ -110,7 +48,6 @@
         </nav>
     </section>
 </main>
-<script th:src="@{/js/lookup-picker.js}" defer></script>
 <script th:src="@{/js/product-images.js}" defer></script>
 <script th:src="@{/js/cart.js}" defer></script>
 </body>
