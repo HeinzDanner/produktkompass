@@ -74,10 +74,7 @@ public class ProductService {
                                            int page, int size, String offCategory) {
         var filter = ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId,
                 username, includeOpenFoodFactsLabels).and(ProductSearch.offCategory(offCategory));
-        if (username != null) {
-            return searchRankedPage(filter.and(ProductSearch.favoritesFirst(username)), page, size);
-        }
-        return findPage(filter, page, size).map(ProductSummary::fromEntity);
+        return searchRankedPage(filter.and(ProductSearch.ranking(username, text)), page, size);
     }
 
     public Page<Product> getAdminProductPage(String text, int page, int size) {

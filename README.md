@@ -388,7 +388,17 @@ umfangreiche Filterblock bleibt entfernt; zusätzliche URL- und API-Filter bleib
 verfügbar und werden beim Absenden der Suche beibehalten.
 Bei angemeldeten Benutzern stehen
 passende eigene Favoriten im Katalog und in der Warenkorb-Suche zuerst, bereits
-vor der Seiteneinteilung. In der Warenkorb-Suche folgen Tag-Boost und Textrelevanz.
+vor der Seiteneinteilung. Beide Suchwege verwenden dieselbe Wortlogik und
+Textrelevanz: Alle Suchwörter müssen vorkommen, dürfen aber unterschiedliche
+Felder treffen (z. B. „Bio Schokolade“: Bio-Label und Produktname).
+Groß-/Kleinschreibung, Wortreihenfolge und zusätzliche Leerzeichen verhindern
+solche Treffer nicht; `%` und `_` werden als wörtliche Zeichen gesucht.
+Nach den Favoriten entscheidet die Textrelevanz: exakter Produktname (App oder OFF),
+Namensanfang, zusammenhängender Text im Namen, Anzahl der Suchwörter im Namen
+und anschließend in der Marke. Produktname und ID lösen Gleichstände stabil auf.
+Ohne Suchtext bleibt die alphabetische Reihenfolge innerhalb der Favoritenpriorität.
+Nur im Warenkorb stehen persönliche Tag-Bevorzugungen und Ausschlüsse zur Verfügung;
+der Tag-Boost liegt dort zwischen Favoritenpriorität und Textrelevanz.
 Suchbedingungen und harte Ausschlüsse gelten weiterhin auch für Favoriten.
 
 OFF-Kategorien bleiben wörtliche, ungeprüfte Herkunftsangaben.

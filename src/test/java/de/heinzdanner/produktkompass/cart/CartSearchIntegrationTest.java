@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CartSearchIntegrationTest {
     @Autowired CartSearchService search;
+    @Autowired ProductService catalogSearch;
     @Autowired CartService cart;
     @Autowired CartSearchPreferences preferences;
     @Autowired ProductRepository products;
@@ -149,6 +150,14 @@ class CartSearchIntegrationTest {
                 .page().getContent()).isEmpty();
         assertThat(search.search("max", "organic CartSearch", List.of(), List.of(), 0)
                 .page().getContent()).extracting("id").contains(off.getId());
+        for (String text : List.of("  BIO \t Schokolade Mehrwort  ", "Schokolade Kakaohaus",
+                "Schokolade nichtvorhanden", "organic CartSearch", "Schokolade Schokolade Mehrwort")) {
+            var catalog = catalogSearch.searchPage(text, null, null, null, null, null, null, "max", 0, 12);
+            assertThat(catalog.getContent()).as(text)
+                    .isEqualTo(search.search("max", text, List.of(), List.of(), 0).page().getContent());
+            assertThat(catalog.getTotalElements())
+                    .isEqualTo(search.search("max", text, List.of(), List.of(), 0).page().getTotalElements());
+        }
     }
 
     @Test
@@ -169,6 +178,14 @@ class CartSearchIntegrationTest {
                 .page().getContent()).extracting("id")
                 .containsExactly(imported.getId(), exact.getId(), prefix.getId(), contained.getId(),
                         metadata.getId(), split.getId());
+        var catalog = catalogSearch.searchPage("Relevanz Schokolade", null, null, null, null, null,
+                null, null, 0, 3);
+        assertThat(catalog.getTotalElements()).isEqualTo(6);
+        assertThat(catalog.getContent()).extracting("id")
+                .containsExactly(imported.getId(), exact.getId(), prefix.getId());
+        assertThat(catalogSearch.searchPage("Relevanz Schokolade", null, null, null, null, null,
+                null, null, 1, 3).getContent()).extracting("id")
+                .containsExactly(contained.getId(), metadata.getId(), split.getId());
         metadata.setLabels(Set.of(ProductLabel.BIO));
         em.flush();
         assertThat(search.search("max", "Relevanz Schokolade", List.of("label:BIO"), List.of(), 0)
@@ -182,6 +199,8 @@ class CartSearchIntegrationTest {
         em.flush();
         assertThat(search.search("max", "Relevanz 50% Kakao_", List.of(), List.of(), 0)
                 .page().getContent()).extracting("id").containsExactly(literal.getId());
+        assertThat(catalogSearch.searchPage("Relevanz 50% Kakao_", null, null, null, null, null,
+                null, null, 0, 12).getContent()).extracting("id").containsExactly(literal.getId());
         assertThat(search.search("max", "   ", List.of(), List.of("label:BIO"), 0).page()
                 .getContent()).extracting("id").contains(neutral.getId()).doesNotContain(own.getId(), off.getId());
     }
@@ -407,8 +426,10 @@ class CartSearchIntegrationTest {
         users.saveAndFlush(owner);
         assertThat(search.search("max", "CartSearch", List.of(), List.of("label:BIO"), 0).page().getContent())
                 .extracting("id").containsExactly(neutral.getId());
-        assertThat(productService.searchPage("CartSearch C", null, null, null, null, null, null, "max", 0, 12)
+        assertThat(productService.searchPage("CartSearch OFF", null, null, null, null, null, null, "max", 0, 12)
                 .getContent()).extracting("id").containsExactly(off.getId());
+        assertThat(productService.searchPage("CartSearch neutral", null, null, null, null, null, null, "max", 0, 12)
+                .getContent()).extracting("id").containsExactly(neutral.getId());
         mvc.perform(get("/products").with(user("max")))
                 .andExpect(status().isOk()).andExpect(content().string(
                         org.hamcrest.Matchers.containsString("aria-label=\"Katalog durchsuchen\"")));

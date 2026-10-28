@@ -9,27 +9,20 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public final class CartSearchSpecifications {
     private CartSearchSpecifications() {}
 
     public static Specification<Product> matching(String username, String text, CartTagCatalog.Resolved tags) {
-        String phrase = text == null ? "" : text.strip().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
-        List<String> words = phrase.isEmpty() ? List.of() : Arrays.stream(phrase.split(" ")).distinct().toList();
-        Specification<Product> filter = (root, query, builder) -> builder.conjunction();
-        for (String word : words) {
-            filter = filter.and(ProductSearch.matching(word, null, null, null, null, null, null, username));
-        }
+        Specification<Product> filter = ProductSearch.matching(text, null, null, null, null, null, null, username);
         for (String key : tags.selection().excluded()) {
             filter = filter.and(Specification.not(matches(tags.available().get(key), username)));
         }
-        return filter.and(ranking(username, phrase, words, tags));
+        return filter.and(ranking(username, text, tags));
     }
 
-    private static Specification<Product> ranking(String username, String phrase, List<String> words,
+    private static Specification<Product> ranking(String username, String text,
                                                    CartTagCatalog.Resolved tags) {
         return (root, query, builder) -> {
             if (query.getResultType() != Long.class) {
@@ -44,36 +37,7 @@ public final class CartSearchSpecifications {
                     order.add(builder.desc(ProductSearch.favoritePriority(root, query, builder, username)));
                 }
                 if (!tags.selection().preferred().isEmpty()) order.add(builder.desc(score));
-                if (!words.isEmpty()) {
-                    Expression<String> name = builder.lower(root.get("name"));
-                    var off = root.join("openFoodFactsData", JoinType.LEFT);
-                    Expression<String> offName = builder.lower(off.get("productName"));
-                    String literal = ProductSearch.escapeLike(phrase);
-                    Expression<Integer> phraseScore = builder.<Integer>selectCase()
-                            .when(builder.or(builder.equal(name, phrase), builder.equal(offName, phrase)), 3)
-                            .when(builder.or(builder.like(name, literal + "%", '\\'),
-                                    builder.like(offName, literal + "%", '\\')), 2)
-                            .when(builder.or(builder.like(name, "%" + literal + "%", '\\'),
-                                    builder.like(offName, "%" + literal + "%", '\\')), 1)
-                            .otherwise(0);
-                    Expression<Integer> nameScore = builder.literal(0);
-                    Expression<Integer> brandScore = builder.literal(0);
-                    Expression<String> brand = builder.lower(root.join("brand", JoinType.LEFT).get("name"));
-                    for (String word : words) {
-                        String pattern = "%" + ProductSearch.escapeLike(word) + "%";
-                        nameScore = builder.sum(nameScore, builder.<Integer>selectCase()
-                                .when(builder.or(builder.like(name, pattern, '\\'),
-                                        builder.like(offName, pattern, '\\')), 1).otherwise(0));
-                        brandScore = builder.sum(brandScore, builder.<Integer>selectCase()
-                                .when(builder.or(builder.like(brand, pattern, '\\'),
-                                        builder.like(builder.lower(off.get("brands")), pattern, '\\')), 1).otherwise(0));
-                    }
-                    order.add(builder.desc(phraseScore));
-                    order.add(builder.desc(nameScore));
-                    order.add(builder.desc(brandScore));
-                }
-                order.add(builder.asc(root.get("name")));
-                order.add(builder.asc(root.get("id")));
+                order.addAll(ProductSearch.textOrder(root, builder, text));
                 query.orderBy(order);
             }
             return builder.conjunction();

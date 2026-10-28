@@ -6,10 +6,14 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -39,14 +43,62 @@ public final class ProductSearch {
         return builder.<Integer>selectCase().when(builder.exists(favorites), 1).otherwise(0);
     }
 
-    public static Specification<Product> favoritesFirst(String username) {
+    public static Specification<Product> ranking(String username, String text) {
         return (product, query, builder) -> {
             if (query.getResultType() != Long.class) {
-                query.orderBy(builder.desc(favoritePriority(product, query, builder, username)),
-                        builder.asc(product.get("name")), builder.asc(product.get("id")));
+                var order = new ArrayList<Order>();
+                if (username != null) {
+                    order.add(builder.desc(favoritePriority(product, query, builder, username)));
+                }
+                order.addAll(textOrder(product, builder, text));
+                query.orderBy(order);
             }
             return builder.conjunction();
         };
+    }
+
+    public static List<Order> textOrder(Root<Product> product, CriteriaBuilder builder, String text) {
+        String phrase = normalizeText(text);
+        var order = new ArrayList<Order>();
+        if (!phrase.isEmpty()) {
+            Expression<String> name = builder.lower(product.get("name"));
+            var off = product.join("openFoodFactsData", JoinType.LEFT);
+            Expression<String> offName = builder.lower(off.get("productName"));
+            String literal = escapeLike(phrase);
+            Expression<Integer> phraseScore = builder.<Integer>selectCase()
+                    .when(builder.or(builder.equal(name, phrase), builder.equal(offName, phrase)), 3)
+                    .when(builder.or(builder.like(name, literal + "%", '\\'),
+                            builder.like(offName, literal + "%", '\\')), 2)
+                    .when(builder.or(builder.like(name, "%" + literal + "%", '\\'),
+                            builder.like(offName, "%" + literal + "%", '\\')), 1)
+                    .otherwise(0);
+            Expression<Integer> nameScore = builder.literal(0);
+            Expression<Integer> brandScore = builder.literal(0);
+            Expression<String> brand = builder.lower(product.join("brand", JoinType.LEFT).get("name"));
+            for (String word : words(phrase)) {
+                String pattern = "%" + escapeLike(word) + "%";
+                nameScore = builder.sum(nameScore, builder.<Integer>selectCase()
+                        .when(builder.or(builder.like(name, pattern, '\\'),
+                                builder.like(offName, pattern, '\\')), 1).otherwise(0));
+                brandScore = builder.sum(brandScore, builder.<Integer>selectCase()
+                        .when(builder.or(builder.like(brand, pattern, '\\'),
+                                builder.like(builder.lower(off.get("brands")), pattern, '\\')), 1).otherwise(0));
+            }
+            order.add(builder.desc(phraseScore));
+            order.add(builder.desc(nameScore));
+            order.add(builder.desc(brandScore));
+        }
+        order.add(builder.asc(product.get("name")));
+        order.add(builder.asc(product.get("id")));
+        return order;
+    }
+
+    private static String normalizeText(String text) {
+        return text == null ? "" : text.strip().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+    }
+
+    private static List<String> words(String phrase) {
+        return phrase.isEmpty() ? List.of() : Arrays.stream(phrase.split(" ")).distinct().toList();
     }
 
     public static Specification<Product> matching(String text, Long brandId, Long categoryId,
@@ -67,8 +119,7 @@ public final class ProductSearch {
         return (product, query, builder) -> {
             var predicates = new ArrayList<Predicate>();
             Join<Product, OpenFoodFactsData> openFoodFacts = null;
-            if (text != null && !text.isBlank()) {
-                String term = text.trim().toLowerCase(Locale.ROOT);
+            for (String term : words(normalizeText(text))) {
                 String pattern = "%" + escapeLike(term) + "%";
                 var categorySearch = query.subquery(Long.class);
                 var categoryProduct = categorySearch.from(Product.class);
@@ -82,15 +133,12 @@ public final class ProductSearch {
                         .get("name")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(product.join("company", jakarta.persistence.criteria.JoinType.LEFT)
                         .get("name")), pattern, '\\'));
-                openFoodFacts = product.join("openFoodFactsData", JoinType.LEFT);
+                if (openFoodFacts == null) {
+                    openFoodFacts = product.join("openFoodFactsData", JoinType.LEFT);
+                }
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("productName")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("brands")), pattern, '\\'));
                 textMatches.add(builder.like(builder.lower(openFoodFacts.get("brandTags")), pattern, '\\'));
-                if (term.contains(" ")) {
-                    // OFF brand slugs such as "xx:la-baleine" use hyphens instead of spaces.
-                    textMatches.add(builder.like(builder.lower(openFoodFacts.get("brandTags")),
-                            pattern.replace(' ', '-'), '\\'));
-                }
                 for (String tag : OpenFoodFactsTags.labelTagsMatchingText(term)) {
                     textMatches.add(containsTag(builder, openFoodFacts.get("labelTags"), tag));
                 }

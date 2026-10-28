@@ -131,6 +131,32 @@ class ProductSearchIntegrationTest {
     }
 
     @Test
+    void nameAndBrandWordScoresBreakPhraseTiesAndFavoritesLeadBeforePagination() {
+        Product metadata = products.save(new Product("A RankingFixture", "Cocoa Rankterm"));
+        Product branded = products.save(new Product("B RankingFixture", null,
+                brands.save(new Brand("Cocoa Rankterm", null))));
+        Product oneNameWord = products.save(new Product("C RankingFixture Rankterm", "Cocoa"));
+        Product twoNameWords = products.save(new Product("D RankingFixture Cocoa Rankterm", null));
+        Product tie = products.save(new Product("D RankingFixture Cocoa Rankterm", null));
+        Product exact = products.save(new Product("Rankterm Cocoa", "RankingFixture"));
+
+        assertThat(service.searchPage("Rankterm Cocoa RankingFixture", null, null, null, null, null,
+                null, null, 0, 20).getContent()).extracting("id")
+                .containsExactly(twoNameWords.getId(), tie.getId(), oneNameWord.getId(), exact.getId(),
+                        branded.getId(), metadata.getId());
+
+        AppUser owner = users.findByUsername("max").orElseThrow();
+        owner.getFavoriteProducts().add(metadata);
+        users.saveAndFlush(owner);
+        var first = service.searchPage("Rankterm Cocoa RankingFixture", null, null, null, null, null,
+                null, "max", 0, 2);
+        assertThat(first.getTotalElements()).isEqualTo(6);
+        assertThat(first.getContent()).extracting("id").containsExactly(metadata.getId(), twoNameWords.getId());
+        assertThat(service.searchPage("Rankterm Cocoa RankingFixture", null, null, null, null, null,
+                null, "max", 1, 2).getContent()).extracting("id").containsExactly(tie.getId(), oneNameWord.getId());
+    }
+
+    @Test
     void tagSearchIncludesTaggedBrandsAndProductsButNeverOtherOwnersTags() {
         AppUser owner = users.save(new AppUser("page-owner", "encoded", Role.USER));
         Brand brand = brands.save(new Brand("Tagged page brand", "Test"));

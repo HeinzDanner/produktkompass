@@ -4,6 +4,7 @@ import de.heinzdanner.produktkompass.product.Category;
 import de.heinzdanner.produktkompass.product.CategoryRepository;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductRepository;
+import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.product.dto.ProductSummary;
 import de.heinzdanner.produktkompass.user.AppUserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @Transactional
@@ -81,6 +83,28 @@ class PublicCatalogSearchIntegrationTest {
                         "value=\"" + category.getId() + "\" selected=\"selected\"");
         mvc.perform(get("/api/v1/categories").param("query", category.getName()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void webAndApiRequireAllWordsAcrossFieldsWhileKeepingCategoryFilter() throws Exception {
+        second.setLabels(java.util.Set.of(ProductLabel.BIO));
+        Product wrongCategory = save("PublicCatalog Beta Extra",
+                categories.save(new Category("Multiword other category", null)));
+        wrongCategory.setLabels(java.util.Set.of(ProductLabel.BIO));
+        products.flush();
+        String text = "  BIO \t Beta PublicCatalog ";
+        var result = mvc.perform(get("/products").param("query", text)
+                        .param("categoryId", category.getId().toString()).param("size", "1"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(page(result).getTotalElements()).isEqualTo(1);
+        assertThat(page(result).getContent()).extracting(ProductSummary::id).containsExactly(second.getId());
+        mvc.perform(get("/api/v1/products/search").param("name", text)
+                        .param("categoryId", category.getId().toString()).param("size", "1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(second.getId()));
+        var missing = mvc.perform(get("/products").param("query", "BIO Beta MissingSearchWord"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(page(missing)).isEmpty();
     }
 
     @Test

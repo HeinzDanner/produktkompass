@@ -83,7 +83,7 @@ class OpenFoodFactsNormalizationIntegrationTest {
                 .andExpect(jsonPath("$.totalPages").value(2))
                 .andExpect(jsonPath("$.content.length()").value(2));
 
-        mvc.perform(get("/api/v1/products/search").param("name", "Barilla"))
+        mvc.perform(get("/api/v1/products/search").param("name", "Normtest Barilla"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(pasta.getId()))
                 .andExpect(jsonPath("$.content[0].openFoodFactsBrandTags").value("xx:Barilla"))
