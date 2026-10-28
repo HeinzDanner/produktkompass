@@ -163,14 +163,7 @@ public record OpenFoodFactsMetadata(
     }
 
     public static String safeImageUrl(String value) {
-        if (value == null) return null;
-        try {
-            URI uri = URI.create(value);
-            return ("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))
-                    && uri.getHost() != null && uri.getUserInfo() == null ? uri.toASCIIString() : null;
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
+        return de.heinzdanner.produktkompass.validation.HttpUrls.normalize(value);
     }
 
     public static boolean isImageColumn(String column) {

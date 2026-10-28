@@ -6,12 +6,16 @@ import de.heinzdanner.produktkompass.product.dto.LookupOption;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
+@Validated
 @Transactional(readOnly = true)
 public class SourceService {
 
@@ -41,7 +45,7 @@ public class SourceService {
     }
 
     @Transactional
-    public Source createSource(SourceRequest request) {
+    public Source createSource(@NotNull @Valid SourceRequest request) {
         Source source = new Source(request.title(), request.url(), request.type(), request.verifiedAt());
         Source savedSource = sourceRepository.save(source);
         auditLogService.logAction("Source", savedSource.getId(), "CREATE", "Created source: " + savedSource.getTitle());
@@ -49,7 +53,7 @@ public class SourceService {
     }
 
     @Transactional
-    public Optional<Source> updateSource(Long id, SourceRequest request) {
+    public Optional<Source> updateSource(Long id, @NotNull @Valid SourceRequest request) {
         return sourceRepository.findById(id)
                 .map(existingSource -> {
                     existingSource.setTitle(request.title());

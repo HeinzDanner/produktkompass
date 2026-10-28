@@ -32,6 +32,14 @@
 
     <section class="box">
         <h2>Ähnliche Produkte</h2>
+        <div th:if="${alternativeOrigin == 'EDITORIAL'}">
+            <h3>Redaktionell zugeordnete Alternativen</h3>
+            <p>Diese Produkte wurden im Katalog als Alternativen zugeordnet. Die Zuordnung ist kein Nachweis gleicher Eigenschaften oder einer vollständigen Prüfung. Quellen und Angaben findest du auf den jeweiligen Produktseiten.</p>
+        </div>
+        <div th:if="${alternativeOrigin == 'AUTOMATIC'}">
+            <h3>Automatische Ähnlichkeitsvorschläge</h3>
+            <p>Diese Vorschläge basieren auf gemeinsamen Kategorien und gespeicherten Produkteigenschaften. Sie sind nicht redaktionell als Alternativen geprüft. Fehlende Angaben sind kein Nachweis gleicher Eigenschaften.</p>
+        </div>
         <div class="product-grid" th:if="${!#lists.isEmpty(similarProducts)}">
             <article class="product-card" th:each="alternative : ${similarProducts}">
                 <div th:replace="~{fragments/off-card :: cardHeader(${alternative}, false)}"></div>

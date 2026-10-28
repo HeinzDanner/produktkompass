@@ -136,7 +136,9 @@ public class ProductWebController {
         }
 
         model.addAttribute("product", ProductSummary.fromEntity(product));
-        model.addAttribute("similarProducts", productService.getAlternativeProductSummaries(id));
+        var alternatives = productService.getAlternativeSelection(id);
+        model.addAttribute("similarProducts", alternatives.products().stream().map(ProductSummary::fromEntity).toList());
+        model.addAttribute("alternativeOrigin", alternatives.origin().name());
         return "similar-products";
     }
 

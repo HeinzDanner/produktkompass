@@ -13,6 +13,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,11 +68,12 @@ class ProductControllerTest {
         product.addAlternativeProduct(alternative);
         setField(product, "id", 10L);
 
-        when(productService.getAlternativeProductResponses(10L)).thenReturn(
-                List.of(de.heinzdanner.produktkompass.product.dto.ProductResponse.fromEntity(alternative)));
+        when(productService.getAlternativeSelection(10L)).thenReturn(
+                new ProductService.AlternativeSelection(List.of(alternative), ProductService.AlternativeOrigin.EDITORIAL));
 
         mockMvc.perform(get("/api/v1/products/10/alternatives"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("X-Alternative-Origin", "EDITORIAL"))
                 .andExpect(jsonPath("$[0].id").value(99))
                 .andExpect(jsonPath("$[0].name").value("Haferdrink"));
     }

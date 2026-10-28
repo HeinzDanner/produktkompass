@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = "spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=true")
 @Transactional
@@ -23,6 +30,50 @@ class AlternativeSearchIntegrationTest {
     @MockitoSpyBean private ProductRepository products;
     @Autowired private CategoryRepository categories;
     @Autowired private EntityManager entityManager;
+    @Autowired private WebApplicationContext context;
+
+    @Test
+    void webAndApiDistinguishEditorialAutomaticAndEmptySelections() throws Exception {
+        Category category = categories.save(new Category("Origin display category", "Test"));
+        Product base = save("Origin base", category, NutritionGrade.A, PackagingType.GLASS, true);
+        Product automatic = save("Origin automatic", category, NutritionGrade.A, PackagingType.GLASS, true);
+        Product editorial = products.save(new Product("Origin editorial", "Test"));
+        entityManager.flush();
+
+        assertOrigin(base, "AUTOMATIC", "Automatische Ähnlichkeitsvorschläge",
+                "Redaktionell zugeordnete Alternativen", automatic.getId());
+
+        base.setAlternativeProducts(new HashSet<>(Set.of(editorial)));
+        entityManager.flush();
+        assertOrigin(base, "EDITORIAL", "Redaktionell zugeordnete Alternativen",
+                "Automatische Ähnlichkeitsvorschläge", editorial.getId());
+
+        Product empty = products.saveAndFlush(new Product("Origin empty", "Test"));
+        var mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        String html = mvc.perform(get("/products/{id}/similar", empty.getId()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).contains("Keine ähnlichen Produkte gefunden.")
+                .doesNotContain("Redaktionell zugeordnete Alternativen", "Automatische Ähnlichkeitsvorschläge");
+        mvc.perform(get("/api/v1/products/{id}/alternatives", empty.getId()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Alternative-Origin", "NONE"))
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    private void assertOrigin(Product base, String origin, String visible, String absent, Long expectedId) throws Exception {
+        var selection = service.getAlternativeSelection(base.getId());
+        assertThat(selection.origin().name()).isEqualTo(origin);
+        assertThat(selection.products()).extracting(Product::getId).containsExactly(expectedId);
+        var mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        String html = mvc.perform(get("/products/{id}/similar", base.getId()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).contains(visible).doesNotContain(absent);
+        mvc.perform(get("/api/v1/products/{id}/alternatives", base.getId()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Alternative-Origin", origin))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(expectedId));
+    }
 
     @Test
     void databaseRanksDistinctCandidatesAndLimitsToSixWithStableTies() {

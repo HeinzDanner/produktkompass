@@ -587,6 +587,14 @@ werden danach gezielt geladen, ohne den gesamten Katalog in Java einzulesen.
 Webseite und `GET /api/v1/products/{id}/alternatives` verwenden dieselbe Logik.
 Für sehr große Bestände stehen Messungen der Ranking-Abfrage noch aus.
 
+Die Webseite kennzeichnet die Herkunft ausdrücklich als „Redaktionell
+zugeordnete Alternativen“ oder „Automatische Ähnlichkeitsvorschläge“.
+Eine redaktionelle Zuordnung allein ist kein Nachweis gleicher Eigenschaften
+oder einer vollständigen Prüfung. Die API behält ihr JSON-Listenformat bei
+und liefert zusätzlich `X-Alternative-Origin`: `EDITORIAL`, `AUTOMATIC`
+oder `NONE` (keine Treffer). Der Service ermittelt Herkunft und Produkte
+gemeinsam; die Controller leiten die Herkunft nicht aus den Treffern ab.
+
 ## Standardlogin
 
 - Benutzer: `admin`
@@ -628,6 +636,13 @@ Die Quellenliste in der Administration verwendet dieselbe Darstellung.
 Prüfdaten bleiben optional und werden weder aus Importzeitpunkten noch aus
 Produktänderungen abgeleitet. Die API liefert weiterhin das gespeicherte
 `verifiedAt` bzw. `null`.
+
+Beim Anlegen und Bearbeiten akzeptieren Webformular, API und Service nur
+absolute HTTP(S)-Quellenadressen mit Host und ohne eingebettete Zugangsdaten.
+Die Syntaxprüfung ruft die Adresse nicht auf und bestätigt weder
+Erreichbarkeit noch inhaltliche Qualität. Prüfdaten dürfen nicht in der
+Zukunft liegen (maßgeblich ist die Serverzeit). Ungültige Eingaben werden
+abgelehnt; bestehende Quellen werden nicht automatisch verändert.
 
 ### MVP-Abgleich (Oktober 2026)
 

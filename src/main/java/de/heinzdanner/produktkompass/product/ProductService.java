@@ -151,22 +151,35 @@ public class ProductService {
     }
 
     public List<Product> getAlternativeProducts(Long productId) {
+        return getAlternativeSelection(productId).products();
+    }
+
+    public enum AlternativeOrigin { EDITORIAL, AUTOMATIC, NONE }
+
+    public record AlternativeSelection(List<Product> products, AlternativeOrigin origin) {
+        public AlternativeSelection {
+            products = List.copyOf(products);
+        }
+    }
+
+    public AlternativeSelection getAlternativeSelection(Long productId) {
         Optional<Product> baseProductOptional = productRepository.findByIdWithDetails(productId);
         if (baseProductOptional.isEmpty()) {
-            return List.of();
+            return new AlternativeSelection(List.of(), AlternativeOrigin.NONE);
         }
 
         Product baseProduct = baseProductOptional.get();
         if (baseProduct.getAlternativeProducts() != null && !baseProduct.getAlternativeProducts().isEmpty()) {
-            return baseProduct.getAlternativeProducts().stream().toList();
+            return new AlternativeSelection(baseProduct.getAlternativeProducts().stream().toList(),
+                    AlternativeOrigin.EDITORIAL);
         }
 
         if (baseProduct.getCategories().isEmpty()) {
-            return List.of();
+            return new AlternativeSelection(List.of(), AlternativeOrigin.NONE);
         }
         List<Long> ids = productRepository.findAutomaticAlternativeIds(productId, PageRequest.of(0, 6));
         if (ids.isEmpty()) {
-            return List.of();
+            return new AlternativeSelection(List.of(), AlternativeOrigin.NONE);
         }
         List<Product> alternatives = productRepository.findAlternativeProductsByIds(ids);
         // Fetch each collection separately for the six selected products, without a collection-fetch page.
@@ -175,8 +188,9 @@ public class ProductService {
         productRepository.findPageLabels(ids);
         productRepository.findPageAlternatives(ids);
         var byId = alternatives.stream().collect(java.util.stream.Collectors.toMap(Product::getId, product -> product));
-        return ids.stream().map(id -> Objects.requireNonNull(byId.get(id),
-                "Ausgewähltes Alternativprodukt wurde nicht gefunden: " + id)).toList();
+        return new AlternativeSelection(ids.stream().map(id -> Objects.requireNonNull(byId.get(id),
+                "Ausgewähltes Alternativprodukt wurde nicht gefunden: " + id)).toList(),
+                AlternativeOrigin.AUTOMATIC);
     }
 
     public List<ProductResponse> getAlternativeProductResponses(Long productId) {

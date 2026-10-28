@@ -54,9 +54,10 @@ public class ProductController {
 
     @GetMapping("/{id}/alternatives")
     public ResponseEntity<List<ProductResponse>> getAlternativeProducts(@PathVariable Long id) {
-        List<ProductResponse> alternatives = productService.getAlternativeProductResponses(id);
-
-        return ResponseEntity.ok(alternatives);
+        var alternatives = productService.getAlternativeSelection(id);
+        return ResponseEntity.ok()
+                .header("X-Alternative-Origin", alternatives.origin().name())
+                .body(alternatives.products().stream().map(ProductResponse::fromEntity).toList());
     }
 
     @GetMapping("/{id}")
