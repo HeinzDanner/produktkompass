@@ -763,6 +763,16 @@ mit standardmäßig 20, maximal 50 Produkten pro Seite, z. B.
 sich auf die aktuelle Ergebnisseite; Quellenhinweise beziehen sich auf die
 aktuelle Ergebnisseite der Quellenliste.
 
+Die Produktliste lässt sich zusätzlich über `quality` nach Quellenlücken filtern:
+`ALL` (Standard), `MISSING_SOURCES` (keine zugeordneten Quellen),
+`MISSING_REVIEW_DATE` (mindestens eine zugeordnete Quelle ohne Prüfdatum)
+und `ANY_GAP` (eine der beiden Lücken). Textsuche und Qualitätsfilter wirken
+gemeinsam in der Datenbank vor der Seiteneinteilung; Seitenlinks und
+Validierungsfehler beim Anlegen erhalten den Filter. Eine Mischung aus Quellen
+mit und ohne Prüfdatum zählt weiterhin als fehlendes Prüfdatum.
+OFF-Importzeitpunkte ersetzen keine redaktionellen Quellen oder Prüfdaten.
+Der Filter verändert keine Daten und erklärt ein Produkt nicht als vollständig geprüft.
+
 Beim Bearbeiten eines Produkts lädt die Alternative-Auswahl nur die ersten
 20 Produkte sowie bereits ausgewählte Alternativen. Mit JavaScript können
 weitere Produkte gesucht und Ergebnisseiten geladen werden, ohne das

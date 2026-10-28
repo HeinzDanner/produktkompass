@@ -78,7 +78,12 @@ public class ProductService {
     }
 
     public Page<Product> getAdminProductPage(String text, int page, int size) {
-        Page<Product> results = findSearchPage(text, null, null, null, null, null, null, null, page, size);
+        return getAdminProductPage(text, ProductQualityFilter.ALL, page, size);
+    }
+
+    public Page<Product> getAdminProductPage(String text, ProductQualityFilter quality, int page, int size) {
+        Page<Product> results = findPage(ProductSearch.matching(text, null, null, null, null, null, null, null)
+                .and(ProductSearch.quality(quality)), page, size);
         if (!results.isEmpty()) {
             productRepository.findPageSources(results.getContent().stream().map(Product::getId).toList());
         }
@@ -108,13 +113,6 @@ public class ProductService {
     }
 
     public record ProductOption(Long id, String name) {
-    }
-
-    private Page<Product> findSearchPage(String text, Long brandId, Long categoryId, ProductLabel label,
-                                         NutritionGrade grade, Boolean madeInGermany, Long tagId,
-                                         String username, int page, int size) {
-        return findPage(ProductSearch.matching(text, brandId, categoryId, label, grade,
-                madeInGermany, tagId, username, false), page, size);
     }
 
     private Page<Product> findPage(Specification<Product> filter, int page, int size) {

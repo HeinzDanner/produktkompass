@@ -22,6 +22,22 @@ public final class ProductSearch {
     private ProductSearch() {
     }
 
+    public static Specification<Product> quality(ProductQualityFilter filter) {
+        return (product, query, builder) -> {
+            if (filter == ProductQualityFilter.ALL) return builder.conjunction();
+            var missingSources = builder.isEmpty(product.get("sources"));
+            if (filter == ProductQualityFilter.MISSING_SOURCES) return missingSources;
+            var unreviewed = query.subquery(Long.class);
+            var candidate = unreviewed.from(Product.class);
+            unreviewed.select(candidate.get("id")).where(
+                    builder.equal(candidate.get("id"), product.get("id")),
+                    builder.isNull(candidate.join("sources").get("verifiedAt")));
+            var missingDate = builder.exists(unreviewed);
+            return filter == ProductQualityFilter.MISSING_REVIEW_DATE
+                    ? missingDate : builder.or(missingSources, missingDate);
+        };
+    }
+
     public static Specification<Product> offCategory(String category) {
         return (product, query, builder) -> {
             if (category == null) return builder.conjunction();

@@ -13,6 +13,7 @@ import de.heinzdanner.produktkompass.product.PackagingType;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductService;
 import de.heinzdanner.produktkompass.product.ProductLabel;
+import de.heinzdanner.produktkompass.product.ProductQualityFilter;
 import de.heinzdanner.produktkompass.product.Source;
 import de.heinzdanner.produktkompass.product.SourceService;
 import de.heinzdanner.produktkompass.product.dto.BrandRequest;
@@ -71,7 +72,7 @@ public class AdminController {
     @ModelAttribute("adminListParams")
     public java.util.Map<String, String> adminListParams(@RequestParam java.util.Map<String, String> parameters) {
         var state = new java.util.LinkedHashMap<String, String>();
-        for (String key : List.of("query", "page", "size", "brandQuery", "brandPage",
+        for (String key : List.of("query", "page", "size", "quality", "brandQuery", "brandPage",
                 "categoryQuery", "categoryPage", "companyQuery", "companyPage", "sourceQuery", "sourcePage")) {
             if (parameters.containsKey(key)) {
                 state.put(key, parameters.get(key));
@@ -378,9 +379,17 @@ public class AdminController {
     }
 
     private void populateAdminModel(Model model, String query, int page, int size) {
-        var productPage = productService.getAdminProductPage(query, page, size);
-        List<Product> products = productPage.getContent();
         var state = listState(model);
+        ProductQualityFilter quality;
+        try {
+            quality = ProductQualityFilter.valueOf(state.getOrDefault("quality", "ALL"));
+        } catch (IllegalArgumentException exception) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Unbekannter Qualitätsfilter.", exception);
+        }
+        var productPage = productService.getAdminProductPage(query, quality, page, size);
+        List<Product> products = productPage.getContent();
+        state.put("quality", quality.name());
         state.put("query", query);
         state.put("page", String.valueOf(productPage.getNumber()));
         state.put("size", String.valueOf(productPage.getSize()));
@@ -395,6 +404,8 @@ public class AdminController {
 
         model.addAttribute("productPage", productPage);
         model.addAttribute("selectedQuery", query);
+        model.addAttribute("selectedQuality", quality);
+        model.addAttribute("qualityFilters", ProductQualityFilter.values());
         model.addAttribute("products", products);
         model.addAttribute("brands", brands.getContent());
         model.addAttribute("categories", categories.getContent());

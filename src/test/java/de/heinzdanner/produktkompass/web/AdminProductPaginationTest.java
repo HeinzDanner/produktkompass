@@ -3,6 +3,9 @@ package de.heinzdanner.produktkompass.web;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductRepository;
 import de.heinzdanner.produktkompass.product.ProductService;
+import de.heinzdanner.produktkompass.product.Source;
+import de.heinzdanner.produktkompass.product.SourceRepository;
+import de.heinzdanner.produktkompass.product.OpenFoodFactsData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,7 @@ class AdminProductPaginationTest {
 
     @Autowired private WebApplicationContext context;
     @Autowired private ProductRepository products;
+    @Autowired private SourceRepository sources;
     @MockitoSpyBean private ProductService service;
 
     private MockMvc mvc;
@@ -73,6 +77,78 @@ class AdminProductPaginationTest {
     }
 
     @Test
+    void qualityFiltersCombineWithTextBeforePaginationWithoutDuplicateProducts() throws Exception {
+        var reviewed = sources.save(new Source("Reviewed quality source", "https://example.org/reviewed",
+                "Test", java.time.LocalDateTime.now().minusDays(1)));
+        var pending = sources.save(new Source("Pending quality source", "https://example.org/pending", "Test", null));
+        var anotherPending = sources.save(new Source("Second pending source", "https://example.org/pending-two", "Test", null));
+        Product complete = new Product("000 admin page reviewed", null);
+        complete.setSources(new HashSet<>(Set.of(reviewed)));
+        products.save(complete);
+        Product undated = new Product("000 admin page undated", null);
+        undated.setSources(new HashSet<>(Set.of(pending)));
+        products.save(undated);
+        Product mixed = new Product("000 admin page mixed", null);
+        mixed.setSources(new HashSet<>(Set.of(reviewed, pending, anotherPending)));
+        products.save(mixed);
+        Product imported = fixtures.getFirst();
+        imported.setOpenFoodFactsData(new OpenFoodFactsData(imported, "9898989800012",
+                imported.getName(), java.time.LocalDateTime.now()));
+        products.flush();
+
+        assertQualityCount("ALL", 28);
+        assertQualityCount("MISSING_SOURCES", 25);
+        assertQualityCount("MISSING_REVIEW_DATE", 2);
+        assertQualityCount("ANY_GAP", 27);
+        var first = mvc.perform(get("/admin").with(user("editor").roles("EDITOR"))
+                        .param("query", "000 admin page").param("quality", "MISSING_REVIEW_DATE").param("size", "1")
+                        .param("brandQuery", "kept-brand"))
+                .andExpect(status().isOk()).andReturn();
+        var firstPage = (Page<?>) first.getModelAndView().getModel().get("productPage");
+        assertThat(firstPage.getTotalElements()).isEqualTo(2);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+        assertThat(first.getResponse().getContentAsString().replaceAll("\\s+", " "))
+                .contains("000 admin page mixed", "quality=MISSING_REVIEW_DATE", "page=1", "brandQuery=kept-brand",
+                        "value=\"MISSING_REVIEW_DATE\" selected=\"selected\"");
+        var second = mvc.perform(get("/admin").with(user("admin").roles("ADMIN"))
+                        .param("query", "000 admin page").param("quality", "MISSING_REVIEW_DATE")
+                        .param("size", "1").param("page", "1"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(((Page<?>) second.getModelAndView().getModel().get("productPage")).getContent())
+                .extracting("id").containsExactly(undated.getId());
+        var empty = mvc.perform(get("/admin").with(user("admin").roles("ADMIN"))
+                        .param("query", "NoQualityProductMatch").param("quality", "ANY_GAP"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(((Page<?>) empty.getModelAndView().getModel().get("productPage")).getTotalElements()).isZero();
+        pending.setVerifiedAt(java.time.LocalDateTime.now().minusHours(1));
+        anotherPending.setVerifiedAt(java.time.LocalDateTime.now().minusHours(1));
+        sources.flush();
+        assertQualityCount("MISSING_REVIEW_DATE", 0);
+    }
+
+    private void assertQualityCount(String filter, long expected) throws Exception {
+        var result = mvc.perform(get("/admin").with(user("admin").roles("ADMIN"))
+                        .param("query", "000 admin page").param("quality", filter).param("size", "2"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(((Page<?>) result.getModelAndView().getModel().get("productPage")).getTotalElements())
+                .as(filter).isEqualTo(expected);
+    }
+
+    @Test
+    void creationValidationKeepsQualityFilterAndOtherListState() throws Exception {
+        var result = mvc.perform(post("/admin/products").with(user("admin").roles("ADMIN")).with(csrf())
+                        .param("name", "").param("query", "000 admin page").param("quality", "MISSING_SOURCES")
+                        .param("page", "1").param("size", "2").param("sourceQuery", "kept-source"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(result.getModelAndView().getViewName()).isEqualTo("admin");
+        var page = (Page<?>) result.getModelAndView().getModel().get("productPage");
+        assertThat(page.getTotalElements()).isEqualTo(25);
+        assertThat(page.getNumber()).isEqualTo(1);
+        assertThat(result.getResponse().getContentAsString().replaceAll("\\s+", " ")).contains(
+                "value=\"MISSING_SOURCES\" selected=\"selected\"", "quality=MISSING_SOURCES", "sourceQuery=kept-source");
+    }
+
+    @Test
     void editLoadsOnlyInitialPageAndSelectedAlternativesOutsideThatPage() throws Exception {
         Product product = fixtures.getFirst();
         Product selected = fixtures.getLast();
@@ -107,5 +183,9 @@ class AdminProductPaginationTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/admin").param("page", "-1").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isBadRequest());
+        mvc.perform(get("/admin").param("quality", "UNKNOWN").with(user("admin").roles("ADMIN")))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/admin").param("quality", "ANY_GAP").with(user("max").roles("USER")))
+                .andExpect(status().isForbidden());
     }
 }

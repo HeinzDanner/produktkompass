@@ -294,15 +294,22 @@
     <section class="box">
         <h2>Produktliste</h2>
         <form method="get" th:action="@{/admin}" class="product-search">
-            <input th:each="entry : ${adminListParams}" th:if="${entry.key != 'query' and entry.key != 'page' and entry.key != 'size'}"
+            <input th:each="entry : ${adminListParams}" th:if="${entry.key != 'query' and entry.key != 'page' and entry.key != 'size' and entry.key != 'quality'}"
                    type="hidden" th:name="${entry.key}" th:value="${entry.value}">
             <label for="adminProductQuery">Produkte suchen</label>
             <input id="adminProductQuery" type="search" name="query" th:value="${selectedQuery}"
                    placeholder="Produkt, Marke, Unternehmen oder Kategorie">
+            <label for="adminProductQuality">Quellenqualität</label>
+            <select id="adminProductQuality" name="quality">
+                <option th:each="filter : ${qualityFilters}" th:value="${filter.name()}"
+                        th:selected="${filter == selectedQuality}" th:text="${filter.displayName}">Alle Produkte</option>
+            </select>
             <input type="hidden" name="size" th:value="${productPage.size}">
             <button type="submit" class="button primary">Suchen</button>
             <a th:href="@{/admin}" class="button secondary">Zurücksetzen</a>
         </form>
+        <p class="hint">„Quelle ohne Prüfdatum“ findet Produkte mit mindestens einer zugeordneten Quelle ohne Prüfdatum.
+            Produkte ohne Quellen sind separat filterbar. OFF-Importzeitpunkte gelten nicht als redaktionelle Prüfung.</p>
         <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">Keine Produkte auf dieser Ergebnisseite gefunden.</div>
 
