@@ -600,8 +600,40 @@ Der Admin-Bereich unter `/admin` (Rolle `ADMIN` oder `EDITOR`) bietet:
 - Anlegen, Bearbeiten und Löschen von Produkten, Marken, Kategorien, Unternehmen und Quellen
 - Feldbezogene Validierungsfehler direkt im jeweiligen Formular
 - Automatische Datenqualitätswarnungen (z. B. Produkt ohne Marke, ohne Quelle oder Quelle ohne Prüfdatum)
-- Ein Audit-Log unter `/admin/audit-log`, das jede Änderung (CREATE/UPDATE/DELETE) mit Zeitstempel protokolliert
+- Ein Audit-Log unter `/admin/audit-log`, das Änderungen (CREATE/UPDATE/DELETE) mit Zeitstempel und Bearbeiter protokolliert
 - Eine JavaScript-Bestätigung ("Wirklich löschen?") vor jedem Löschvorgang, um versehentliches Löschen zu verhindern
+
+Der gemeinsame `AuditLogService` ermittelt den Bearbeiter aus der authentifizierten
+Spring-Security-Sitzung bzw. API-Anmeldung, nicht aus Formulareingaben. Ohne
+authentifizierten Benutzer wird `SYSTEM` gespeichert. Migration V23 ergänzt die
+optionale Spalte `actor`; vorhandene Einträge bleiben unverändert und werden als
+„Nicht erfasst (Altbestand)“ angezeigt. Auch die Audit-API liefert `actor`.
+Der `EditorialAssessmentService` protokolliert nun ebenfalls Anlegen, Ändern
+und Löschen. Fachänderung und Audit-Eintrag gehören zur selben Transaktion.
+Das Log enthält weiterhin Aktionsbeschreibungen, keine vollständigen
+Vorher-/Nachher-Snapshots aller Felder.
+
+### MVP-Abgleich (Oktober 2026)
+
+„Fertig“ bezeichnet den technischen MVP-Umfang, nicht die Vollständigkeit
+oder redaktionelle Prüfung des gesamten Datenbestands.
+
+| Bereich | Stand | Einordnung |
+|---|---|---|
+| Katalog | Fertig | Produktdetails, Marken/Unternehmen, Kategorien, Suche und API vorhanden; Suche derzeit im Warenkorb, URL-/API-Filter bleiben erhalten. |
+| Quellen / Prüfdatum | Teilweise fertig | Quellenzuordnung, Prüfdatum und Qualitätswarnungen vorhanden; fehlende Belege oder Prüfdaten verhindern das Anzeigen eines Produkts nicht. Redaktionelle Datenpflege bleibt erforderlich. |
+| Alternativen | Teilweise fertig | Redaktionelle Zuordnung und automatische Vorschläge vorhanden; automatische Ähnlichkeit ist keine redaktionelle Verifikation. Prüfung der zugewiesenen Alternativen bleibt redaktionelle Aufgabe. |
+| Anmeldung | Fertig | Registrierung, Login/Logout, Rollen, CSRF und Kontosperren vorhanden. |
+| Favoriten | Fertig | Benutzerbezogen, duplikatfrei; passende Favoriten vor anderen Suchtreffern, Ausschlüsse bleiben wirksam. |
+| Administration | Fertig | CRUD der fünf Kernentitäten, Rollenverwaltung und Bearbeitung von Datenmeldungen vorhanden. |
+| Audit-Log | Teilweise fertig | Kern-CRUD, Bewertungen, Rollen und Meldungsstatus protokolliert; neue Einträge mit Bearbeiter. Vollständige Feldhistorie und nachträgliche Zuordnung alter Einträge fehlen. |
+
+Die Backend-Bereiche folgen überwiegend Controller → Service → Repository.
+Im Warenkorb sind SQL, Tagkatalog, Suchprädikate und HTTP-Verarbeitung nun
+getrennt. Außerhalb davon bleiben der große `AdminController` (mehrere
+Verwaltungsbereiche und Qualitätswarnungen), ältere Vollkatalog-Suchmethoden
+im `ProductService` und HTTP-Fehler im `ProductReportService` Aufräumkandidaten.
+Das ist kein Anlass, funktionierende Bereiche ohne konkreten Bedarf umzubauen.
 
 Die Produktliste unter `/admin` besitzt eine Datenbanksuche und Pagination
 mit standardmäßig 20, maximal 50 Produkten pro Seite, z. B.

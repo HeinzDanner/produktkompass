@@ -13,7 +13,7 @@
     <section class="box">
         <h1>Audit-Log</h1>
         <p><a th:href="@{/admin}">&larr; Zurück zur Admin-Übersicht</a></p>
-        <p>Lückenlose Protokollierung aller redaktionellen Änderungen (neueste zuerst).</p>
+        <p>Protokollierte redaktionelle Änderungen (neueste zuerst). Altbestand enthält keine Bearbeiterangabe; SYSTEM bezeichnet Aktionen ohne angemeldeten Benutzer.</p>
 
         <div th:if="${#lists.isEmpty(auditLogs)}" class="empty-state">Noch keine Einträge vorhanden.</div>
 
@@ -21,6 +21,7 @@
             <thead>
             <tr>
                 <th>Zeitpunkt</th>
+                <th>Bearbeiter</th>
                 <th>Entität</th>
                 <th>ID</th>
                 <th>Aktion</th>
@@ -30,6 +31,7 @@
             <tbody>
             <tr th:each="log : ${auditLogs}">
                 <td th:text="${#temporals.format(log.createdAt, 'dd.MM.yyyy HH:mm:ss')}">Zeitpunkt</td>
+                <td th:text="${log.actor != null ? log.actor : 'Nicht erfasst (Altbestand)'}">Bearbeiter</td>
                 <td th:text="${log.entityName}">Entität</td>
                 <td th:text="${log.entityId}">ID</td>
                 <td th:text="${log.action}">Aktion</td>

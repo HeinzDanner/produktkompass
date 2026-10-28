@@ -31,17 +31,21 @@ public class AuditLog {
     @Column(length = 2000)
     private String details;
 
+    @Column(length = 255, updatable = false)
+    private String actor;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     protected AuditLog() {
     }
 
-    public AuditLog(String entityName, Long entityId, String action, String details) {
+    public AuditLog(String entityName, Long entityId, String action, String details, String actor) {
         this.entityName = entityName;
         this.entityId = entityId;
         this.action = action;
         this.details = details;
+        this.actor = actor;
     }
 
     @PrePersist
@@ -67,6 +71,10 @@ public class AuditLog {
 
     public String getDetails() {
         return details;
+    }
+
+    public String getActor() {
+        return actor;
     }
 
     public LocalDateTime getCreatedAt() {

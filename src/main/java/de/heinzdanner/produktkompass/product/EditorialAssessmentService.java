@@ -1,5 +1,6 @@
 package de.heinzdanner.produktkompass.product;
 
+import de.heinzdanner.produktkompass.audit.AuditLogService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,9 +12,12 @@ import java.util.Optional;
 public class EditorialAssessmentService {
 
     private final EditorialAssessmentRepository editorialAssessmentRepository;
+    private final AuditLogService auditLogService;
 
-    public EditorialAssessmentService(EditorialAssessmentRepository editorialAssessmentRepository) {
+    public EditorialAssessmentService(EditorialAssessmentRepository editorialAssessmentRepository,
+                                      AuditLogService auditLogService) {
         this.editorialAssessmentRepository = editorialAssessmentRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<EditorialAssessment> getAllAssessments() {
@@ -30,7 +34,10 @@ public class EditorialAssessmentService {
 
     @Transactional
     public EditorialAssessment createAssessment(EditorialAssessment assessment) {
-        return editorialAssessmentRepository.save(assessment);
+        EditorialAssessment saved = editorialAssessmentRepository.save(assessment);
+        auditLogService.logAction("EditorialAssessment", saved.getId(), "CREATE",
+                "Created assessment for product: " + saved.getProduct().getId() + "; Status: " + saved.getStatus());
+        return saved;
     }
 
     @Transactional
@@ -45,7 +52,10 @@ public class EditorialAssessmentService {
                     existing.setSource(updatedAssessment.getSource());
                     existing.setReviewedBy(updatedAssessment.getReviewedBy());
                     existing.setReviewedAt(updatedAssessment.getReviewedAt());
-                    return editorialAssessmentRepository.save(existing);
+                    EditorialAssessment saved = editorialAssessmentRepository.save(existing);
+                    auditLogService.logAction("EditorialAssessment", saved.getId(), "UPDATE",
+                            "Updated assessment for product: " + saved.getProduct().getId() + "; Status: " + saved.getStatus());
+                    return saved;
                 });
     }
 
@@ -55,6 +65,7 @@ public class EditorialAssessmentService {
             return false;
         }
         editorialAssessmentRepository.deleteById(id);
+        auditLogService.logAction("EditorialAssessment", id, "DELETE", "Deleted assessment with id: " + id);
         return true;
     }
 }
