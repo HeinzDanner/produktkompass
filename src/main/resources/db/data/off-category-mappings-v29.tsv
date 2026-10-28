@@ -1,0 +1,56 @@
+# Source: https://github.com/openfoodfacts/openfoodfacts-server/blob/6c4d573a1cc6a28cacb07cfb674024bad28531e8/taxonomies/food/categories.txt
+# Researched 2026-10-28. Exact terms for four additional German filter groups.
+# category<TAB>exact OFF value<TAB>taxonomy concept
+Fleisch und Wurstwaren	en:bacon	Bacon
+Fleisch und Wurstwaren	en:beef-and-its-products	Beef and its products
+Fleisch und Wurstwaren	en:beef-preparations	Beef preparations
+Fleisch und Wurstwaren	en:meat-preparations	Meat preparations
+Fleisch und Wurstwaren	en:meats	Meats
+Fleisch und Wurstwaren	en:meats-and-their-products	Meats and their products
+Fleisch und Wurstwaren	en:pork	Pork
+Fleisch und Wurstwaren	en:pork-and-its-products	Pork and its products
+Fisch und Meeresfrüchte	en:anchovy	Anchovies
+Fisch und Meeresfrüchte	en:anchovy-fillets	Anchovy fillets
+Fisch und Meeresfrüchte	en:fatty-fishes	Fatty fishes
+Fisch und Meeresfrüchte	en:fish-fillets	Fish fillets
+Fisch und Meeresfrüchte	en:fishes	Fishes
+Fisch und Meeresfrüchte	en:fishes-and-their-products	Fishes and their products
+Fisch und Meeresfrüchte	en:marinated-anchovy-fillets	Marinated anchovy fillets
+Fisch und Meeresfrüchte	en:marinated-anchovy-fillets-with-vegetable-oil	Marinated anchovy fillets with vegetable oil
+Fisch und Meeresfrüchte	en:sardines	Sardines
+Fisch und Meeresfrüchte	en:seafood	Seafood
+Fisch und Meeresfrüchte	en:tunas	Tunas
+Fisch und Meeresfrüchte	Tonijn	Tunas (Dutch synonym)
+Öle und Fette	en:animal-fats	Animal fats
+Öle und Fette	en:fats	Fats
+Öle und Fette	en:olive-oils	Olive oils
+Öle und Fette	en:spreadable-fats	Spreadable fats
+Öle und Fette	en:vegetable-fats	Vegetable fats
+Öle und Fette	en:vegetable-oils	Vegetable oils
+Öle und Fette	Matières grasses à tartiner	Spreadable fats (French synonym)
+Aufstriche und Konfitüren	Beurres de cacahuètes	Peanut butters (French synonym)
+Aufstriche und Konfitüren	Beurres de fruits à coques	Nut butters (French synonym)
+Aufstriche und Konfitüren	en:artichoke-spreads	Artichoke spreads
+Aufstriche und Konfitüren	en:confectionary-based-spreads	Confectionary based spreads
+Aufstriche und Konfitüren	en:Confectionary based spreads	Confectionary based spreads
+Aufstriche und Konfitüren	en:Creme-para-barrar-de-avelã	Hazelnut spreads (Portuguese variant)
+Aufstriche und Konfitüren	en:figs-jams	Fig jams
+Aufstriche und Konfitüren	en:fruit-jams	Fruit jams
+Aufstriche und Konfitüren	en:fruit-jellies	Fruit jellies
+Aufstriche und Konfitüren	en:hazelnut-spreads	Hazelnut spreads
+Aufstriche und Konfitüren	en:jams	Jams
+Aufstriche und Konfitüren	en:legume-butters	Legume butters
+Aufstriche und Konfitüren	en:nut-butters	Nut butters
+Aufstriche und Konfitüren	en:oilseed-purees	Oilseed purees
+Aufstriche und Konfitüren	en:pates-a-tartiner-aux-noisettes	Hazelnut spreads (French variant)
+Aufstriche und Konfitüren	en:peanut-butters	Peanut butters
+Aufstriche und Konfitüren	en:plant-based-spreads	Plant-based spreads
+Aufstriche und Konfitüren	en:produits-a-tartiner	Spreads (French synonym)
+Aufstriche und Konfitüren	en:produits-a-tartiner-sucres	Sweet spreads (French synonym)
+Aufstriche und Konfitüren	en:salted-spreads	Salted spreads
+Aufstriche und Konfitüren	en:spreads	Spreads
+Aufstriche und Konfitüren	en:sweet-spreads	Sweet spreads
+Aufstriche und Konfitüren	en:tahini	Tahini
+Aufstriche und Konfitüren	fr:pates-a-tartiner	Spreads (French synonym)
+Aufstriche und Konfitüren	Gesalzene Aufstriche	Salted spreads (German synonym)
+Aufstriche und Konfitüren	pflanzliche Brotaufstriche	Plant-based spreads (German synonym)

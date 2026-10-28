@@ -410,7 +410,7 @@ class CartSearchIntegrationTest {
         assertThat(productService.searchPage("CartSearch C", null, null, null, null, null, null, "max", 0, 12)
                 .getContent()).extracting("id").containsExactly(off.getId());
         mvc.perform(get("/products").with(user("max")))
-                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(
-                        org.hamcrest.Matchers.containsString("class=\"product-search\""))));
+                .andExpect(status().isOk()).andExpect(content().string(
+                        org.hamcrest.Matchers.containsString("aria-label=\"Katalog durchsuchen\"")));
     }
 }

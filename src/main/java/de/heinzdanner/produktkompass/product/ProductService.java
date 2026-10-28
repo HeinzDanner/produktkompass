@@ -64,8 +64,16 @@ public class ProductService {
                                            NutritionGrade grade, Boolean madeInGermany, Long tagId,
                                            String username, boolean includeOpenFoodFactsLabels,
                                            int page, int size) {
+        return searchPage(text, brandId, categoryId, label, grade, madeInGermany, tagId, username,
+                includeOpenFoodFactsLabels, page, size, null);
+    }
+
+    public Page<ProductSummary> searchPage(String text, Long brandId, Long categoryId, ProductLabel label,
+                                           NutritionGrade grade, Boolean madeInGermany, Long tagId,
+                                           String username, boolean includeOpenFoodFactsLabels,
+                                           int page, int size, String offCategory) {
         var filter = ProductSearch.matching(text, brandId, categoryId, label, grade, madeInGermany, tagId,
-                username, includeOpenFoodFactsLabels);
+                username, includeOpenFoodFactsLabels).and(ProductSearch.offCategory(offCategory));
         if (username != null) {
             return searchRankedPage(filter.and(ProductSearch.favoritesFirst(username)), page, size);
         }

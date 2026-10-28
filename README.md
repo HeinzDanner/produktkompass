@@ -374,11 +374,92 @@ erhalten keine erfundene Bewertung; „nicht anwendbar“ bleibt eine Textangabe
 
 ### Persönlicher Warenkorb
 
-Der bisherige Such-/Filterblock im Produktkatalog ist vorerst entfernt; die
-Suchparameter und API-Filter bleiben verfügbar. Bei angemeldeten Benutzern stehen
+Der öffentliche Produktkatalog bietet ohne Anmeldung ein Suchfeld und eine
+Kategorieauswahl. „Suchen“ sendet die Auswahl per GET an `/products` und startet
+auf Seite 1; Suchtext und Kategorie bleiben in Ergebnis- und Seitenlinks erhalten.
+Die kompakte Suchzeile enthält Suchfeld, Kategorieauswahl und Suchbutton;
+die zusätzliche Kategorie-Suchleiste und der Zurücksetzen-Button entfallen.
+Die Auswahl enthält nur deutsche Katalogkategorien. Der Filter berücksichtigt
+direkte Produktzuordnungen und explizit zugeordnete OFF-Kategorien gemeinsam.
+Es werden ausschließlich Katalognamen/IDs geladen, nicht der Produktbestand.
+Suchtext leeren und „Alle Kategorien“ auswählen hebt
+die sichtbaren Suchbedingungen auf. Der frühere
+umfangreiche Filterblock bleibt entfernt; zusätzliche URL- und API-Filter bleiben
+verfügbar und werden beim Absenden der Suche beibehalten.
+Bei angemeldeten Benutzern stehen
 passende eigene Favoriten im Katalog und in der Warenkorb-Suche zuerst, bereits
 vor der Seiteneinteilung. In der Warenkorb-Suche folgen Tag-Boost und Textrelevanz.
 Suchbedingungen und harte Ausschlüsse gelten weiterhin auch für Favoriten.
+
+OFF-Kategorien bleiben wörtliche, ungeprüfte Herkunftsangaben.
+Unter `/admin/category-mappings` können ADMIN und EDITOR einzelne Begriffe
+einer Katalogkategorie zuordnen, ändern oder durch „Nicht zugeordnet“ entfernen.
+Die Liste ist durchsuchbar und auf 20 Einträge pro Seite begrenzt.
+Änderungen sind CSRF-geschützt, werden mit Bearbeiter auditiert und wirken
+sofort auf Web- und API-Kategoriefilter. Produktdaten bleiben unverändert.
+V26/V27 legen die Zuordnungstabelle und eine konservative Startauswahl an,
+darunter `Chocolats noirs` und `nl:Chocolade` unter „Süßwaren und Schokolade“.
+Fehlende deutsche Basiskategorien für diese Startauswahl werden angelegt.
+Unklare Sammelbegriffe wie `nl:Koeken/Chocolade/Snoep` bleiben zunächst
+unzugeordnet und können nach redaktioneller Entscheidung zugeordnet werden.
+Keine automatische Übersetzung, Teilwortzuordnung oder Vererbungsannahme.
+
+V28 erweitert diese Startliste um eine recherchierte, explizite Zuordnung
+für **721 der 867** zum Recherchezeitpunkt vorhandenen OFF-Kategorieeinträge.
+Im lokalen Bestand nach Anwendung: 721 zugeordnet (rund 83 %), 146 offen;
+vorher waren 27 zugeordnet. Dies ist eine Bestandsaufnahme vom 28.10.2026,
+kein dauerhaft garantiertes Verhältnis bei weiteren Importen.
+Grundlage sind die mehrsprachigen Namen, Synonyme und Elternbeziehungen der
+[offiziellen OFF-Kategorietaxonomie](https://github.com/openfoodfacts/openfoodfacts-server/blob/6c4d573a1cc6a28cacb07cfb674024bad28531e8/taxonomies/food/categories.txt)
+(Revision `6c4d573a1cc6a28cacb07cfb674024bad28531e8`, Recherche 28.10.2026).
+OFF beschreibt diese Hierarchie in seiner
+[Taxonomie-Dokumentation](https://github.com/openfoodfacts/openfoodfacts-server/blob/6c4d573a1cc6a28cacb07cfb674024bad28531e8/taxonomies/README.md).
+Die Liste liegt nachvollziehbar in
+`src/main/resources/db/data/off-category-mappings-v28.tsv`: deutsche Zielkategorie,
+exakter vorhandener OFF-Wert sowie Taxonomiebegriff bzw. Hinweis auf eine
+zusätzlich geprüfte Schreibvariante. Die Taxonomie selbst wird nicht mitgeliefert.
+
+Die Hierarchie diente nur als Recherchehilfe; zur Laufzeit werden weiterhin
+exakte, explizit gespeicherte Zuordnungen verwendet. Bei mehreren möglichen
+Gruppen wurden spezifische Begriffe bevorzugt (z. B. Haferdrink als
+Milchalternative, Dosentomaten als Konserve, gefrorene Kräuter als Tiefkühlprodukt).
+Generische Angaben wie „pflanzliche Lebensmittel“, „Lebensmittel“,
+„Lebensmittelgeschäft“ oder „gesalzen“ erhalten keine beliebige Fachkategorie.
+Für Fleisch, Fisch, Öle und manche Aufstriche fehlt eine passende vorhandene
+Kataloggruppe; auch diese Begriffe bleiben zunächst offen.
+
+V28 überschreibt keine bereits vorhandene Zuordnung und protokolliert je
+Zielkategorie die tatsächlich ergänzte Anzahl als SYSTEM-Aktion im Audit-Log.
+Die TSV-Datei ist Bestandteil der Flyway-Prüfsumme; nach Anwendung nicht ändern,
+sondern weitere Datenänderungen im Admin-Bereich oder über neue Migrationen
+vornehmen. Die Abdeckung bezieht sich auf Kategoriebegriffe, nicht auf den
+Anteil korrekt eingeordneter Produkte oder eine redaktionelle Produktprüfung.
+
+V29 ergänzt die vier bislang fehlenden deutschen Gruppen „Fleisch und
+Wurstwaren“, „Fisch und Meeresfrüchte“, „Öle und Fette“ sowie „Aufstriche und
+Konfitüren“. Die erneute Prüfung derselben offiziellen Taxonomierevision
+ergab 53 weitere genaue Begriffe, dokumentiert in
+`src/main/resources/db/data/off-category-mappings-v29.tsv`.
+Nach Anwendung im lokalen Bestand: **774 von 867** Kategoriebegriffen
+zugeordnet (rund 89 %), **93 offen**, Stand 28.10.2026.
+Beispiele: `en:bacon`, `Tonijn`, `en:vegetable-oils` und
+`Beurres de cacahuètes`. Vorhandene Kategorien und Zuordnungen bleiben
+erhalten; neu angelegte Kategorien und tatsächlich ergänzte Zuordnungen
+werden als SYSTEM-Aktionen auditiert. Auch diese Datei gehört zur
+Flyway-Prüfsumme und wird nach Anwendung nicht verändert.
+Breite Begriffe wie `en:fruit-preserves` sind nicht automatisch Konfitüren
+(sie können auch andere Obstkonserven umfassen); Fleischalternativen
+werden nicht als Fleisch eingeordnet. Solche offenen Begriffe erfordern
+eine weitere fachliche Entscheidung, nicht bloß eine Übersetzung.
+Ein Filter trifft einen vollständigen, getrimmten Eintrag, keine Teilwörter.
+Die Webauswahl verwendet `categoryId=off:<Originaleintrag>`; numerische
+`categoryId`-Links bleiben Katalogfilter. Die Such-API akzeptiert zusätzlich
+`offCategory=<Originaleintrag>` (mit `categoryId` zusammen als UND-Filter).
+V24/V25 legen den OFF-Kategorieindex an und befüllen ihn aus vorhandenen Daten.
+Künftige Importe aktualisieren ihn beim Setzen der beiden OFF-Kategoriefelder,
+auch wenn ein Feld geleert wird. Redaktionelle Zuordnungen bleiben unberührt.
+Die öffentliche Auswahl lädt nur die Katalogkategorien; OFF-Begriffe
+ohne Zuordnung bleiben über die Freitextsuche und den exakten OFF-Filter auffindbar.
 
 Der Warenkorbbereich trennt HTTP/Session-/Model-Aufgaben (`CartController`),
 Anwendungsabläufe (`CartService`, `CartSearchService`, `CartSearchPreferences`)
@@ -651,7 +732,7 @@ oder redaktionelle Prüfung des gesamten Datenbestands.
 
 | Bereich | Stand | Einordnung |
 |---|---|---|
-| Katalog | Fertig | Produktdetails, Marken/Unternehmen, Kategorien, Suche und API vorhanden; Suche derzeit im Warenkorb, URL-/API-Filter bleiben erhalten. |
+| Katalog | Fertig | Produktdetails, Marken/Unternehmen, Kategorien, öffentliche Suche ohne Anmeldung und API vorhanden; zusätzliche Warenkorbsuche mit persönlichen Tags. |
 | Quellen / Prüfdatum | Teilweise fertig | Quellenzuordnung, öffentlich sichtbares Prüfdatum und Qualitätswarnungen vorhanden; fehlende Belege oder Prüfdaten sind erkennbar, verhindern das Anzeigen eines Produkts aber nicht. Redaktionelle Datenpflege bleibt erforderlich. |
 | Alternativen | Teilweise fertig | Redaktionelle Zuordnung und automatische Vorschläge vorhanden; automatische Ähnlichkeit ist keine redaktionelle Verifikation. Prüfung der zugewiesenen Alternativen bleibt redaktionelle Aufgabe. |
 | Anmeldung | Fertig | Registrierung, Login/Logout, Rollen, CSRF und Kontosperren vorhanden. |

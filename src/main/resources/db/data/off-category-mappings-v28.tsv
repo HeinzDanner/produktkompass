@@ -1,0 +1,724 @@
+# Source: https://github.com/openfoodfacts/openfoodfacts-server/blob/6c4d573a1cc6a28cacb07cfb674024bad28531e8/taxonomies/food/categories.txt
+# Researched 2026-10-28. Explicit local filter mappings, not product verification.
+# category<TAB>exact OFF value<TAB>taxonomy canonical name or reviewed variant
+Brot und Backwaren	biscuits	Biscuits
+Brot und Backwaren	Biscuits au chocolat	Chocolate biscuits
+Brot und Backwaren	Biscuits fourrés	Filled biscuits
+Brot und Backwaren	Biscuits secs	Dry biscuits
+Brot und Backwaren	brioches	Brioches
+Brot und Backwaren	de:Backerbsen	Reviewed term; see taxonomy source and README
+Brot und Backwaren	de:Backzutaten	Reviewed term; see taxonomy source and README
+Brot und Backwaren	en:Biscotti	Biscuits
+Brot und Backwaren	en:biscuits	Biscuits
+Brot und Backwaren	en:biscuits-and-cakes	Biscuits and cakes
+Brot und Backwaren	en:biscuits-and-crackers	Reviewed term; see taxonomy source and README
+Brot und Backwaren	en:biscuits-cookies-shelf-stable	Biscuits/Cookies (Shelf Stable)
+Brot und Backwaren	en:Biscuits/Cookies (Shelf Stable)	Biscuits/Cookies (Shelf Stable)
+Brot und Backwaren	en:breads	Breads
+Brot und Backwaren	en:brioches	Brioches
+Brot und Backwaren	en:chocolate-biscuits	Chocolate biscuits
+Brot und Backwaren	en:crispbreads	Crispbreads
+Brot und Backwaren	en:dry-biscuits	Dry biscuits
+Brot und Backwaren	en:filled-biscuits	Filled biscuits
+Brot und Backwaren	en:flaky-biscuits	Flaky biscuits
+Brot und Backwaren	en:rye-breads	Rye breads
+Brot und Backwaren	en:sweet-pastries-and-pies	Sweet pastries and pies
+Brot und Backwaren	en:toasted-bread-rolls	Toasted bread rolls
+Brot und Backwaren	en:toasts	Toasts
+Brot und Backwaren	en:viennoiseries	Viennoiseries
+Brot und Backwaren	Knäckebrote	Crispbreads
+Brot und Backwaren	Petits pains grillés	Toasted bread rolls
+Brot und Backwaren	Roggenbrote	Rye breads
+Getränke	Băuturi îndulcite artificial	Artificially sweetened beverages
+Getränke	Bebidas de cola	Colas
+Getränke	Boissons avec sucre ajouté	Sweetened beverages
+Getränke	Boissons sans alcool	Non-alcoholic beverages
+Getränke	Boissons sans sucre ajouté	Unsweetened beverages
+Getränke	Cola ohne Zucker	Reviewed term; see taxonomy source and README
+Getränke	Cola sucré	Cola with sugar
+Getränke	Colas	Colas
+Getränke	de:Cola ohne Zucker	Reviewed term; see taxonomy source and README
+Getränke	de:Sanddornsäfte	Reviewed term; see taxonomy source and README
+Getränke	Diet cola soft drink	Diet cola soft drink
+Getränke	Eaux de sources	Spring waters
+Getränke	Eaux minérales naturelles	Natural mineral waters
+Getränke	en:alcoholic-beverages	Alcoholic beverages
+Getränke	en:artificially-sweetened-beverages	Artificially sweetened beverages
+Getränke	en:beverage-preparations	Reviewed term; see taxonomy source and README
+Getränke	en:beverages	Beverages
+Getränke	en:beverages-and-beverages-preparations	Reviewed term; see taxonomy source and README
+Getränke	en:Boissons avec sucre ajouté	Sweetened beverages
+Getränke	en:Boissons gazeuses sucrées sans jus de fruit	Carbonated soft drinks without fruit juice with sugar
+Getränke	en:carbonated-drinks	Carbonated drinks
+Getränke	en:cola-with-sugar	Cola with sugar
+Getränke	en:colas	Colas
+Getränke	en:diet-beverages	Diet beverages
+Getränke	en:diet-cola-soft-drink	Diet cola soft drink
+Getränke	en:diet-sodas	Diet sodas
+Getränke	en:distilled-beverages	Distilled beverages
+Getränke	en:eaux-de-vie	Eaux de vie
+Getränke	en:fermented-drinks	Fermented drinks
+Getränke	en:Fruit juices	Fruit juices
+Getränke	en:fruit-based-beverages	Fruit-based beverages
+Getränke	en:fruit-juices	Fruit juices
+Getränke	en:fruit-soft-drinks	Fruit soft drinks
+Getränke	en:Getranke	Beverages
+Getränke	en:Getränke	Beverages
+Getränke	en:hard-liquors	Hard liquors
+Getränke	en:hot-beverages	Hot beverages
+Getränke	en:instant-beverages	Reviewed term; see taxonomy source and README
+Getränke	en:juices-and-nectars	Juices and nectars
+Getränke	en:kvass	Kvass
+Getränke	en:lemon-base-for-beverage-without-sugar-to-be-diluted	Reviewed term; see taxonomy source and README
+Getränke	en:lemonades	Lemonades
+Getränke	en:Lemonades with sugar	Lemonades with sugar
+Getränke	en:lemonades-with-sugar	Lemonades with sugar
+Getränke	en:mineral-waters	Mineral waters
+Getränke	en:natural-mineral-waters	Natural mineral waters
+Getränke	en:non-alcoholic-beverages	Non-alcoholic beverages
+Getränke	en:Pflanzliche-getränke	Plant-based beverages
+Getränke	en:plant-based-beverages	Plant-based beverages
+Getränke	en:sodas	Sodas
+Getränke	en:Sodas	Sodas
+Getränke	en:Sodas au cola	Colas
+Getränke	en:soft-drinks	Soft drinks
+Getränke	en:spring-waters	Spring waters
+Getränke	en:sweetened-beverages	Sweetened beverages
+Getränke	en:unsweetened-beverages	Unsweetened beverages
+Getränke	en:vodka	Vodka
+Getränke	en:Vodka	Vodka
+Getränke	en:waters	Waters
+Getränke	en:wines	Wines
+Getränke	fr:getränke	Beverages
+Getränke	fr:natürliches-mineralwasser	Natural mineral waters
+Getränke	Fruchsäfte	Fruit juices
+Getränke	getränke	Beverages
+Getränke	Getränke	Beverages
+Getränke	Jus de fruits	Fruit juices
+Getränke	Kalorienarme Colas	Diet cola soft drink
+Getränke	Kvass	Kvass
+Getränke	Lemon base for beverage without sugar to be diluted	Reviewed term; see taxonomy source and README
+Getränke	Natural mineral waters	Natural mineral waters
+Getränke	natürliches-mineralwasser	Natural mineral waters
+Getränke	Pflanzliche-getränke	Plant-based beverages
+Getränke	pt:bebidas cafeína	Reviewed term; see taxonomy source and README
+Getränke	Sanddornsäfte	Reviewed term; see taxonomy source and README
+Getränke	Sodas au cola light	Diet cola soft drink
+Getränke	Sweetened beverages	Sweetened beverages
+Getränke	Unsweetened beverages	Unsweetened beverages
+Kaffee und Tee	Cafés	Coffees
+Kaffee und Tee	Cafés solubles	Instant coffees
+Kaffee und Tee	Chicorée et café en poudre soluble	Instant mix of chicory and coffee powder
+Kaffee und Tee	en:Boissons-au-café	Coffee drinks
+Kaffee und Tee	en:coffee-drinks	Coffee drinks
+Kaffee und Tee	en:coffees	Coffees
+Kaffee und Tee	en:Coffees	Coffees
+Kaffee und Tee	en:herbal-teas	Herbal teas
+Kaffee und Tee	en:Instant coffee substitutes	Instant coffee substitutes
+Kaffee und Tee	en:instant-coffee-substitutes	Instant coffee substitutes
+Kaffee und Tee	en:instant-coffees	Instant coffees
+Kaffee und Tee	en:instant-mix-of-chicory-and-coffee-powder	Instant mix of chicory and coffee powder
+Kaffee und Tee	en:teas	Teas
+Kaffee und Tee	en:Teas	Teas
+Kaffee und Tee	en:Thea	Reviewed term; see taxonomy source and README
+Kaffee und Tee	fr:Cafes-froid	Reviewed term; see taxonomy source and README
+Kaffee und Tee	fr:Caffe latte	Cappuccino
+Konserven und Fertiggerichte	Baked beans in tomato sauce	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	Canned common beans	Canned common beans
+Konserven und Fertiggerichte	de:Vegetarisches-chili	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:Aliments-à-base-de-plantes-en-conserve	Canned plant-based foods
+Konserven und Fertiggerichte	en:baked-beans-in-tomato-sauce	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:bolognese-spaghetti	Bolognese spaghetti
+Konserven und Fertiggerichte	en:bolognese-style-pasta	Bolognese-style pasta
+Konserven und Fertiggerichte	en:canned-common-beans	Canned common beans
+Konserven und Fertiggerichte	en:canned-fishes	Canned fishes
+Konserven und Fertiggerichte	en:canned-foods	Canned foods
+Konserven und Fertiggerichte	en:canned-fruits	Canned fruits
+Konserven und Fertiggerichte	en:canned-legumes	Canned legumes
+Konserven und Fertiggerichte	en:canned-lentils	Canned lentils
+Konserven und Fertiggerichte	en:canned-meals	Canned meals
+Konserven und Fertiggerichte	en:canned-peppers	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:canned-plant-based-foods	Canned plant-based foods
+Konserven und Fertiggerichte	en:canned-sardines	Canned sardines
+Konserven und Fertiggerichte	en:canned-seasoned-lentils	Canned seasoned lentils
+Konserven und Fertiggerichte	en:canned-tomato-products	Canned tomato products
+Konserven und Fertiggerichte	en:canned-tomatoes	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:canned-vegetables	Canned vegetables
+Konserven und Fertiggerichte	en:chili-sin-carne	Chili sin carne
+Konserven und Fertiggerichte	en:dehydrated-soups	Dehydrated soups
+Konserven und Fertiggerichte	en:dried-meals	Dried meals
+Konserven und Fertiggerichte	en:extra-fine-gherkins	Extra-fine gherkins
+Konserven und Fertiggerichte	en:falafels	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:Fertiggerichte	Meals
+Konserven und Fertiggerichte	en:gari	Gari
+Konserven und Fertiggerichte	en:Japanese curry	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:Kits repas	Meal kits
+Konserven und Fertiggerichte	en:lobster-bisque	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:meal-kits	Meal kits
+Konserven und Fertiggerichte	en:meals	Meals
+Konserven und Fertiggerichte	en:meals-with-meat	Meals with meat
+Konserven und Fertiggerichte	en:miso-soup	Miso soup
+Konserven und Fertiggerichte	en:paella	Paella
+Konserven und Fertiggerichte	en:pasta-dishes	Pasta dishes
+Konserven und Fertiggerichte	en:pickled-cucumbers	Pickled cucumbers
+Konserven und Fertiggerichte	en:pickled-gherkins	Pickled gherkins
+Konserven und Fertiggerichte	en:pickled-onions	Pickled onions
+Konserven und Fertiggerichte	en:pickled-vegetables	Pickled vegetables
+Konserven und Fertiggerichte	en:pickles	Pickles
+Konserven und Fertiggerichte	en:pizzas	Pizzas
+Konserven und Fertiggerichte	en:pizzas-pies-and-quiches	Pizzas pies and quiches
+Konserven und Fertiggerichte	en:plant-based-meals	Plant-based meals
+Konserven und Fertiggerichte	en:plant-based-pickles	Plant-based pickles
+Konserven und Fertiggerichte	en:prepared-lentils	Prepared lentils
+Konserven und Fertiggerichte	en:ratatouille	Ratatouille
+Konserven und Fertiggerichte	en:refrigerated-meals	Refrigerated meals
+Konserven und Fertiggerichte	en:rice-dishes	Rice dishes
+Konserven und Fertiggerichte	en:sardines-in-oil	Sardines in oil
+Konserven und Fertiggerichte	en:sardines-in-olive-oil	Sardines in olive oil
+Konserven und Fertiggerichte	en:soups	Soups
+Konserven und Fertiggerichte	en:strained-tomatoes	Strained tomatoes
+Konserven und Fertiggerichte	en:Suppen	Soups
+Konserven und Fertiggerichte	en:tomato-pastes	Tomato pastes
+Konserven und Fertiggerichte	en:vegetable-soups	Vegetable soups
+Konserven und Fertiggerichte	en:Vegetables - Prepared/Processed (Shelf Stable)	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	en:vegetarian-balls	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	Falafel	Reviewed term; see taxonomy source and README
+Konserven und Fertiggerichte	Légumes en conserve	Canned vegetables
+Konserven und Fertiggerichte	Lentilles cuisinées en conserve	Canned seasoned lentils
+Konserven und Fertiggerichte	Lentilles en conserve	Canned lentils
+Konserven und Fertiggerichte	Lentilles préparées	Prepared lentils
+Konserven und Fertiggerichte	Plats préparés d'origine végétale	Plant-based meals
+Konserven und Fertiggerichte	Plats préparés en conserve	Canned meals
+Konserven und Fertiggerichte	Ratatouilles	Ratatouille
+Konserven und Fertiggerichte	Sardines à l'huile d'olive	Sardines in olive oil
+Milchprodukte und Milchalternativen	Almond-based drinks	Almond-based drinks
+Milchprodukte und Milchalternativen	Boissons végétales d'avoine nature	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	Butter	Butters
+Milchprodukte und Milchalternativen	en:almond-based-drinks	Almond-based drinks
+Milchprodukte und Milchalternativen	en:butters	Butters
+Milchprodukte und Milchalternativen	en:cereal-based-drinks	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	en:cheese-spreads	Cheese spreads
+Milchprodukte und Milchalternativen	en:cheeses	Cheeses
+Milchprodukte und Milchalternativen	en:Cheeses (perishable)	Cheeses (perishable)
+Milchprodukte und Milchalternativen	en:cheeses-perishable	Cheeses (perishable)
+Milchprodukte und Milchalternativen	en:cream-cheeses	Cream cheeses
+Milchprodukte und Milchalternativen	en:creams	Creams
+Milchprodukte und Milchalternativen	en:dairies	Dairies
+Milchprodukte und Milchalternativen	en:dairy-spreads	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	en:dairy-substitutes	Dairy substitutes
+Milchprodukte und Milchalternativen	en:fermented-milk-products	Fermented milk products
+Milchprodukte und Milchalternativen	en:fruit-soy-yogurts	Fruit soy yogurts
+Milchprodukte und Milchalternativen	en:italian-cheeses	Italian cheeses
+Milchprodukte und Milchalternativen	en:milk-substitutes	Milk substitutes
+Milchprodukte und Milchalternativen	en:milkfat	Milkfat
+Milchprodukte und Milchalternativen	en:non-dairy-desserts	Non-dairy desserts
+Milchprodukte und Milchalternativen	en:non-dairy-fermented-foods	Non-dairy fermented foods
+Milchprodukte und Milchalternativen	en:non-dairy-yogurts	Non-dairy yogurts
+Milchprodukte und Milchalternativen	en:nut-based-drinks	Nut-based drinks
+Milchprodukte und Milchalternativen	en:oat-based-drinks	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	en:parmigiano-reggiano	Parmigiano-Reggiano
+Milchprodukte und Milchalternativen	en:plain-oat-based-drinks	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	en:plant-based-creams	Plant-based creams
+Milchprodukte und Milchalternativen	en:plant-based-creams-for-cooking	Plant-based creams for cooking
+Milchprodukte und Milchalternativen	en:plant-based-milk-alternatives	Plant-based milk alternatives
+Milchprodukte und Milchalternativen	en:soy-milk-yogurts	Soy milk yogurts
+Milchprodukte und Milchalternativen	en:whipped-creams	Whipped creams
+Milchprodukte und Milchalternativen	fr:Fromage fouetté	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	Fromage fouetté	Reviewed term; see taxonomy source and README
+Milchprodukte und Milchalternativen	Fromages	Cheeses
+Milchprodukte und Milchalternativen	Fromages à la crème	Cream cheeses
+Milchprodukte und Milchalternativen	Fromages à tartiner	Cheese spreads
+Milchprodukte und Milchalternativen	Frucht-Soja-Joghurts	Fruit soy yogurts
+Milchprodukte und Milchalternativen	Mandelmilch	Almond-based drinks
+Milchprodukte und Milchalternativen	Parmesan	Parmigiano-Reggiano
+Milchprodukte und Milchalternativen	Schlagsahne	Whipped creams
+Milchprodukte und Milchalternativen	Sojajoghurt	Soy milk yogurts
+Milchprodukte und Milchalternativen	Streichkäse	Cheese spreads
+Nudeln und Teigwaren	Dry durum wheat pasta	Dry durum wheat pasta
+Nudeln und Teigwaren	Durum wheat spaghetti	Durum wheat spaghetti
+Nudeln und Teigwaren	en:cereal-pastas	Cereal pastas
+Nudeln und Teigwaren	en:dry-durum-wheat-pasta	Dry durum wheat pasta
+Nudeln und Teigwaren	en:dry-pastas	Dry pastas
+Nudeln und Teigwaren	en:durum-wheat-pasta	Durum wheat pasta
+Nudeln und Teigwaren	en:durum-wheat-spaghetti	Durum wheat spaghetti
+Nudeln und Teigwaren	en:noodles	Noodles
+Nudeln und Teigwaren	en:pastas	Pastas
+Nudeln und Teigwaren	en:spaghetti	Spaghetti
+Nudeln und Teigwaren	fr:Pâtes au pesto	Reviewed term; see taxonomy source and README
+Nudeln und Teigwaren	fr:Pâtes au Yuzu	Reviewed term; see taxonomy source and README
+Obst und Gemüse	en:celery	Celery
+Obst und Gemüse	en:common-beans	Common beans
+Obst und Gemüse	en:dried-tomato-in-oil	Dried tomatoes in oil
+Obst und Gemüse	en:dried-tomatoes	Dried tomatoes
+Obst und Gemüse	en:dried-vegetables	Dried vegetables
+Obst und Gemüse	en:fresh-horseradish	Fresh horseradish
+Obst und Gemüse	en:fresh-vegetables	Fresh vegetables
+Obst und Gemüse	en:garlic	Garlics
+Obst und Gemüse	en:garlics	Garlics
+Obst und Gemüse	en:legume-seeds	Legume seeds
+Obst und Gemüse	en:lentils	Lentils
+Obst und Gemüse	en:mashed-vegetables	Reviewed term; see taxonomy source and README
+Obst und Gemüse	en:mixed-bell-peppers	Mixed bell peppers
+Obst und Gemüse	en:mushrooms	Mushrooms
+Obst und Gemüse	en:onions	Onions
+Obst und Gemüse	en:prepared-vegetables	Reviewed term; see taxonomy source and README
+Obst und Gemüse	en:pulses	Pulses
+Obst und Gemüse	en:red-bell-peppers	Red bell peppers
+Obst und Gemüse	en:shiitake-mushrooms	Shiitake mushrooms
+Obst und Gemüse	en:sweet-peppers	Sweet peppers
+Obst und Gemüse	en:tomato-pulps	Reviewed term; see taxonomy source and README
+Obst und Gemüse	en:tomatoes	Tomatoes
+Obst und Gemüse	en:vegetable-rods	Vegetable rods
+Obst und Gemüse	en:vegetables	Vegetables
+Obst und Gemüse	en:Vorbereitetes Gemüse	Reviewed term; see taxonomy source and README
+Obst und Gemüse	en:white-beans	White beans
+Reis und Getreideprodukte	Amidon de maïs	Corn starch
+Reis und Getreideprodukte	Copos de avena	Rolled oats
+Reis und Getreideprodukte	Corn flakes	Corn flakes
+Reis und Getreideprodukte	en:breakfast-cereals	Breakfast cereals
+Reis und Getreideprodukte	en:cereal-butters	Cereal butters
+Reis und Getreideprodukte	en:cereal-clusters-with-nuts	Cereal clusters with nuts
+Reis und Getreideprodukte	en:cereal-flakes	Cereal flakes
+Reis und Getreideprodukte	en:cereal-starches	Cereal starches
+Reis und Getreideprodukte	en:cereals-and-their-products	Cereals and their products
+Reis und Getreideprodukte	en:cereals-with-fruits	Cereals with fruits
+Reis und Getreideprodukte	en:cereals-with-nuts	Cereals with nuts
+Reis und Getreideprodukte	en:corn-flakes	Corn flakes
+Reis und Getreideprodukte	en:corn-starch	Corn starch
+Reis und Getreideprodukte	en:crunchy-cereal-clusters	Crunchy cereal clusters
+Reis und Getreideprodukte	en:extruded-cereals	Extruded cereals
+Reis und Getreideprodukte	en:extruded-flakes	Reviewed term; see taxonomy source and README
+Reis und Getreideprodukte	en:flakes	Reviewed term; see taxonomy source and README
+Reis und Getreideprodukte	en:flocons d'avoine	Rolled oats
+Reis und Getreideprodukte	en:mueslis	Mueslis
+Reis und Getreideprodukte	en:mueslis-with-fruits	Mueslis with fruits
+Reis und Getreideprodukte	en:puffed-cereal-cakes	Puffed cereal cakes
+Reis und Getreideprodukte	en:puffed-corn-cakes	Puffed corn cakes
+Reis und Getreideprodukte	en:rolled-flakes	Reviewed term; see taxonomy source and README
+Reis und Getreideprodukte	en:rolled-oats	Rolled oats
+Reis und Getreideprodukte	Extruded flakes	Reviewed term; see taxonomy source and README
+Reis und Getreideprodukte	flocons d'avoine	Rolled oats
+Reis und Getreideprodukte	Flocons d'avoine	Rolled oats
+Reis und Getreideprodukte	mueslis	Mueslis
+Reis und Getreideprodukte	Mueslis aux fruits	Mueslis with fruits
+Reis und Getreideprodukte	Pépites de céréales aux fruits à coques	Cereal clusters with nuts
+Reis und Getreideprodukte	ro:Cereale	Reviewed term; see taxonomy source and README
+Reis und Getreideprodukte	Rolled oats	Rolled oats
+Saucen und Würzmittel	Arômes	Flavors
+Saucen und Würzmittel	bg:аматричана	Аматричана
+Saucen und Würzmittel	Cooking Sauces	Cooking Sauces
+Saucen und Würzmittel	cs:Tekuté koření	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Bio Tomatensauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Cayennepfeffer	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Fischsauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Gewürz	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Gewürzpulver	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Knoblauch-sauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Majonäse	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Meerrettich	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Paprika Pulver	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Paprikazubereitung	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Remoulade	Remoulade sauces
+Saucen und Würzmittel	de:Remouladen	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Salze m Beimischung	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Soße	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Tomatensoßen	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Tomatensugo	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Vanillepaste	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	de:Würzpaste	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:aiolis	Aiolis
+Saucen und Würzmittel	en:ajvar	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:alfredo-sauces	Alfredo sauces
+Saucen und Würzmittel	en:algerian-style-sauces	Algerian-style sauces
+Saucen und Würzmittel	en:Aneth	Dill
+Saucen und Würzmittel	en:aromatic-plants	Aromatic plants
+Saucen und Würzmittel	en:arrabbiata-sauces	Arrabbiata sauces
+Saucen und Würzmittel	en:balsamic-vinegars	Balsamic vinegars
+Saucen und Würzmittel	en:balsamic-vinegars-of-modena	Balsamic vinegars of Modena
+Saucen und Würzmittel	en:barbecue-sauces	Barbecue sauces
+Saucen und Würzmittel	en:basils	Basils
+Saucen und Würzmittel	en:bay-laurel	Bay laurel
+Saucen und Würzmittel	en:beef-broth	Beef broth
+Saucen und Würzmittel	en:Bell pepper sauces	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:black-peppercorns	Black peppercorns
+Saucen und Würzmittel	en:black-peppers	Black peppers
+Saucen und Würzmittel	en:bolognese-sauces	Bolognese sauces
+Saucen und Würzmittel	en:bouillon-cubes	Bouillon cubes
+Saucen und Würzmittel	en:bouillon-pots	Bouillon pots
+Saucen und Würzmittel	en:bouillon-powders	Bouillon powders
+Saucen und Würzmittel	en:Bouillons de légumes	Vegetable broths
+Saucen und Würzmittel	en:broth-stock	Broth stock
+Saucen und Würzmittel	en:broths	broths
+Saucen und Würzmittel	en:brown-sauces	Brown sauces
+Saucen und Würzmittel	en:Brühen	broths
+Saucen und Würzmittel	en:burger-sauces	Burger sauces
+Saucen und Würzmittel	en:caesar-salad-dressings	Caesar salad dressings
+Saucen und Würzmittel	en:capers	Capers
+Saucen und Würzmittel	en:capsicum-frutescens	Capsicum frutescens
+Saucen und Würzmittel	en:cardamom	Cardamom
+Saucen und Würzmittel	en:cayenne-peppers	Cayenne peppers
+Saucen und Würzmittel	en:celeriac-in-remoulade-sauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:cheese-sauces	Cheese sauces
+Saucen und Würzmittel	en:chicken-seasoning	Chicken seasoning
+Saucen und Würzmittel	en:chili-peppers	Chili peppers
+Saucen und Würzmittel	en:chutneys	Chutneys
+Saucen und Würzmittel	en:cider-vinegars	Cider vinegars
+Saucen und Würzmittel	en:cinnamon	Cinnamon
+Saucen und Würzmittel	en:cinnamon-powder	Cinnamon powder
+Saucen und Würzmittel	en:classic-hummus	Classic hummus
+Saucen und Würzmittel	en:coarse-grained-salts	Coarse-grained salts
+Saucen und Würzmittel	en:cocktail-sauces	Cocktail sauces
+Saucen und Würzmittel	en:condiment-pastes	Condiment pastes
+Saucen und Würzmittel	en:Condimentos	Condiments
+Saucen und Würzmittel	en:condiments	Condiments
+Saucen und Würzmittel	en:Cooking Sauces	Cooking Sauces
+Saucen und Würzmittel	en:cooking-sauces	Cooking Sauces
+Saucen und Würzmittel	en:coriander-leaves	Coriander leaves
+Saucen und Würzmittel	en:cranberry-sauces	Cranberry sauces
+Saucen und Würzmittel	en:cream-sauces	Cream sauces
+Saucen und Würzmittel	en:Creole seasoning mix	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:culinary-plants	Culinary plants
+Saucen und Würzmittel	en:curry-ketchups	Curry ketchups
+Saucen und Würzmittel	en:curry-pastes	Curry pastes
+Saucen und Würzmittel	en:curry-powders	Curry powders
+Saucen und Würzmittel	en:curry-sauces	Curry sauces
+Saucen und Würzmittel	en:Currysaucen	Curry sauces
+Saucen und Würzmittel	en:Dark-soy-sauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:Dehydrated-broth-stock	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:dehydrated-broths	Dehydrated broths
+Saucen und Würzmittel	en:dehydrated-meat-and-vegetables-broth-stock	Dehydrated meat and vegetables broth stock
+Saucen und Würzmittel	en:dehydrated-poultry-stock	Dehydrated poultry stock
+Saucen und Würzmittel	en:dehydrated-sauces	Dehydrated sauces
+Saucen und Würzmittel	en:dehydrated-veal-stock	Dehydrated veal stock
+Saucen und Würzmittel	en:dehydrated-vegetable-bouillons	Dehydrated vegetable bouillons
+Saucen und Würzmittel	en:dijon-mayonnaises	Dijon mayonnaises
+Saucen und Würzmittel	en:dijon-mustards	Dijon mustards
+Saucen und Würzmittel	en:dips	Dips
+Saucen und Würzmittel	en:dressings-and-dips-shelf-stable	Dressings and Dips (Shelf Stable)
+Saucen und Würzmittel	en:dried-aromatic-plants	Dried aromatic plants
+Saucen und Würzmittel	en:dried-bay-laurel	Dried bay laurel
+Saucen und Würzmittel	en:dried-oregano	Dried oregano
+Saucen und Würzmittel	en:egg-free-mayonnaises	Egg-free mayonnaises
+Saucen und Würzmittel	en:Eggplant sauces	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:Epices	Spices
+Saucen und Würzmittel	en:fine-grained-salts	Fine-grained salts
+Saucen und Würzmittel	en:fine-mustards	Fine mustards
+Saucen und Würzmittel	en:flavors	Flavors
+Saucen und Würzmittel	en:french-mustards	French mustards
+Saucen und Würzmittel	en:fried-tomato-sauces	Fried tomato sauces
+Saucen und Würzmittel	en:fruit-chutneys	Fruit chutneys
+Saucen und Würzmittel	en:garlic-and-their-products	Garlics and their products
+Saucen und Würzmittel	en:garlic-powder	Garlic powders
+Saucen und Würzmittel	en:garlic-powders	Garlic powders
+Saucen und Würzmittel	en:garlics-and-their-products	Garlics and their products
+Saucen und Würzmittel	en:Gemüsebrühen	Vegetable broths
+Saucen und Würzmittel	en:Gemüsesaucen	Vegetable sauces
+Saucen und Würzmittel	en:german-mustards	German mustards
+Saucen und Würzmittel	en:Getrocknete und gemahlene Kräuter	Ground dried aromatic plants
+Saucen und Würzmittel	en:Getrocknete-und-gemahlene-kräuter	Ground dried aromatic plants
+Saucen und Würzmittel	en:Gewürzmittel	Condiments
+Saucen und Würzmittel	en:Gewürzpflanzen	Aromatic plants
+Saucen und Würzmittel	en:ginger	Ginger
+Saucen und Würzmittel	en:ginger-powder	Ginger powder
+Saucen und Würzmittel	en:glazes-with-balsamic-vinegar	Glazes with balsamic vinegar
+Saucen und Würzmittel	en:glazes-with-vinegar	Glazes with vinegar
+Saucen und Würzmittel	en:Gochujang	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:grated-horseradish	Grated horseradish
+Saucen und Würzmittel	en:green-cardamom	Green cardamom
+Saucen und Würzmittel	en:green-curry-pastes	Green curry pastes
+Saucen und Würzmittel	en:green-pestos	Green pestos
+Saucen und Würzmittel	en:green-sauces	Green sauces
+Saucen und Würzmittel	en:ground-black-peppers	Ground black peppers
+Saucen und Würzmittel	en:ground-coriander-leaves	Ground coriander leaves
+Saucen und Würzmittel	en:ground-dried-aromatic-plants	Ground dried aromatic plants
+Saucen und Würzmittel	en:ground-dried-oregano	Ground dried oregano
+Saucen und Würzmittel	en:ground-dried-rosemary	Ground dried rosemary
+Saucen und Würzmittel	en:ground-dried-vegetables	Ground dried vegetables
+Saucen und Würzmittel	en:ground-nutmeg	Ground nutmeg
+Saucen und Würzmittel	en:ground-peppers	Ground peppers
+Saucen und Würzmittel	en:harissa-sauces	Harissa sauces
+Saucen und Würzmittel	en:Herbes aromatiques	Herbs
+Saucen und Würzmittel	en:herbes-de-provence	Herbes de Provence
+Saucen und Würzmittel	en:herbs	Herbs
+Saucen und Würzmittel	en:herbs-and-spices	Herbs and spices
+Saucen und Würzmittel	en:himalaya-salts	Himalaya salts
+Saucen und Würzmittel	en:himalayan-pink-salts	Himalayan pink salts
+Saucen und Würzmittel	en:hoisin-sauces	Hoisin sauces
+Saucen und Würzmittel	en:hollandaise-sauce	Hollandaise sauce
+Saucen und Würzmittel	en:honey-mustards	Honey mustards
+Saucen und Würzmittel	en:hot-sauces	Hot sauces
+Saucen und Würzmittel	en:hummus	Hummus
+Saucen und Würzmittel	en:indian-style-sauces	Indian-style sauces
+Saucen und Würzmittel	en:iodised-salts	Iodised salts
+Saucen und Würzmittel	en:jalapenos	Jalapeños
+Saucen und Würzmittel	en:joppie-sauces	Joppie sauces
+Saucen und Würzmittel	en:ketchup	Ketchup
+Saucen und Würzmittel	en:Kräuter	Herbs
+Saucen und Würzmittel	en:Kräuter-der-provence	Herbes de Provence
+Saucen und Würzmittel	en:liquid-broths	Liquid broths
+Saucen und Würzmittel	en:low-fat-vinaigrette-dressings	Low-fat vinaigrette dressings
+Saucen und Würzmittel	en:lyophilized-aromatic-plants	Lyophilized aromatic plants
+Saucen und Würzmittel	en:lyophilized-parsley	Lyophilized parsley
+Saucen und Würzmittel	en:mango-chutneys	Mango chutneys
+Saucen und Würzmittel	en:marinades	Marinades
+Saucen und Würzmittel	en:Marinades	Marinades
+Saucen und Würzmittel	en:marjoram	Marjoram
+Saucen und Würzmittel	en:mayonnaises	Mayonnaises
+Saucen und Würzmittel	en:meal-sauces	Meal sauces
+Saucen und Würzmittel	en:meat-based-pasta-sauces	Meat-based pasta sauces
+Saucen und Würzmittel	en:meat-based-sauces	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:mint	Mint
+Saucen und Würzmittel	en:mixed-herbs	Mixed herbs
+Saucen und Würzmittel	en:mixtures-of-herbs-and-spices	Mixtures of herbs and spices
+Saucen und Würzmittel	en:mushroom-sauces	Mushroom sauces
+Saucen und Würzmittel	en:mustard-sauces	Mustard sauces
+Saucen und Würzmittel	en:mustards	Mustards
+Saucen und Würzmittel	en:neapolitan-sauces	Neapolitan sauces
+Saucen und Würzmittel	en:nuoc-mam-sauce	Nuoc mam sauce
+Saucen und Würzmittel	en:nutmeg	Nutmeg
+Saucen und Würzmittel	en:old-style-mustards	Old style mustards
+Saucen und Würzmittel	en:onion-powder	Onion powders
+Saucen und Würzmittel	en:oregano	Oregano
+Saucen und Würzmittel	en:oyster-sauces	Oyster sauces
+Saucen und Würzmittel	en:paprika	Paprika
+Saucen und Würzmittel	en:parsley	Parsley
+Saucen und Würzmittel	en:pasta-sauces	Pasta sauces
+Saucen und Würzmittel	en:Pâtes de curry	Curry pastes
+Saucen und Würzmittel	en:Pâtes de curry verte	Green curry pastes
+Saucen und Würzmittel	en:peanut-sauces	Peanut sauces
+Saucen und Würzmittel	en:pepper-sauces	Pepper sauces
+Saucen und Würzmittel	en:peppercorns	Peppercorns
+Saucen und Würzmittel	en:peppers	Peppers
+Saucen und Würzmittel	en:pestos	Pestos
+Saucen und Würzmittel	en:Pestos au basilic	Green pestos
+Saucen und Würzmittel	en:Petersilie	Parsley
+Saucen und Würzmittel	en:Petersilie gerebelt	Ground dried parsley
+Saucen und Würzmittel	en:pickled-capers	Pickled capers
+Saucen und Würzmittel	en:pizza-sauces	Pizza sauces
+Saucen und Würzmittel	en:plant-based-mayonnaises	Plant-based mayonnaises
+Saucen und Würzmittel	en:Plantes aromatiques	Aromatic plants
+Saucen und Würzmittel	en:Plantes condimentaires	Culinary plants
+Saucen und Würzmittel	en:potted-aromatic-plants	Potted aromatic plants
+Saucen und Würzmittel	en:potted-basils	Potted basils
+Saucen und Würzmittel	en:poultry-broth	Poultry broth
+Saucen und Würzmittel	en:red-curry-pastes	Red curry pastes
+Saucen und Würzmittel	en:red-pestos	Red pestos
+Saucen und Würzmittel	en:red-wine-vinegars	Red wine vinegars
+Saucen und Würzmittel	en:remoulade-sauce	Remoulade sauces
+Saucen und Würzmittel	en:rice-vinegars	Rice vinegars
+Saucen und Würzmittel	en:rosemary	Rosemary
+Saucen und Würzmittel	en:salad-dressings	Salad dressings
+Saucen und Würzmittel	en:Salsa	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:Salsas	Sauces
+Saucen und Würzmittel	en:Salsas de soja	Soy sauces
+Saucen und Würzmittel	en:salts	Salts
+Saucen und Würzmittel	en:sambal	Sambal
+Saucen und Würzmittel	en:sambal-oelek	Sambal oelek
+Saucen und Würzmittel	en:Saucen	Sauces
+Saucen und Würzmittel	en:sauces	Sauces
+Saucen und Würzmittel	en:Sauces à base d'extrait de viande	Sauces à base d'extrait de viande
+Saucen und Würzmittel	en:Sauces au soja	Soy sauces
+Saucen und Würzmittel	en:Sauces déshydratées	Dehydrated sauces
+Saucen und Würzmittel	en:Sauces Pesto	Pestos
+Saucen und Würzmittel	en:Sauces pour marinades	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:sauces-with-mustard	Sauces with mustard
+Saucen und Würzmittel	en:sea-salts	Sea salts
+Saucen und Würzmittel	en:Senfe	Mustards
+Saucen und Würzmittel	en:Sesame sauces	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:Shelf-stable other sauces	Shelf-stable other sauces
+Saucen und Würzmittel	en:shelf-stable-other-sauces	Shelf-stable other sauces
+Saucen und Würzmittel	en:soy-sauces	Soy sauces
+Saucen und Würzmittel	en:spice-blends	Spice blends
+Saucen und Würzmittel	en:spice-mix	Spice blends
+Saucen und Würzmittel	en:spices	Spices
+Saucen und Würzmittel	en:sunflower-oil-mayonnaises	Sunflower oil mayonnaises
+Saucen und Würzmittel	en:sweet-and-sour-sauces	Sweet and sour sauces
+Saucen und Würzmittel	en:sweet-chili-sauces	Sweet chili sauces
+Saucen und Würzmittel	en:sweet-mustards	Sweet mustards
+Saucen und Würzmittel	en:tabasco pepper	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:table-salts	Table salts
+Saucen und Würzmittel	en:tamaris	Tamaris
+Saucen und Würzmittel	en:tapenades	Tapenades
+Saucen und Würzmittel	en:tartare-sauces	Tartare sauces
+Saucen und Würzmittel	en:tenderisers	Tenderisers
+Saucen und Würzmittel	en:Tenderisers	Tenderisers
+Saucen und Würzmittel	en:teriyaki-sauces	Teriyaki sauces
+Saucen und Würzmittel	en:Tom Yum Paste	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:tomato-caviar	Tomato caviar
+Saucen und Würzmittel	en:tomato-ketchup	Tomato Ketchup
+Saucen und Würzmittel	en:tomato-purees	Tomato purées
+Saucen und Würzmittel	en:tomato-sauces	Tomato sauces
+Saucen und Würzmittel	en:tomato-sauces-with-basil	Tomato sauces with basil
+Saucen und Würzmittel	en:tomato-sauces-with-olives	Tomato sauces with olives
+Saucen und Würzmittel	en:tomato-sauces-with-vegetables	Tomato sauces with vegetables
+Saucen und Würzmittel	en:Tonkatsu sauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:turmeric	Turmeric
+Saucen und Würzmittel	en:turmeric-powder	Turmeric powder
+Saucen und Würzmittel	en:tzatzikis	Tzatzikis
+Saucen und Würzmittel	en:vanilla	Vanilla
+Saucen und Würzmittel	en:veal-stock	Veal stock
+Saucen und Würzmittel	en:vegan-sauces	Vegan sauces
+Saucen und Würzmittel	en:vegetable-bouillon-cubes	Vegetable bouillon cubes
+Saucen und Würzmittel	en:vegetable-bouillon-powders	Vegetable bouillon powders
+Saucen und Würzmittel	en:vegetable-broths	Vegetable broths
+Saucen und Würzmittel	en:vegetable-sauces	Vegetable sauces
+Saucen und Würzmittel	en:vegetarian-sauces	Vegetarian sauces
+Saucen und Würzmittel	en:vinaigrettes	Vinaigrettes
+Saucen und Würzmittel	en:vinegars	Vinegars
+Saucen und Würzmittel	en:vodka-pasta-sauces	Vodka pasta sauces
+Saucen und Würzmittel	en:wasabi-pastes	Wasabi pastes
+Saucen und Würzmittel	en:white-wine-vinegars	White wine vinegars
+Saucen und Würzmittel	en:whole-nutmeg	Whole nutmeg
+Saucen und Würzmittel	en:Wholegrain Mustard	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:wine-vinegars	Wine vinegars
+Saucen und Würzmittel	en:Worcester sauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:worcestershire-sauces	Worcestershire sauces
+Saucen und Würzmittel	en:Worcestershiresaucen	Worcestershire sauces
+Saucen und Würzmittel	en:Würzsauce	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	en:yakitori-sauces	Yakitori sauces
+Saucen und Würzmittel	en:yellow-curry-pastes	Yellow curry pastes
+Saucen und Würzmittel	en:yellow-mustards	Yellow mustards
+Saucen und Würzmittel	es:Salsas-bolonesas-vegetales	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Bases culinaires	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Capres	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:gros-sels	Coarse-grained salts
+Saucen und Würzmittel	fr:habanero	Habanero
+Saucen und Würzmittel	fr:Harissa du Cap Bon	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:moutarde-de-bourgogne	Moutarde de Bourgogne
+Saucen und Würzmittel	fr:moutardes-au-noix	Moutardes au noix
+Saucen und Würzmittel	fr:Persil-lyophilise	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Pesto d'artichauts	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:piccalillis	Piccalillis
+Saucen und Würzmittel	fr:Préparation pour curry	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Purée de piment	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauce arrabbiata	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauce au sésame	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauce barbecue à la chinoise	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauce tomate origan	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces arrabbiata	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces ketchup curry	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces mexicaines	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces piquantes	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces pour dips	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces pour féculents	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sauces tomates cuisinée aux petits légumes	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:sauces-au-soja-salees	Sauces au soja salées
+Saucen und Würzmittel	fr:sauces-au-soja-sucrees	Sauces au soja sucrées
+Saucen und Würzmittel	fr:sauces-pour-nems	Sauces pour nems
+Saucen und Würzmittel	fr:sauces-puttanesca	Puttanesca sauces
+Saucen und Würzmittel	fr:SEL/EPICES	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Sels aux herbes	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:sels-fins	Fine-grained salts
+Saucen und Würzmittel	fr:vinaigres-aromatises	Vinaigres aromatisés
+Saucen und Würzmittel	fr:Vinaigrette Légère	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	fr:Vinaigrettes au sésame	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	hu:Tormakrém	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	it:Sugo alla amatriciana	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	ja:カレールウ	curry-roux
+Saucen und Würzmittel	Ketchup	Ketchup
+Saucen und Würzmittel	Moutardes de Dijon	Dijon mustards
+Saucen und Würzmittel	nl:Sauzen (warm/koud)	Reviewed term; see taxonomy source and README
+Saucen und Würzmittel	Nudelsoßen	Pasta sauces
+Saucen und Würzmittel	Pesto alla Genovese	Green pestos
+Saucen und Würzmittel	Red pestos	Red pestos
+Saucen und Würzmittel	Sauces	Sauces
+Saucen und Würzmittel	Sauces tomates au basilic	Tomato sauces with basil
+Saucen und Würzmittel	Tomatensaucen	Tomato sauces
+Saucen und Würzmittel	Tomato Ketchup	Tomato Ketchup
+Snacks und Knabberartikel	Almonds	Almonds
+Snacks und Knabberartikel	Cashew nuts	Cashew nuts
+Snacks und Knabberartikel	Cereal bars	Cereal bars
+Snacks und Knabberartikel	Cerneaux de noix	Walnut kernels
+Snacks und Knabberartikel	Crackers (Appetizers)	Crackers (Appetizers)
+Snacks und Knabberartikel	de:Cashew	Reviewed term; see taxonomy source and README
+Snacks und Knabberartikel	en:almonds	Almonds
+Snacks und Knabberartikel	en:appetizers	Appetizers
+Snacks und Knabberartikel	en:bars	Bars
+Snacks und Knabberartikel	en:Botanas	Snacks
+Snacks und Knabberartikel	en:cashew-nuts	Cashew nuts
+Snacks und Knabberartikel	en:cereal-bars	Cereal bars
+Snacks und Knabberartikel	en:chocolate-cereal-bars	Chocolate cereal bars
+Snacks und Knabberartikel	en:crackers-appetizers	Crackers (Appetizers)
+Snacks und Knabberartikel	en:crisps	Crisps
+Snacks und Knabberartikel	en:mixed-nuts	Mixed nuts
+Snacks und Knabberartikel	en:nuts	Nuts
+Snacks und Knabberartikel	en:pine-nuts	Pine nuts
+Snacks und Knabberartikel	en:potato-crisps	Potato crisps
+Snacks und Knabberartikel	en:potato-crisps-with-salt	Potato crisps with salt
+Snacks und Knabberartikel	en:potato-crisps-with-sea-salt	Potato crisps with sea salt
+Snacks und Knabberartikel	en:salty-snacks	Salty snacks
+Snacks und Knabberartikel	en:salty-snacks-made-from-potato	Salty snacks made from potato
+Snacks und Knabberartikel	en:shelled-nuts	Shelled nuts
+Snacks und Knabberartikel	en:shelled-pine-nuts	Shelled pine nuts
+Snacks und Knabberartikel	en:Snack dolci	Sweet snacks
+Snacks und Knabberartikel	en:snacks	Snacks
+Snacks und Knabberartikel	en:Snacks dulces	Sweet snacks
+Snacks und Knabberartikel	en:snacks-sucrés	Sweet snacks
+Snacks und Knabberartikel	en:stacked-extruded-potato-crisps	Stacked extruded potato crisps
+Snacks und Knabberartikel	en:sweet-snacks	Sweet snacks
+Snacks und Knabberartikel	en:walnut-kernels	Walnut kernels
+Snacks und Knabberartikel	en:walnuts	Walnuts
+Snacks und Knabberartikel	geschälte Pinienkerne	Shelled pine nuts
+Snacks und Knabberartikel	Müsliriegel mit Schokolade	Chocolate cereal bars
+Snacks und Knabberartikel	Nusskerne	Shelled nuts
+Snacks und Knabberartikel	Nussmischung	Mixed nuts
+Snacks und Knabberartikel	Potato crisps with sea salt	Potato crisps with sea salt
+Snacks und Knabberartikel	Snacks	Snacks
+Snacks und Knabberartikel	Tuiles de pommes de terre extrudées salées	Stacked extruded potato crisps
+Süßwaren und Schokolade	Bitterschokoladen	Dark chocolates
+Süßwaren und Schokolade	Cacao-et-derives	Cocoa and its products
+Süßwaren und Schokolade	Chocolats noirs	Dark chocolates
+Süßwaren und Schokolade	Chocolats noirs extra fin	Extra fine dark chocolates
+Süßwaren und Schokolade	Chocolats noirs pâtissiers en tablette	Dark chocolate bars for cooking
+Süßwaren und Schokolade	Cioccolato fondente	Dark chocolates
+Süßwaren und Schokolade	Cocoa and hazelnuts spreads	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	Confiseries	Confectioneries
+Süßwaren und Schokolade	Confiseries chocolatées	Chocolate candies
+Süßwaren und Schokolade	Dark chocolate bars	Dark chocolate bars
+Süßwaren und Schokolade	Dark chocolate bars for cooking	Dark chocolate bars for cooking
+Süßwaren und Schokolade	Dark chocolates	Dark chocolates
+Süßwaren und Schokolade	dark-chocolate-bar-with-more-than-70-cocoa	Dark chocolate bars with 70% cocoa or more
+Süßwaren und Schokolade	en:Cacao y sus productos	Cocoa and its products
+Süßwaren und Schokolade	en:Cacao-et-derives	Cocoa and its products
+Süßwaren und Schokolade	en:cacao-et-dérivés	Cocoa and its products
+Süßwaren und Schokolade	en:candies	Candies
+Süßwaren und Schokolade	en:chocolate-spreads	Chocolate spreads
+Süßwaren und Schokolade	en:chocolates	Chocolates
+Süßwaren und Schokolade	en:Chocolates negros	Dark chocolates
+Süßwaren und Schokolade	en:Chocolates negros extra finos	Extra fine dark chocolates
+Süßwaren und Schokolade	en:chocolates-with-hazelnuts	Chocolates with hazelnuts
+Süßwaren und Schokolade	en:Chocolats noirs pâtissiers en tablette	Dark chocolate bars for cooking
+Süßwaren und Schokolade	en:cocoa-and-hazelnuts-spreads	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	en:cocoa-and-its-products	Cocoa and its products
+Süßwaren und Schokolade	en:confectioneries	Confectioneries
+Süßwaren und Schokolade	en:Confiseries	Confectioneries
+Süßwaren und Schokolade	en:Confiseries chocolatées	Chocolate candies
+Süßwaren und Schokolade	en:Creme-para-barrar-de-avelã-e-cacau	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	en:dark-chocolate-bar	Dark chocolate bars
+Süßwaren und Schokolade	en:dark-chocolate-bar-with-more-than-70-cocoa	Dark chocolate bars with 70% cocoa or more
+Süßwaren und Schokolade	en:dark-chocolate-bars	Dark chocolate bars
+Süßwaren und Schokolade	en:dark-chocolate-bars-for-cooking	Dark chocolate bars for cooking
+Süßwaren und Schokolade	en:dark-chocolates	Dark chocolates
+Süßwaren und Schokolade	en:dragees	Dragées
+Süßwaren und Schokolade	en:extra-fine-dark-chocolates	Extra fine dark chocolates
+Süßwaren und Schokolade	en:gummi-candies	Gummi candies
+Süßwaren und Schokolade	en:milk-chocolate-bar	Milk chocolate bars
+Süßwaren und Schokolade	en:milk-chocolates	Milk chocolates
+Süßwaren und Schokolade	en:milk-chocolates-with-hazelnuts	Milk chocolates with hazelnuts
+Süßwaren und Schokolade	en:nut-confectioneries	Nut confectioneries
+Süßwaren und Schokolade	en:pates-a-tartiner-au-chocolat	Chocolate spreads
+Süßwaren und Schokolade	en:pates-a-tartiner-aux-noisettes-et-au-cacao	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	Extra fine dark chocolates	Extra fine dark chocolates
+Süßwaren und Schokolade	fr:Chocolat noir 90 %	Reviewed term; see taxonomy source and README
+Süßwaren und Schokolade	Gummibonbons	Gummi candies
+Süßwaren und Schokolade	Milchschokolade mit Haselnüssen	Milk chocolates with hazelnuts
+Süßwaren und Schokolade	nl:Chocolade	Chocolates
+Süßwaren und Schokolade	Pâtes à tartiner aux noisettes et au cacao	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	Schoko- und Haselnussaufstriche	Cocoa and hazelnuts spreads
+Süßwaren und Schokolade	Süßwaren	Confectioneries
+Süßwaren und Schokolade	Tablette de chocolat au lait	Milk chocolate bars
+Süßwaren und Schokolade	Тъмен шоколад	Dark chocolates
+Tiefkühlprodukte	en:frozen-aromatic-plants	Reviewed term; see taxonomy source and README
+Tiefkühlprodukte	en:frozen-foods	Frozen foods
+Tiefkühlprodukte	en:frozen-plant-based-foods	Frozen plant-based foods
+Tiefkühlprodukte	en:frozen-vegetables	Frozen vegetables

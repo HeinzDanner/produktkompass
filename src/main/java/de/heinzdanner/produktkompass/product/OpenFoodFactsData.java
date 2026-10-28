@@ -59,6 +59,12 @@ public class OpenFoodFactsData {
     @Column(name = "category_tags", columnDefinition = "TEXT")
     private String categoryTags;
 
+    @jakarta.persistence.ElementCollection
+    @jakarta.persistence.CollectionTable(name = "product_off_categories",
+            joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "category_value", nullable = false, columnDefinition = "TEXT")
+    private Set<String> categoryEntries = new LinkedHashSet<>();
+
     @Column(columnDefinition = "TEXT")
     private String quantity;
 
@@ -257,6 +263,7 @@ public class OpenFoodFactsData {
 
     public void setCategories(String categories) {
         this.categories = categories;
+        refreshCategoryEntries();
     }
 
     public String getCategoryTags() {
@@ -265,6 +272,16 @@ public class OpenFoodFactsData {
 
     public void setCategoryTags(String categoryTags) {
         this.categoryTags = categoryTags;
+        refreshCategoryEntries();
+    }
+
+    private void refreshCategoryEntries() {
+        var entries = new LinkedHashSet<>(de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsTags.split(categories));
+        entries.addAll(de.heinzdanner.produktkompass.openfoodfacts.OpenFoodFactsTags.split(categoryTags));
+        if (!categoryEntries.equals(entries)) {
+            categoryEntries.clear();
+            categoryEntries.addAll(entries);
+        }
     }
 
     public String getQuantity() {

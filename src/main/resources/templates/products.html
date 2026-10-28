@@ -15,6 +15,26 @@
             <a class="button" th:href="@{/}">Zur Startseite</a>
         </div>
 
+        <form method="get" th:action="@{/products}" class="product-search catalog-search" aria-label="Katalog durchsuchen">
+            <label for="catalogQuery">Produkte suchen</label>
+            <input id="catalogQuery" type="search" name="query" th:value="${selectedQuery}"
+                   placeholder="Produkt, Marke, Unternehmen oder Kategorie">
+            <label for="catalogCategory">Kategorie</label>
+            <select id="catalogCategory" name="categoryId" aria-label="Kategorien">
+                <option value="" th:selected="${selectedCategoryFilter == ''}">Alle Kategorien</option>
+                <option th:each="category : ${catalogCategories}" th:value="${category.id}"
+                        th:text="${category.name}" th:selected="${category.id == selectedCategoryId}">Kategorie</option>
+            </select>
+            <input type="hidden" name="size" th:value="${productPage.size}">
+            <input th:if="${selectedBrandId != null}" type="hidden" name="brandId" th:value="${selectedBrandId}">
+            <input th:if="${selectedLabel != null}" type="hidden" name="label" th:value="${selectedLabel}">
+            <input th:if="${selectedNutritionGrade != null}" type="hidden" name="nutritionGrade" th:value="${selectedNutritionGrade}">
+            <input th:if="${selectedMadeInGermany != null}" type="hidden" name="madeInGermany" th:value="${selectedMadeInGermany}">
+            <input th:if="${selectedTagId != null}" type="hidden" name="tagId" th:value="${selectedTagId}">
+            <input th:if="${includeOpenFoodFactsLabels}" type="hidden" name="includeOpenFoodFactsLabels" value="true">
+            <button type="submit" class="button primary">Suchen</button>
+        </form>
+
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">Keine Produkte gefunden.</div>
         <p th:text="${productPage.totalElements + ' Produkte gefunden'}">Trefferzahl</p>
 
@@ -40,11 +60,11 @@
         </div>
         <nav aria-label="Ergebnisseiten" class="actions">
             <a th:if="${productPage.hasPrevious()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
             <span th:if="${productPage.totalPages > 0}"
                   th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
             <a th:if="${productPage.hasNext()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryId},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
         </nav>
     </section>
 </main>

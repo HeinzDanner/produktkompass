@@ -18,6 +18,18 @@ public final class ProductSearch {
     private ProductSearch() {
     }
 
+    public static Specification<Product> offCategory(String category) {
+        return (product, query, builder) -> {
+            if (category == null) return builder.conjunction();
+            var matches = query.subquery(Long.class);
+            var data = matches.from(OpenFoodFactsData.class);
+            matches.select(data.get("productId")).where(
+                    builder.equal(data.get("productId"), product.get("id")),
+                    builder.equal(data.join("categoryEntries"), category));
+            return builder.exists(matches);
+        };
+    }
+
     public static Expression<Integer> favoritePriority(jakarta.persistence.criteria.Root<Product> product,
             jakarta.persistence.criteria.CriteriaQuery<?> query, CriteriaBuilder builder, String username) {
         var favorites = query.subquery(Long.class);
@@ -123,7 +135,14 @@ public final class ProductSearch {
                 categoryFilter.select(categoryProduct.get("id")).where(
                         builder.equal(categoryProduct.get("id"), product.get("id")),
                         builder.equal(categoryProduct.join("categories").get("id"), categoryId));
-                predicates.add(builder.exists(categoryFilter));
+                var offFilter = query.subquery(Long.class);
+                var offData = offFilter.from(OpenFoodFactsData.class);
+                var mapping = offFilter.from(OffCategoryMapping.class);
+                offFilter.select(offData.get("productId")).where(
+                        builder.equal(offData.get("productId"), product.get("id")),
+                        builder.equal(offData.join("categoryEntries"), mapping.get("offValue")),
+                        builder.equal(mapping.get("category").get("id"), categoryId));
+                predicates.add(builder.or(builder.exists(categoryFilter), builder.exists(offFilter)));
             }
             if (label != null) {
                 var labelMatches = new ArrayList<Predicate>();

@@ -63,7 +63,7 @@ public class ProductWebController {
     @GetMapping("/products")
     public String products(@RequestParam(required = false) String query,
                            @RequestParam(required = false) Long brandId,
-                           @RequestParam(required = false) Long categoryId,
+                           @RequestParam(name = "categoryId", required = false) String categoryFilter,
                            @RequestParam(required = false) ProductLabel label,
                            @RequestParam(required = false) NutritionGrade nutritionGrade,
                            @RequestParam(required = false) Boolean madeInGermany,
@@ -73,29 +73,46 @@ public class ProductWebController {
                            @RequestParam(defaultValue = "20") int size,
                            Principal principal,
                            Model model) {
+        Long categoryId = null;
+        String offCategory = null;
+        if (categoryFilter != null && !categoryFilter.isBlank()) {
+            if (categoryFilter.startsWith("off:") && categoryFilter.length() > 4) {
+                offCategory = categoryFilter.substring(4);
+            } else {
+                try {
+                    categoryId = Long.valueOf(categoryFilter);
+                } catch (NumberFormatException invalidCategory) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.BAD_REQUEST, "Ungültige Kategorie.", invalidCategory);
+                }
+            }
+        }
         if (tagId != null) {
             userTagService.requireOwnedTag(principal == null ? null : principal.getName(), tagId);
         }
         var results = productService.searchPage(query, brandId, categoryId, label, nutritionGrade,
                 madeInGermany, tagId, principal == null ? null : principal.getName(),
-                includeOpenFoodFactsLabels, page, size);
+                includeOpenFoodFactsLabels, page, size, offCategory);
         model.addAttribute("products", results.getContent());
         model.addAttribute("productPage", results);
         model.addAttribute("brands", brandService.getBrandOptions(
                 brandId == null ? List.of() : List.of(brandId)));
         model.addAttribute("categories", categoryService.getCategoryOptions(
                 categoryId == null ? List.of() : List.of(categoryId)));
+        model.addAttribute("catalogCategories", categoryService.getPublicCategories());
         model.addAttribute("productLabels", ProductLabel.values());
         model.addAttribute("nutritionGrades", NutritionGrade.values());
         model.addAttribute("selectedQuery", query == null ? "" : query);
         model.addAttribute("selectedBrandId", brandId);
         model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedCategoryFilter", categoryFilter == null ? "" : categoryFilter);
+        model.addAttribute("selectedOffCategory", offCategory);
         model.addAttribute("selectedLabel", label);
         model.addAttribute("selectedNutritionGrade", nutritionGrade);
         model.addAttribute("selectedMadeInGermany", madeInGermany);
         model.addAttribute("selectedTagId", tagId);
         model.addAttribute("includeOpenFoodFactsLabels", includeOpenFoodFactsLabels);
-        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
+        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || offCategory != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
         model.addAttribute("favoriteProductIds", principal == null ? Set.of()
                 : appUserService.getFavoriteIdsForProducts(principal.getName(),
                         results.getContent().stream().map(product -> product.id()).toList()));

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFF-Kategorien zuordnen – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>OFF-Kategorien zuordnen</h1>
+        <p><a th:href="@{/admin}">Zur Administration</a></p>
+        <p>Ordne eindeutige OFF-Begriffe einer Katalogkategorie zu. Dies erweitert den Suchfilter, verändert aber keine Produktangaben. Unklare Sammelbegriffe bitte nicht auf Verdacht zuordnen.</p>
+        <p th:if="${mappingSuccess}" role="status" th:text="${mappingSuccess}"></p>
+        <form method="get" th:action="@{/admin/category-mappings}" class="product-search">
+            <label for="mappingQuery">OFF-Kategorie suchen</label>
+            <input id="mappingQuery" name="query" type="search" th:value="${query}">
+            <button type="submit" class="button">Suchen</button>
+        </form>
+        <p th:text="${mappingPage.totalElements + ' OFF-Kategorien im Bestand'}"></p>
+        <div th:each="entry : ${mappingPage.content}">
+            <form method="post" th:action="@{/admin/category-mappings}" class="product-search">
+                <input type="hidden" name="value" th:value="${entry.value}">
+                <input type="hidden" name="query" th:value="${query}">
+                <input type="hidden" name="page" th:value="${mappingPage.number}">
+                <label th:for="${'mapping-' + entryStat.index}" th:text="${entry.value + ' (OFF)'}"></label>
+                <select th:id="${'mapping-' + entryStat.index}" name="categoryId">
+                    <option value="" th:selected="${entry.categoryId == null}">Nicht zugeordnet</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}"
+                            th:selected="${category.id == entry.categoryId}" th:text="${category.name}"></option>
+                </select>
+                <button type="submit" class="button secondary">Speichern</button>
+            </form>
+        </div>
+        <nav class="actions" aria-label="OFF-Kategorienseiten">
+            <a th:if="${mappingPage.hasPrevious()}" th:href="@{/admin/category-mappings(query=${query},page=${mappingPage.number - 1})}">Zurück</a>
+            <span th:text="${'Seite ' + (mappingPage.totalPages == 0 ? 0 : mappingPage.number + 1) + ' von ' + mappingPage.totalPages}"></span>
+            <a th:if="${mappingPage.hasNext()}" th:href="@{/admin/category-mappings(query=${query},page=${mappingPage.number + 1})}">Weiter</a>
+        </nav>
+    </section>
+</main>
+</body>
+</html>

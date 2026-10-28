@@ -95,7 +95,7 @@ class MasterDataPaginationTest {
     }
 
     @Test
-    void publicFilterParametersRemainSupportedWithoutDisplayingFilterControls() throws Exception {
+    void publicSearchKeepsOffPageCategorySelectionWithoutFullLoads() throws Exception {
         var selectedBrand = brandFixtures.getLast().getId();
         var selectedCategory = categoryFixtures.getLast().getId();
         var result = mvc.perform(get("/products").param("brandId", selectedBrand.toString())
@@ -104,7 +104,9 @@ class MasterDataPaginationTest {
         assertOptions(result.getModelAndView().getModel().get("brands"), selectedBrand);
         assertOptions(result.getModelAndView().getModel().get("categories"), selectedCategory);
         assertThat(result.getResponse().getContentAsString().replaceAll("\\s+", " "))
-                .doesNotContain("class=\"product-search\"", "lookup-picker.js");
+                .contains("class=\"product-search catalog-search\"",
+                        "value=\"" + selectedCategory + "\" selected=\"selected\"")
+                .doesNotContain("<select id=\"brandId\"", "lookup-picker.js");
         verifyNoFullLoads();
     }
 

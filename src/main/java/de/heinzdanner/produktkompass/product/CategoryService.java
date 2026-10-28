@@ -23,6 +23,10 @@ public class CategoryService {
         this.auditLogService = auditLogService;
     }
 
+    public List<LookupOption> getPublicCategories() {
+        return categoryRepository.findPublicOptions();
+    }
+
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }

@@ -41,12 +41,18 @@ public class ProductController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String offCategory,
             @RequestParam(required = false) ProductLabel label,
             @RequestParam(required = false) NutritionGrade nutritionGrade,
             @RequestParam(required = false) Boolean madeInGermany,
             @RequestParam(defaultValue = "false") boolean includeOpenFoodFactsLabels,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        if (offCategory != null && !offCategory.isBlank()) {
+            return ResponseEntity.ok(ProductPage.from(productService.searchPage(
+                    name, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null,
+                    includeOpenFoodFactsLabels, page, size, offCategory)));
+        }
         return ResponseEntity.ok(ProductPage.from(productService.searchPage(
                 name, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null,
                 includeOpenFoodFactsLabels, page, size)));
