@@ -613,6 +613,22 @@ und Löschen. Fachänderung und Audit-Eintrag gehören zur selben Transaktion.
 Das Log enthält weiterhin Aktionsbeschreibungen, keine vollständigen
 Vorher-/Nachher-Snapshots aller Felder.
 
+### Quellen und Prüfdatum anzeigen
+
+Auf der Produktdetailseite stehen unter „Datenquellen und Herkunft“ die
+zugeordneten Katalogquellen mit Link, Quellentyp und Prüfdatum
+(`dd.MM.yyyy HH:mm`, ohne zusätzliche Zeitzonenumrechnung).
+Fehlender Typ wird als „Nicht angegeben“, fehlendes Prüfdatum als
+„Kein Prüfdatum hinterlegt“ ausgewiesen. Ohne Quellenzuordnung erscheint
+„Keine Katalogquelle zugeordnet.“; vorhandene OFF-Provenienz bleibt davon
+unabhängig sichtbar. Ein Quellenprüfdatum ist kein Nachweis einer
+vollständigen Prüfung aller Produktangaben.
+
+Die Quellenliste in der Administration verwendet dieselbe Darstellung.
+Prüfdaten bleiben optional und werden weder aus Importzeitpunkten noch aus
+Produktänderungen abgeleitet. Die API liefert weiterhin das gespeicherte
+`verifiedAt` bzw. `null`.
+
 ### MVP-Abgleich (Oktober 2026)
 
 „Fertig“ bezeichnet den technischen MVP-Umfang, nicht die Vollständigkeit
@@ -621,7 +637,7 @@ oder redaktionelle Prüfung des gesamten Datenbestands.
 | Bereich | Stand | Einordnung |
 |---|---|---|
 | Katalog | Fertig | Produktdetails, Marken/Unternehmen, Kategorien, Suche und API vorhanden; Suche derzeit im Warenkorb, URL-/API-Filter bleiben erhalten. |
-| Quellen / Prüfdatum | Teilweise fertig | Quellenzuordnung, Prüfdatum und Qualitätswarnungen vorhanden; fehlende Belege oder Prüfdaten verhindern das Anzeigen eines Produkts nicht. Redaktionelle Datenpflege bleibt erforderlich. |
+| Quellen / Prüfdatum | Teilweise fertig | Quellenzuordnung, öffentlich sichtbares Prüfdatum und Qualitätswarnungen vorhanden; fehlende Belege oder Prüfdaten sind erkennbar, verhindern das Anzeigen eines Produkts aber nicht. Redaktionelle Datenpflege bleibt erforderlich. |
 | Alternativen | Teilweise fertig | Redaktionelle Zuordnung und automatische Vorschläge vorhanden; automatische Ähnlichkeit ist keine redaktionelle Verifikation. Prüfung der zugewiesenen Alternativen bleibt redaktionelle Aufgabe. |
 | Anmeldung | Fertig | Registrierung, Login/Logout, Rollen, CSRF und Kontosperren vorhanden. |
 | Favoriten | Fertig | Benutzerbezogen, duplikatfrei; passende Favoriten vor anderen Suchtreffern, Ausschlüsse bleiben wirksam. |

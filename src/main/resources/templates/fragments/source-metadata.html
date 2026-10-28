@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<body>
+<dl th:fragment="metadata(source)" class="detail-list">
+    <dt>Quellentyp</dt>
+    <dd th:text="${#strings.isEmpty(#strings.trim(source.type)) ? 'Nicht angegeben' : source.type}">Typ</dd>
+    <dt>Prüfdatum der Quelle</dt>
+    <dd>
+        <time th:if="${source.verifiedAt != null}" th:datetime="${source.verifiedAt}"
+              th:text="${#temporals.format(source.verifiedAt, 'dd.MM.yyyy HH:mm')}">Prüfdatum</time>
+        <span th:unless="${source.verifiedAt != null}">Kein Prüfdatum hinterlegt</span>
+    </dd>
+</dl>
+</body>
+</html>

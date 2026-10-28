@@ -160,9 +160,13 @@
             Unterschiedliche Angaben stehen nebeneinander. Fehlende Angaben bedeuten nicht „frei von“.
             Für Allergene und Zutaten ist die aktuelle Verpackung maßgeblich.
             Fehler kannst du ohne Anmeldung melden.</p>
+        <h3>Katalogquellen</h3>
+        <p class="hint">Das Prüfdatum bezieht sich auf die jeweilige Quelle, nicht auf eine vollständige Prüfung aller Produktangaben.</p>
+        <p th:if="${product.sources == null or product.sources.isEmpty()}">Keine Katalogquelle zugeordnet.</p>
         <ul th:if="${product.sources != null and !product.sources.isEmpty()}">
             <li th:each="source : ${product.sources}">
                 <a th:href="${source.url}" th:text="${source.title}" target="_blank" rel="noopener noreferrer">Quelle</a>
+                <div th:replace="~{fragments/source-metadata :: metadata(${source})}"></div>
             </li>
         </ul>
         <th:block th:if="${product.openFoodFactsData != null}">

@@ -278,6 +278,7 @@
         <div class="admin-list" th:if="${!#lists.isEmpty(sources)}">
             <div class="admin-item" th:each="source : ${sources}">
                 <strong th:text="${source.title}">Quelle</strong>
+                <div th:replace="~{fragments/source-metadata :: metadata(${source})}"></div>
                 <div class="admin-item-actions">
                     <a th:href="@{/admin/sources/{id}/edit(id=${source.id})}" class="button secondary">Bearbeiten</a>
                     <form th:action="@{/admin/sources/{id}/delete(id=${source.id})}" method="post"
