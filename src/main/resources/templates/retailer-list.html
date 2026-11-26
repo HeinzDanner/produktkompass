@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Händler-Einkaufsliste erstellen – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Händler-Einkaufsliste erstellen</h1>
+        <p>Wähle einen Katalog. Für jeden Warenkorbartikel werden ähnliche Katalogprodukte vorgeschlagen.
+            Die bestehende Einkaufsliste bleibt unverändert.</p>
+        <form method="get" th:action="@{/cart/retailer-list}" class="product-search">
+            <label for="retailerCatalog">Katalog</label>
+            <select id="retailerCatalog" name="catalogCode" required>
+                <option value="">Händler auswählen</option>
+                <option th:each="catalog : ${retailerCatalogs}" th:value="${catalog.code}"
+                        th:selected="${preview != null and preview.catalog.code == catalog.code}"
+                        th:text="${catalog.displayName + ' · ' + catalog.productCount + ' Produkte'}">Katalog</option>
+            </select>
+            <button class="button primary" type="submit">Alternativen suchen</button>
+        </form>
+        <div th:if="${#lists.isEmpty(retailerCatalogs)}" class="empty-state">
+            Es gibt noch keinen importierten oder synthetischen Händlerkatalog.
+        </div>
+    </section>
+
+    <section class="box" th:if="${preview != null}">
+        <h2 th:text="${'Vorschläge · ' + preview.catalog.displayName}">Vorschläge</h2>
+        <p class="hint">Quelle: <span th:text="${preview.catalog.sourceDescription}">Katalogquelle</span>.
+            Produktähnlichkeit und Vorlieben sind Vorschläge, keine Bestätigung des Filialsortiments.</p>
+        <p class="hint">Bekannte Labels jedes Ausgangsprodukts werden möglichst erhalten.
+            Explizite Vorlieben haben Vorrang. „Nicht bestätigt“ bedeutet fehlende passende Händlerangabe,
+            nicht automatisch eine gegenteilige Eigenschaft. Labels werden nicht kopiert.</p>
+        <p class="alert warning">Fehlende Zutaten-, Allergen- oder Spurenangaben bedeuten „unbekannt“, nicht „frei davon“.
+            Bitte Verpackung und Händlerangaben selbst prüfen. Es wird nichts automatisch ersetzt.</p>
+        <form method="post" th:action="@{/cart/retailer-list}" class="retailer-list-form">
+            <input type="hidden" name="catalogCode" th:value="${preview.catalog.code}">
+            <label for="listName">Name der neuen Einkaufsliste</label>
+            <input id="listName" type="text" name="name" maxlength="120" required
+                   th:value="${defaultListName}">
+            <div class="retailer-suggestions">
+                <article class="retailer-suggestion" th:each="item : ${preview.items}">
+                    <h3 th:text="${item.sourceName}">Warenkorbprodukt</h3>
+                    <p th:text="${'Menge im Warenkorb: ' + item.quantity}">Menge</p>
+                    <label th:for="${'selection-' + item.sourceProductId}">Entscheidung für diesen Artikel</label>
+                    <select th:id="${'selection-' + item.sourceProductId}"
+                            th:name="${'selection_' + item.sourceProductId}" required>
+                        <option value="" disabled th:selected="${item.cachedProductId == null}">
+                            Bitte Katalogprodukt oder manuelle Notiz wählen
+                        </option>
+                        <option th:each="suggestion : ${item.suggestions}"
+                                th:value="${suggestion.product.id}"
+                                th:selected="${item.cachedProductId != null and item.cachedProductId == suggestion.product.id}"
+                                th:text="${suggestion.product.name
+                                    + (suggestion.product.brand != null ? ' · ' + suggestion.product.brand : '')
+                                    + (suggestion.product.packageSize != null ? ' · ' + suggestion.product.packageSize : '')
+                                    + (suggestion.product.price != null ? ' · ' + #numbers.formatDecimal(suggestion.product.price, 1, 2) + ' €' : '')
+                                    + (suggestion.matchedPreferences.isEmpty() ? '' : ' · passt zu: ' + #strings.listJoin(suggestion.matchedPreferences, ', '))
+                                    + (suggestion.matchedSourceLabels.isEmpty() ? '' : ' · passende Ausgangslabels: ' + #strings.listJoin(suggestion.matchedSourceLabels, ', '))
+                                    + (suggestion.unconfirmedSourceLabels.isEmpty() ? '' : ' · nicht bestätigt: ' + #strings.listJoin(suggestion.unconfirmedSourceLabels, ', '))}">
+                            Produkt
+                        </option>
+                        <option value="manual">Originalname als manuelle Notiz übernehmen</option>
+                    </select>
+                    <ul th:if="${!#lists.isEmpty(item.suggestions)}" class="quality-warnings">
+                        <li th:each="suggestion : ${item.suggestions}">
+                            <span th:text="${suggestion.product.name + ': '
+                                + (suggestion.matchedPreferences.isEmpty()
+                                    ? (suggestion.sameCategory ? 'ähnliche Kategorie' : 'ähnlicher Name')
+                                    : 'bevorzugte Angabe: ' + #strings.listJoin(suggestion.matchedPreferences, ', '))}">
+                            Match-Hinweis
+                            </span>
+                            <p th:if="${!suggestion.matchedSourceLabels.isEmpty()}"
+                               th:text="${'Passende Ausgangslabels laut Händlerdaten: ' + #strings.listJoin(suggestion.matchedSourceLabels, ', ')}"></p>
+                            <p th:if="${!suggestion.unconfirmedSourceLabels.isEmpty()}"
+                               th:text="${'Ausgangslabels nicht bestätigt: ' + #strings.listJoin(suggestion.unconfirmedSourceLabels, ', ')}"></p>
+                        </li>
+                    </ul>
+                    <p th:if="${#lists.isEmpty(item.suggestions)}" class="hint">
+                        Keine ähnlichen Produkte in diesem Katalog gefunden. Du kannst den Originalnamen als manuelle Notiz übernehmen.
+                    </p>
+                </article>
+            </div>
+            <p class="hint">Wähle für jeden Warenkorbartikel einen Katalogtreffer oder die manuelle Notiz.
+                Bereits bestätigte Treffer sind vorausgewählt und können geändert werden.</p>
+            <button type="submit" class="button primary">Auswahl als neue Liste speichern</button>
+        </form>
+    </section>
+    <p><a th:href="@{/cart}">Zurück zum Warenkorb</a> · <a th:href="@{/cart/retailer-lists}">Meine Händler-Einkaufslisten</a></p>
+</main>
+</body>
+</html>

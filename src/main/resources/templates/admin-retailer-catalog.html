@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Händlerkataloge – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Händlerkatalog importieren</h1>
+        <p>Der Import ersetzt den bisherigen Snapshot dieses Händlercodes. Warenkörbe und bereits gespeicherte
+            Einkaufslisten werden nicht verändert.</p>
+        <p class="hint">Nur Daten verwenden, deren Import und Nutzung du verantworten darfst. Es gibt keinen
+            automatischen Abruf bei Lidl oder einem anderen Händler.</p>
+        <div th:if="${adminSuccess}" class="alert success" th:text="${adminSuccess}">Erfolg.</div>
+        <div th:if="${adminError}" class="alert error" th:text="${adminError}">Fehler.</div>
+        <a class="button secondary" th:href="@{/admin/retailer-catalog/template.csv}">CSV-Vorlage herunterladen</a>
+        <form method="post" enctype="multipart/form-data" th:action="@{/admin/retailer-catalog/import}"
+              class="admin-form retailer-import-form">
+            <label for="catalogCode">Händlercode</label>
+            <input id="catalogCode" name="code" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_-]{1,31}"
+                   placeholder="z. B. LIDL">
+            <label for="displayName">Anzeigename</label>
+            <input id="displayName" name="displayName" required maxlength="100" placeholder="z. B. Lidl Onlinekatalog">
+            <label for="retailerFile">Semikolon-getrennte CSV (UTF-8, max. 64 MB)</label>
+            <input id="retailerFile" type="file" name="file" accept=".csv,text/csv" required>
+            <button type="submit" class="button primary">Snapshot importieren</button>
+        </form>
+        <p><a th:href="@{/admin}">Zurück zum Admin-Bereich</a></p>
+    </section>
+    <section class="box">
+        <h2>Vorhandene Datenbestände</h2>
+        <div th:if="${#lists.isEmpty(retailerCatalogs)}" class="empty-state">Keine Kataloge vorhanden.</div>
+        <div class="admin-list" th:unless="${#lists.isEmpty(retailerCatalogs)}">
+            <article class="admin-item" th:each="catalog : ${retailerCatalogs}">
+                <div>
+                    <strong th:text="${catalog.displayName}">Händler</strong>
+                    <div class="meta-row">
+                        <span th:text="${catalog.code}">CODE</span>
+                        <span th:text="${catalog.sourceDescription}">Quelle</span>
+                        <span th:text="${catalog.productCount + ' Produkte'}">0 Produkte</span>
+                        <span th:if="${catalog.importedAt != null}"
+                              th:text="${'Importiert: ' + #temporals.format(catalog.importedAt, 'dd.MM.yyyy HH:mm')}">Importdatum</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+</body>
+</html>

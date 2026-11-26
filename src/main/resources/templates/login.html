@@ -20,6 +20,9 @@
         </div>
         <div th:if="${param.logout}" class="alert success">Du hast dich erfolgreich abgemeldet.</div>
         <div th:if="${param.registered}" class="alert success">Registrierung erfolgreich. Du kannst dich jetzt anmelden.</div>
+        <div th:if="${param.emailVerified}" class="alert success">E-Mail-Adresse bestätigt.</div>
+        <div th:if="${param.passwordReset}" class="alert success">Passwort geändert. Bitte melde dich mit dem neuen Passwort an.</div>
+        <div th:if="${param.expired}" class="alert error">Deine Sitzung ist nicht mehr gültig. Bitte erneut anmelden.</div>
 
         <form th:action="@{/login}" method="post">
             <label for="username">Benutzername</label>
@@ -34,6 +37,7 @@
         <p class="hint">Nach dem Login kommst du zurück zur ursprünglich angeforderten Seite.</p>
         <p class="hint">Demo-Admin: <strong>admin</strong> / <strong>admin123</strong></p>
         <p class="hint"><a th:href="@{/register}">Noch kein Konto? Jetzt registrieren</a></p>
+        <p class="hint"><a th:href="@{/forgot-password}">Passwort vergessen?</a></p>
     </section>
 </main>
 </body>

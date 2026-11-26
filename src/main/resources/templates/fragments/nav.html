@@ -10,6 +10,7 @@
             <a th:if="${navAuthenticated}" th:href="@{/favorites}">Favoriten</a>
             <a th:if="${navAuthenticated}" th:href="@{/cart}">Warenkorb</a>
             <a th:if="${navAuthenticated}" th:href="@{/tags}">Meine Tags</a>
+            <a th:if="${navAuthenticated}" th:href="@{/account/security}">Kontosicherheit</a>
             <a th:if="${navIsAdmin}" th:href="@{/admin}">Admin</a>
             <span class="nav-username" th:if="${navAuthenticated}" th:text="${navUsername}">Benutzer</span>
             <a th:unless="${navAuthenticated}" th:href="@{/login}">Login</a>

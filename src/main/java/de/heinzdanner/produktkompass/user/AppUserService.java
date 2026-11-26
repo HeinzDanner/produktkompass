@@ -53,12 +53,13 @@ public class AppUserService implements UserDetailsService {
         AppUser appUser = appUserRepository.findByUsername(normalizeUsername(username))
                 .orElseThrow(() -> new UsernameNotFoundException("Benutzer nicht gefunden: " + username));
 
-        return User.withUsername(appUser.getUsername())
+        var details = User.withUsername(appUser.getUsername())
                 .password(appUser.getPassword())
                 .roles(appUser.getRole().name())
                 .disabled(!appUser.isEnabled())
                 .accountLocked(appUser.isCurrentlyLocked())
                 .build();
+        return new VersionedUserDetails(details, appUser.getCredentialVersion());
     }
 
     /**
@@ -68,7 +69,12 @@ public class AppUserService implements UserDetailsService {
      */
     @Transactional
     public void registerFailedLogin(String username) {
-        appUserRepository.findByUsername(normalizeUsername(username)).ifPresent(user -> {
+        appUserRepository.findByUsernameForUpdate(normalizeUsername(username)).ifPresent(user -> {
+            if (user.isCurrentlyLocked()) return;
+            if (user.getLockedUntil() != null) {
+                user.setFailedLoginAttempts(0);
+                user.setLockedUntil(null);
+            }
             int attempts = user.getFailedLoginAttempts() + 1;
             user.setFailedLoginAttempts(attempts);
             if (attempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
@@ -84,7 +90,7 @@ public class AppUserService implements UserDetailsService {
      */
     @Transactional
     public void registerSuccessfulLogin(String username) {
-        appUserRepository.findByUsername(normalizeUsername(username)).ifPresent(user -> {
+        appUserRepository.findByUsernameForUpdate(normalizeUsername(username)).ifPresent(user -> {
             if (user.getFailedLoginAttempts() > 0 || user.getLockedUntil() != null) {
                 user.setFailedLoginAttempts(0);
                 user.setLockedUntil(null);

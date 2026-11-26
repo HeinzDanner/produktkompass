@@ -13,6 +13,13 @@ server:
         same-site: lax
 
 spring:
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT:587}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -31,3 +38,9 @@ logging:
   level:
     root: WARN
     de.heinzdanner.produktkompass: INFO
+
+produktkompass:
+  security:
+    recovery:
+      base-url: ${RECOVERY_BASE_URL}
+      from: ${RECOVERY_MAIL_FROM}

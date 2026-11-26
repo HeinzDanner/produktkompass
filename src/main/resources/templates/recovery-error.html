@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiederherstellung nicht möglich – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container page-content">
+    <section class="login-panel box">
+        <h1>Wiederherstellung nicht möglich</h1>
+        <div class="alert error" th:text="${recoveryError}"></div>
+        <p>Bei Eingabefehlern kannst du den Link aus der E-Mail erneut öffnen.</p>
+        <p><a th:href="@{/forgot-password}">Neuen Link anfordern</a></p>
+        <p><a th:href="@{/account/security}">Kontosicherheit</a></p>
+        <p><a th:href="@{/login}">Zur Anmeldung</a></p>
+    </section>
+</main>
+</body>
+</html>

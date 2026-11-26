@@ -8,14 +8,80 @@
 </head>
 <body>
 <nav th:replace="~{fragments/nav :: nav}"></nav>
-<main class="container page-content">
-    <section class="box">
+<main class="container page-content" th:classappend="${!navAuthenticated} ? 'guest-catalog-workspace'">
+    <section th:unless="${navAuthenticated}" class="box cart-search guest-catalog-search" aria-label="Produktsuche">
+        <h2>Produkte suchen</h2>
+        <form method="get" th:action="@{/products}" id="cart-search-form" data-guest-search
+              class="cart-main-search" aria-label="Katalog durchsuchen">
+            <label for="cart-query">Produktname oder Stichwort</label>
+            <div class="cart-search-input">
+                <input id="cart-query" type="search" name="query" th:value="${selectedQuery}"
+                       placeholder="Produktname oder Stichwort">
+                <button type="submit">Suchen</button>
+            </div>
+            <label for="catalogCategory">Kategorie</label>
+            <select id="catalogCategory" name="categoryId" aria-label="Kategorien">
+                <option value="" th:selected="${selectedCategoryFilter == ''}">Alle Kategorien</option>
+                <option th:each="category : ${catalogCategories}" th:value="${category.id}"
+                        th:text="${category.name}" th:selected="${category.id == selectedCategoryId}">Kategorie</option>
+                <option th:if="${selectedOffCategory != null}" th:value="${selectedCategoryFilter}" selected
+                        th:text="${selectedOffCategory + ' (OFF)'}"></option>
+            </select>
+            <input type="hidden" name="size" th:value="${productPage.size}">
+            <input th:if="${selectedBrandId != null}" type="hidden" name="brandId" th:value="${selectedBrandId}">
+            <input th:if="${selectedLabel != null}" type="hidden" name="label" th:value="${selectedLabel}">
+            <input th:if="${selectedNutritionGrade != null}" type="hidden" name="nutritionGrade" th:value="${selectedNutritionGrade}">
+            <input th:if="${selectedMadeInGermany != null}" type="hidden" name="madeInGermany" th:value="${selectedMadeInGermany}">
+            <input th:if="${includeOpenFoodFactsLabels}" type="hidden" name="includeOpenFoodFactsLabels" value="true">
+        </form>
+        <details class="cart-tag-search" open>
+            <summary th:text="${'Tag-Suche · ' + preferred.size() + ' bevorzugt · ' + excluded.size() + ' ausgeschlossen'}">Tag-Suche</summary>
+            <p class="hint">Bevorzugte Tags verbessern die Reihenfolge. Ausschlüsse entfernen bekannte Treffer.
+                Fehlende Angaben bedeuten „unbekannt“, nicht „frei davon“.</p>
+            <p class="hint">Mit „Suchen“ wendest du die Auswahl an. Ohne Anmeldung wird sie nicht in einem Benutzerkonto gespeichert.</p>
+            <p data-tag-notice role="status" aria-live="polite"></p>
+            <div class="tag-zone" data-tag-zone="preferred">
+                <h3>↑ Bevorzugt</h3>
+                <div class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'preferred'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+            <div class="tag-zone" data-tag-zone="neutral">
+                <h3>Verfügbare Tags · Neutral</h3>
+                <label for="cart-tag-query">Tags finden …</label>
+                <input id="cart-tag-query" type="search" list="cart-tag-names" autocomplete="off" placeholder="Tags finden …">
+                <datalist id="cart-tag-names">
+                    <option th:each="selection : ${searchTags}" th:value="${selection.tag.name}" th:label="${selection.tag.source}"></option>
+                </datalist>
+                <div class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'neutral'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+            <div class="tag-zone" data-tag-zone="excluded">
+                <h3>− Ausgeschlossen</h3>
+                <div class="tag-zone-chips">
+                    <th:block th:each="selection : ${searchTags}" th:if="${selection.state.value() == 'excluded'}">
+                        <div th:replace="~{fragments/search-tag :: chip(${selection})}"></div>
+                    </th:block>
+                </div>
+            </div>
+        </details>
+        <div class="cart-tag-reset">
+            <button type="button" class="secondary" data-tags-reset hidden>Alle Tags zurücksetzen</button>
+            <a th:href="@{/products}">Suche zurücksetzen</a>
+        </div>
+    </section>
+    <section class="box catalog-results">
         <div class="section-header">
             <h1>Produktkatalog</h1>
             <a class="button" th:href="@{/}">Zur Startseite</a>
         </div>
 
-        <form method="get" th:action="@{/products}" class="product-search catalog-search" aria-label="Katalog durchsuchen">
+        <form th:if="${navAuthenticated}" method="get" th:action="@{/products}" class="product-search catalog-search" aria-label="Katalog durchsuchen">
             <label for="catalogQuery">Produkte suchen</label>
             <input id="catalogQuery" type="search" name="query" th:value="${selectedQuery}"
                    placeholder="Produkt, Marke, Unternehmen oder Kategorie">
@@ -60,15 +126,16 @@
         </div>
         <nav aria-label="Ergebnisseiten" class="actions">
             <a th:if="${productPage.hasPrevious()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
+               th:href="${!navAuthenticated} ? ${guestPreviousUrl} : @{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number - 1},size=${productPage.size})}">Zurück</a>
             <span th:if="${productPage.totalPages > 0}"
                   th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
             <a th:if="${productPage.hasNext()}" class="button secondary"
-               th:href="@{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
+               th:href="${!navAuthenticated} ? ${guestNextUrl} : @{/products(query=${selectedQuery},brandId=${selectedBrandId},categoryId=${selectedCategoryFilter},label=${selectedLabel},nutritionGrade=${selectedNutritionGrade},madeInGermany=${selectedMadeInGermany},tagId=${selectedTagId},includeOpenFoodFactsLabels=${includeOpenFoodFactsLabels},page=${productPage.number + 1},size=${productPage.size})}">Weiter</a>
         </nav>
     </section>
 </main>
 <script th:src="@{/js/product-images.js}" defer></script>
 <script th:src="@{/js/cart.js}" defer></script>
+<script th:unless="${navAuthenticated}" th:src="@{/js/cart-search.js}" defer></script>
 </body>
 </html>

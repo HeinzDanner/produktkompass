@@ -13,9 +13,11 @@
     <section class="box">
         <h1>Admin-Bereich</h1>
         <p>Verwalte Produkte, Marken, Unternehmen, Kategorien und Quellen zentral.</p>
+        <p><a href="#product-editor">Produkt suchen und editieren &rarr;</a></p>
         <p><a th:href="@{/admin/audit-log}">Audit-Log ansehen &rarr;</a></p>
         <p><a th:href="@{/admin/reports}">Produktmeldungen prüfen &rarr;</a></p>
         <p><a th:href="@{/admin/category-mappings}">OFF-Kategorien zuordnen &rarr;</a></p>
+        <p><a th:href="@{/admin/retailer-catalog}">Händlerkataloge importieren &rarr;</a></p>
         <p th:if="${navIsAdministrator}">
             <a th:href="@{/admin/users}">Benutzer und Rollen verwalten &rarr;</a>
         </p>
@@ -291,9 +293,10 @@
         </div>
     </section>
 
-    <section class="box">
-        <h2>Produktliste</h2>
-        <form method="get" th:action="@{/admin}" class="product-search">
+    <section class="box" id="product-editor">
+        <h2>Produkt suchen und editieren</h2>
+        <p class="hint">Suche ein vorhandenes Produkt und öffne mit „Bearbeiten“ den Produkteditor.</p>
+        <form method="get" th:action="@{/admin#product-editor}" class="product-search">
             <input th:each="entry : ${adminListParams}" th:if="${entry.key != 'query' and entry.key != 'page' and entry.key != 'size' and entry.key != 'quality'}"
                    type="hidden" th:name="${entry.key}" th:value="${entry.value}">
             <label for="adminProductQuery">Produkte suchen</label>
@@ -306,7 +309,7 @@
             </select>
             <input type="hidden" name="size" th:value="${productPage.size}">
             <button type="submit" class="button primary">Suchen</button>
-            <a th:href="@{/admin}" class="button secondary">Zurücksetzen</a>
+            <a th:href="@{/admin#product-editor}" class="button secondary">Zurücksetzen</a>
         </form>
         <p class="hint">„Quelle ohne Prüfdatum“ findet Produkte mit mindestens einer zugeordneten Quelle ohne Prüfdatum.
             Produkte ohne Quellen sind separat filterbar. OFF-Importzeitpunkte gelten nicht als redaktionelle Prüfung.</p>
@@ -335,11 +338,11 @@
         </div>
         <nav aria-label="Admin-Produktergebnisse" class="actions">
             <a th:if="${productPage.hasPrevious()}" class="button secondary"
-               th:href="${productPreviousUrl}">Zurück</a>
+               th:href="${productPreviousUrl + '#product-editor'}">Zurück</a>
             <span th:if="${productPage.totalPages > 0}"
                   th:text="${'Seite ' + (productPage.number + 1) + ' von ' + productPage.totalPages}">Seite</span>
             <a th:if="${productPage.hasNext()}" class="button secondary"
-               th:href="${productNextUrl}">Weiter</a>
+               th:href="${productNextUrl + '#product-editor'}">Weiter</a>
         </nav>
     </section>
 </main>

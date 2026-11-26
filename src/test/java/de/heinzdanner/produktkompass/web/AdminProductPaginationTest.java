@@ -57,6 +57,24 @@ class AdminProductPaginationTest {
     }
 
     @Test
+    void productEditorEntryIsAvailableToAdminsAndEditors() throws Exception {
+        for (String role : List.of("ADMIN", "EDITOR")) {
+            var result = mvc.perform(get("/admin").param("query", "000 admin page")
+                            .param("size", "2").with(user("staff").roles(role)))
+                    .andExpect(status().isOk()).andReturn();
+            assertThat(result.getResponse().getContentAsString())
+                    .contains("href=\"#product-editor\"", "Produkt suchen und editieren",
+                            "id=\"product-editor\"", "action=\"/admin#product-editor\"",
+                            "href=\"/admin/products/" + fixtures.getFirst().getId() + "/edit\"",
+                            "#product-editor\">Weiter</a>");
+            mvc.perform(get("/admin/products/" + fixtures.getFirst().getId() + "/edit")
+                            .with(user("staff").roles(role)))
+                    .andExpect(status().isOk());
+        }
+        mvc.perform(get("/admin").with(user("max").roles("USER"))).andExpect(status().isForbidden());
+    }
+
+    @Test
     void adminFiltersAndPaginatesWithWarningsOnlyForDisplayedProducts() throws Exception {
         var result = mvc.perform(get("/admin").param("query", "000 admin page")
                         .param("page", "1").param("size", "2")

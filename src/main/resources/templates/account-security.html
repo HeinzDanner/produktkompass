@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontosicherheit – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="login-panel box">
+        <h1>Kontosicherheit</h1>
+        <div th:if="${param.sent}" class="alert success">Bestätigungsnachricht versendet. Prüfe dein E-Mail-Postfach.</div>
+        <p>Nur eine bestätigte E-Mail-Adresse kann zur Passwort-Wiederherstellung verwendet werden.</p>
+        <p th:if="${email != null}">Adresse: <strong th:text="${email}"></strong>
+            <span th:text="${verified} ? '(bestätigt)' : '(noch nicht bestätigt)'"></span></p>
+        <p th:if="${verified}" class="hint">Eine Änderung der bestätigten Adresse ist hier noch nicht vorgesehen.
+            Kontaktiere bei Problemen den Administrator.</p>
+        <form th:unless="${verified}" method="post" th:action="@{/account/security/email}" th:object="${emailRequest}">
+            <label for="email">E-Mail-Adresse</label>
+            <input id="email" type="email" name="email" th:value="*{email}" maxlength="254" autocomplete="email" required>
+            <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            <label for="password">Aktuelles Passwort zur Bestätigung</label>
+            <input id="password" type="password" name="password" autocomplete="current-password" required>
+            <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            <button type="submit">Bestätigungslink senden</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -12,13 +12,18 @@ public interface OpenFoodFactsDataRepository extends JpaRepository<OpenFoodFacts
             select distinct new de.heinzdanner.produktkompass.product.dto.OffCategoryOption(entry, mapping.category.id)
             from OpenFoodFactsData data join data.categoryEntries entry
             left join OffCategoryMapping mapping on mapping.offValue = entry
-            where lower(entry) like :pattern escape '!' order by entry
+            where lower(entry) like :pattern escape '!'
+              and (:unmappedOnly = false or mapping.offValue is null)
+            order by entry
             """, countQuery = """
             select count(distinct entry) from OpenFoodFactsData data join data.categoryEntries entry
+            left join OffCategoryMapping mapping on mapping.offValue = entry
             where lower(entry) like :pattern escape '!'
+              and (:unmappedOnly = false or mapping.offValue is null)
             """)
     org.springframework.data.domain.Page<de.heinzdanner.produktkompass.product.dto.OffCategoryOption> categoryMappingPage(
             @org.springframework.data.repository.query.Param("pattern") String pattern,
+            @org.springframework.data.repository.query.Param("unmappedOnly") boolean unmappedOnly,
             org.springframework.data.domain.Pageable pageable);
 
     @Query("select count(data) from OpenFoodFactsData data join data.categoryEntries entry where entry = :value")

@@ -1,4 +1,20 @@
 services:
+  mailpit:
+    image: axllent/mailpit:v1.27.8
+    profiles: ["mail"]
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.29.0
+    profiles: ["recipes"]
+    ports:
+      - "127.0.0.1:9925:9000"
+    environment:
+      ALLOW_SIGNUP: "false"
+      BASE_URL: http://localhost:9925
+    volumes:
+      - mealie_data:/app/data
   postgres:
     image: postgres:16-alpine
     container_name: produktkompass-postgres
@@ -26,6 +42,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      RECOVERY_BASE_URL: ${RECOVERY_BASE_URL:-http://localhost:8080}
       POSTGRES_DB: ${POSTGRES_DB:-produktkompass}
       POSTGRES_USER: ${POSTGRES_USER:-produktkompass}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
@@ -35,3 +54,4 @@ services:
 
 volumes:
   postgres_data:
+  mealie_data:

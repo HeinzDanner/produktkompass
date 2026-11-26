@@ -46,8 +46,8 @@ class OffCategorySearchIntegrationTest {
         for (String category : new String[]{"Chocolats noirs", "nl:Chocolade", "nl:Koeken/Chocolade/Snoep"}) {
             String html = mvc.perform(get("/products").param("categoryId", "off:" + category))
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-            assertThat(html).contains(chocolate.getName()).doesNotContain("OFF category nonmatch",
-                    "value=\"off:" + category + "\"");
+            assertThat(html).contains(chocolate.getName(), "value=\"off:" + category + "\"")
+                    .doesNotContain("OFF category nonmatch");
             mvc.perform(get("/api/v1/products/search").param("offCategory", category))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.totalElements").value(1))

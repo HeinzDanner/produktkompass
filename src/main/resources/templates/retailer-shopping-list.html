@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${savedList.header.name + ' – ProduktKompass'}">Einkaufsliste</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1 th:text="${savedList.header.name}">Einkaufsliste</h1>
+        <div th:if="${success}" class="alert success" th:text="${success}">Liste gespeichert.</div>
+        <p th:text="${savedList.header.catalogName + ' · erstellt ' + #temporals.format(savedList.header.createdAt, 'dd.MM.yyyy HH:mm')}">
+            Händler und Erstelldatum
+        </p>
+        <p class="hint">Gespeicherter Katalog-Snapshot; keine Aussage über aktuelle Filialverfügbarkeit.</p>
+        <p class="alert warning">Allergen- und Zutateninformationen sind nicht garantiert vollständig.
+            Fehlende Angaben sind unbekannt. Bitte vor dem Kauf selbst prüfen.</p>
+        <div th:if="${#lists.isEmpty(savedList.items)}" class="empty-state">Die Liste enthält keine Produkte.</div>
+        <div class="admin-list" th:unless="${#lists.isEmpty(savedList.items)}">
+            <article class="admin-item" th:each="item : ${savedList.items}">
+                <div>
+                    <strong th:text="${item.productName}">Produkt</strong>
+                    <div class="meta-row">
+                        <span th:if="${item.selectionKind == 'MANUAL'}">Manuell prüfen – kein Katalogtreffer</span>
+                        <span th:if="${item.brand != null}" th:text="${item.brand}">Marke</span>
+                        <span th:if="${item.packageSize != null}" th:text="${item.packageSize}">Packungsgröße</span>
+                        <span th:text="${'Menge: ' + item.quantity}">Menge</span>
+                        <span th:if="${item.unitPrice != null}"
+                              th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2) + ' € / Stück'}">Preis</span>
+                    </div>
+                    <small th:text="${'Ersetzt: ' + item.sourceName}">Ausgangsprodukt</small>
+                </div>
+                <a th:if="${item.productUrl != null}" th:href="${item.productUrl}"
+                   target="_blank" rel="noopener noreferrer">Produktseite</a>
+            </article>
+        </div>
+        <p class="actions">
+            <a class="button primary" th:href="@{/cart/retailer-lists/{id}/export.csv(id=${savedList.header.id})}">
+                Einkaufsliste als CSV exportieren
+            </a>
+            <a class="button secondary" th:href="@{/cart/retailer-list}">Weitere Liste erstellen</a>
+            <a class="button secondary" th:href="@{/cart}">Zum Warenkorb</a>
+        </p>
+    </section>
+</main>
+</body>
+</html>

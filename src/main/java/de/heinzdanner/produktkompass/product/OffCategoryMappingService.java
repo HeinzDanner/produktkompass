@@ -25,9 +25,14 @@ public class OffCategoryMappingService {
         this.audit = audit;
     }
 
-    public Page<OffCategoryOption> page(String query, int page) {
+    public Page<OffCategoryOption> page(String query, boolean unmappedOnly, int page) {
         MasterDataPaging.request(page, 20, "name");
-        return data.categoryMappingPage(MasterDataPaging.pattern(query), PageRequest.of(page, 20));
+        String pattern = MasterDataPaging.pattern(query);
+        var result = data.categoryMappingPage(pattern, unmappedOnly, PageRequest.of(page, 20));
+        int lastPage = Math.max(0, result.getTotalPages() - 1);
+        return page > lastPage
+                ? data.categoryMappingPage(pattern, unmappedOnly, PageRequest.of(lastPage, 20))
+                : result;
     }
 
     @Transactional

@@ -87,6 +87,64 @@ class OffCategoryMappingIntegrationTest {
     }
 
     @Test
+    void unmappedFilterCombinesSearchPaginationAndAssignment() throws Exception {
+        imported.getOpenFoodFactsData().setCategories(null);
+        imported.getOpenFoodFactsData().setCategoryTags(java.util.stream.IntStream.range(0, 22)
+                .mapToObj(index -> "mappingfilter:" + String.format(java.util.Locale.ROOT, "%02d", index))
+                .collect(java.util.stream.Collectors.joining(",")));
+        products.saveAndFlush(imported);
+        mvc.perform(post("/admin/category-mappings").with(user("editor").roles("EDITOR")).with(csrf())
+                        .param("value", "mappingfilter:00").param("categoryId", chocolate.getId().toString()))
+                .andExpect(status().is3xxRedirection());
+
+        var all = mvc.perform(get("/admin/category-mappings").with(user("editor").roles("EDITOR"))
+                        .param("query", "mappingfilter:"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(mappingPage(all).getTotalElements()).isEqualTo(22);
+
+        var filtered = mvc.perform(get("/admin/category-mappings").with(user("editor").roles("EDITOR"))
+                        .param("query", "mappingfilter:").param("unmappedOnly", "true"))
+                .andExpect(status().isOk()).andExpect(model().attribute("unmappedOnly", true))
+                .andReturn();
+        assertThat(mappingPage(filtered).getTotalElements()).isEqualTo(21);
+        assertThat(mappingPage(filtered).getContent()).hasSize(20)
+                .allSatisfy(entry -> assertThat(entry.categoryId()).isNull())
+                .extracting(entry -> entry.value()).doesNotContain("mappingfilter:00");
+        assertThat(filtered.getResponse().getContentAsString())
+                .contains("unmappedOnly=true", "Nur nicht zugeordnet");
+
+        var second = mvc.perform(get("/admin/category-mappings").with(user("editor").roles("EDITOR"))
+                        .param("query", "mappingfilter:").param("unmappedOnly", "true").param("page", "1"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(mappingPage(second).getContent()).hasSize(1);
+        mvc.perform(post("/admin/category-mappings").with(user("editor").roles("EDITOR")).with(csrf())
+                        .param("value", mappingPage(second).getContent().getFirst().value())
+                        .param("categoryId", chocolate.getId().toString()).param("query", "mappingfilter:")
+                        .param("unmappedOnly", "true").param("page", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/category-mappings?query=mappingfilter%3A&page=1&unmappedOnly=true"));
+        var after = mvc.perform(get("/admin/category-mappings").with(user("editor").roles("EDITOR"))
+                        .param("query", "mappingfilter:").param("unmappedOnly", "true").param("page", "1"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(mappingPage(after).getNumber()).isZero();
+        assertThat(mappingPage(after).getTotalElements()).isEqualTo(20);
+
+        var empty = mvc.perform(get("/admin/category-mappings").with(user("editor").roles("EDITOR"))
+                        .param("query", "mappingfilter:00").param("unmappedOnly", "true"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Keine OFF-Kategorien")))
+                .andReturn();
+        assertThat(mappingPage(empty).getTotalElements()).isZero();
+    }
+
+    @SuppressWarnings("unchecked")
+    private org.springframework.data.domain.Page<de.heinzdanner.produktkompass.product.dto.OffCategoryOption> mappingPage(
+            org.springframework.test.web.servlet.MvcResult result) {
+        return (org.springframework.data.domain.Page<de.heinzdanner.produktkompass.product.dto.OffCategoryOption>)
+                result.getModelAndView().getModel().get("mappingPage");
+    }
+
+    @Test
     void mappingAdministrationRejectsUnauthorizedCsrfAndInvalidEntries() throws Exception {
         mvc.perform(get("/admin/category-mappings")).andExpect(status().is3xxRedirection());
         mvc.perform(get("/admin/category-mappings").with(user("max").roles("USER")))

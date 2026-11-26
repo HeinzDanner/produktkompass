@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +33,8 @@ class LoginLockoutIntegrationTest {
     private WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
+    @Autowired
+    private de.heinzdanner.produktkompass.user.AppUserRepository users;
 
     @BeforeEach
     void setUp() {
@@ -62,6 +65,8 @@ class LoginLockoutIntegrationTest {
                     .andExpect(redirectedUrl("/login?error"));
         }
 
+        var locked = users.findByUsername(username).orElseThrow();
+        var originalExpiry = locked.getLockedUntil();
         // Selbst das korrekte Passwort wird jetzt abgelehnt, weil das Konto gesperrt ist
         mockMvc.perform(post("/login")
                         .with(csrf())
@@ -69,5 +74,17 @@ class LoginLockoutIntegrationTest {
                         .param("password", correctPassword))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?locked"));
+        assertThat(users.findByUsername(username).orElseThrow().getLockedUntil()).isEqualTo(originalExpiry);
+
+        locked.setLockedUntil(java.time.LocalDateTime.now().minusMinutes(1));
+        users.saveAndFlush(locked);
+        mockMvc.perform(post("/login").with(csrf()).param("username", username).param("password", "invalid"))
+                .andExpect(redirectedUrl("/login?error"));
+        var expired = users.findByUsername(username).orElseThrow();
+        assertThat(expired.getFailedLoginAttempts()).isEqualTo(1);
+        assertThat(expired.getLockedUntil()).isNull();
+        mockMvc.perform(post("/login").with(csrf()).param("username", username).param("password", correctPassword))
+                .andExpect(status().is3xxRedirection());
+        assertThat(users.findByUsername(username).orElseThrow().getFailedLoginAttempts()).isZero();
     }
 }

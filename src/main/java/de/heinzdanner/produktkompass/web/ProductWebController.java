@@ -1,5 +1,9 @@
 package de.heinzdanner.produktkompass.web;
 
+import de.heinzdanner.produktkompass.cart.CartSearchPreferences;
+import de.heinzdanner.produktkompass.cart.CartSearchSpecifications;
+import de.heinzdanner.produktkompass.cart.CartTagCatalog;
+import de.heinzdanner.produktkompass.cart.TagState;
 import de.heinzdanner.produktkompass.product.BrandService;
 import de.heinzdanner.produktkompass.product.Brand;
 import de.heinzdanner.produktkompass.product.CategoryService;
@@ -8,12 +12,15 @@ import de.heinzdanner.produktkompass.product.CompanyService;
 import de.heinzdanner.produktkompass.product.NutritionGrade;
 import de.heinzdanner.produktkompass.product.Product;
 import de.heinzdanner.produktkompass.product.ProductLabel;
+import de.heinzdanner.produktkompass.product.ProductSearch;
 import de.heinzdanner.produktkompass.product.ProductService;
 import de.heinzdanner.produktkompass.user.AppUserService;
 import de.heinzdanner.produktkompass.user.Role;
 import de.heinzdanner.produktkompass.usertag.UserTag;
 import de.heinzdanner.produktkompass.usertag.UserTagService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,12 +29,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.security.Principal;
 import de.heinzdanner.produktkompass.product.dto.OpenFoodFactsView;
 import de.heinzdanner.produktkompass.product.dto.ProductDisplay;
 import de.heinzdanner.produktkompass.product.dto.ProductSummary;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,19 +51,22 @@ public class ProductWebController {
     private final CategoryService categoryService;
     private final CompanyService companyService;
     private final UserTagService userTagService;
+    private final CartTagCatalog cartTags;
 
     public ProductWebController(ProductService productService,
                                AppUserService appUserService,
                                BrandService brandService,
                                CategoryService categoryService,
                                CompanyService companyService,
-                               UserTagService userTagService) {
+                               UserTagService userTagService,
+                               CartTagCatalog cartTags) {
         this.productService = productService;
         this.appUserService = appUserService;
         this.brandService = brandService;
         this.categoryService = categoryService;
         this.companyService = companyService;
         this.userTagService = userTagService;
+        this.cartTags = cartTags;
     }
 
     @GetMapping("/")
@@ -71,6 +85,9 @@ public class ProductWebController {
                            @RequestParam(defaultValue = "false") boolean includeOpenFoodFactsLabels,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "20") int size,
+                           @RequestParam(defaultValue = "") List<String> preferred,
+                           @RequestParam(defaultValue = "") List<String> excluded,
+                           @RequestParam Map<String, String> parameters,
                            Principal principal,
                            Model model) {
         Long categoryId = null;
@@ -90,9 +107,41 @@ public class ProductWebController {
         if (tagId != null) {
             userTagService.requireOwnedTag(principal == null ? null : principal.getName(), tagId);
         }
-        var results = productService.searchPage(query, brandId, categoryId, label, nutritionGrade,
-                madeInGermany, tagId, principal == null ? null : principal.getName(),
-                includeOpenFoodFactsLabels, page, size, offCategory);
+        Page<ProductSummary> results;
+        if (principal == null) {
+            if (parameters.keySet().stream().anyMatch(key -> key.startsWith("tag."))) {
+                preferred = new ArrayList<>();
+                excluded = new ArrayList<>();
+                for (var entry : parameters.entrySet()) {
+                    if (!entry.getKey().startsWith("tag.")) continue;
+                    TagState state;
+                    try {
+                        state = TagState.fromValue(entry.getValue());
+                    } catch (IllegalArgumentException exception) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ungültiger Tag-Zustand.", exception);
+                    }
+                    switch (state) {
+                        case PREFERRED -> preferred.add(entry.getKey().substring(4));
+                        case EXCLUDED -> excluded.add(entry.getKey().substring(4));
+                        case NEUTRAL -> { }
+                    }
+                }
+            }
+            var tags = cartTags.resolve(null, preferred, excluded, true);
+            var filter = ProductSearch.matching(
+                    query, brandId, categoryId, label, nutritionGrade, madeInGermany, null, null,
+                    includeOpenFoodFactsLabels).and(ProductSearch.offCategory(offCategory));
+            results = productService.searchRankedPage(filter.and(
+                    CartSearchSpecifications.matching(null, query, tags)), page, size);
+            model.addAttribute("searchTags", tags.options());
+            model.addAttribute("preferred", tags.selection().preferred());
+            model.addAttribute("excluded", tags.selection().excluded());
+            model.addAttribute("guestPreviousUrl", guestPageUrl(parameters, page - 1, tags.selection()));
+            model.addAttribute("guestNextUrl", guestPageUrl(parameters, page + 1, tags.selection()));
+        } else {
+            results = productService.searchPage(query, brandId, categoryId, label, nutritionGrade,
+                    madeInGermany, tagId, principal.getName(), includeOpenFoodFactsLabels, page, size, offCategory);
+        }
         model.addAttribute("products", results.getContent());
         model.addAttribute("productPage", results);
         model.addAttribute("brands", brandService.getBrandOptions(
@@ -112,7 +161,8 @@ public class ProductWebController {
         model.addAttribute("selectedMadeInGermany", madeInGermany);
         model.addAttribute("selectedTagId", tagId);
         model.addAttribute("includeOpenFoodFactsLabels", includeOpenFoodFactsLabels);
-        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || offCategory != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null);
+        model.addAttribute("hasActiveFilter", (query != null && !query.isBlank()) || brandId != null || categoryId != null || offCategory != null || label != null || nutritionGrade != null || madeInGermany != null || tagId != null
+                || (principal == null && (!preferred.isEmpty() || !excluded.isEmpty())));
         model.addAttribute("favoriteProductIds", principal == null ? Set.of()
                 : appUserService.getFavoriteIdsForProducts(principal.getName(),
                         results.getContent().stream().map(product -> product.id()).toList()));
@@ -120,6 +170,19 @@ public class ProductWebController {
             model.addAttribute("userTagOptions", userTagService.getTagOptionsForUser(principal.getName()));
         }
         return "products";
+    }
+
+    private String guestPageUrl(Map<String, String> parameters, int page,
+                                CartSearchPreferences.Selection tags) {
+        var url = UriComponentsBuilder.fromPath("/products");
+        parameters.forEach((key, value) -> {
+            if (!key.equals("page") && !key.startsWith("tag.") && !key.equals("preferred") && !key.equals("excluded")) {
+                url.queryParam(key, value);
+            }
+        });
+        tags.preferred().forEach(key -> url.queryParam("preferred", key));
+        tags.excluded().forEach(key -> url.queryParam("excluded", key));
+        return url.queryParam("page", Math.max(0, page)).build().encode().toUriString();
     }
 
     @GetMapping("/products/{id}")

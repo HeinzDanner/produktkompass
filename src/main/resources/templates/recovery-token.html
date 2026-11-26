@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontowiederherstellung – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container page-content">
+    <section class="login-panel box">
+        <h1 th:text="${verification} ? 'E-Mail bestätigen' : 'Neues Passwort setzen'"></h1>
+        <form method="post" th:action="${verification} ? @{/verify-email} : @{/reset-password}">
+            <input type="hidden" name="token" th:value="${token}">
+            <th:block th:unless="${verification}">
+                <p>Verwende eine einzigartige Passphrase mit mindestens 15 Zeichen.
+                    Maximal 72 UTF-8-Bytes (Umlaute benötigen mehr als ein Byte).</p>
+                <label for="password">Neues Passwort</label>
+                <input id="password" type="password" name="password" minlength="15" maxlength="72"
+                       autocomplete="new-password" required>
+                <label for="confirmPassword">Neues Passwort wiederholen</label>
+                <input id="confirmPassword" type="password" name="confirmPassword" minlength="15" maxlength="72"
+                       autocomplete="new-password" required>
+            </th:block>
+            <button type="submit" th:text="${verification} ? 'Adresse bestätigen' : 'Passwort speichern'"></button>
+        </form>
+        <p><a th:href="@{/login}">Zur Anmeldung</a></p>
+    </section>
+</main>
+</body>
+</html>

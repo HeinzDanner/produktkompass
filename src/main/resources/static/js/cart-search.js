@@ -1,6 +1,7 @@
 (() => {
     const form = document.getElementById('cart-search-form');
     if (!form) return;
+    const guest = form.hasAttribute('data-guest-search');
     const tagSearch = document.querySelector('.cart-tag-search');
     const chips = [...tagSearch.querySelectorAll('[data-tag-key]')];
     const tagQuery = document.getElementById('cart-tag-query');
@@ -10,17 +11,17 @@
     const list = document.querySelector('[data-cart-list]');
     const queryInput = document.getElementById('cart-query');
     const draftKey = `cart-search-query:${form.dataset.searchOwner}`;
-    if (!new URL(location.href).searchParams.has('query')) {
+    if (!guest && !new URL(location.href).searchParams.has('query')) {
         const draft = sessionStorage.getItem(draftKey);
         if (draft !== null) queryInput.value = draft;
     }
-    queryInput.addEventListener('input', () => sessionStorage.setItem(draftKey, queryInput.value));
+    if (!guest) queryInput.addEventListener('input', () => sessionStorage.setItem(draftKey, queryInput.value));
     let request;
     let dragged;
     let dragPreview;
     let preferenceWrites = Promise.resolve();
     let pendingWrites = 0;
-    let currentItems = [...list.querySelectorAll('[data-cart-row]')].map(row => ({
+    let currentItems = guest ? [] : [...list.querySelectorAll('[data-cart-row]')].map(row => ({
         id: row.dataset.cartRow,
         quantity: Number(row.querySelector('[data-cart-quantity]').textContent)
     }));
@@ -45,8 +46,13 @@
 
     function url(page = 0) {
         const result = new URL(form.getAttribute('action'), location.href);
+        if (guest) {
+            for (const [key, value] of new FormData(form)) {
+                if (!key.startsWith('tag.')) result.searchParams.append(key, value);
+            }
+        }
         result.searchParams.set('query', document.getElementById('cart-query').value);
-        result.searchParams.set('tagsExplicit', 'true');
+        if (!guest) result.searchParams.set('tagsExplicit', 'true');
         for (const chip of chips) {
             if (chip.dataset.tagState !== 'neutral') {
                 result.searchParams.append(chip.dataset.tagState, chip.dataset.tagKey);
@@ -100,6 +106,7 @@
     }
 
     function savePreferences() {
+        if (guest) return Promise.resolve(true);
         const preferenceForm = document.querySelector('[data-tag-preferences]');
         const body = new URLSearchParams(new FormData(preferenceForm));
         for (const chip of chips) {
@@ -128,6 +135,10 @@
 
     form.addEventListener('submit', event => {
         event.preventDefault();
+        if (guest) {
+            location.assign(url());
+            return;
+        }
         sessionStorage.setItem(draftKey, queryInput.value);
         savePreferences();
         search();
@@ -171,7 +182,8 @@
         });
     }
     reset.hidden = false;
-    document.querySelector('[data-tags-reset-link]').hidden = true;
+    const resetLink = document.querySelector('[data-tags-reset-link]');
+    if (resetLink) resetLink.hidden = true;
     reset.addEventListener('click', () => {
         chips.forEach(chip => { chip.dataset.tagState = 'neutral'; });
         notice.textContent = 'Alle Tags sind wieder neutral.';
@@ -198,6 +210,7 @@
         if (saved) location.assign(navigation.href);
     });
     document.addEventListener('cart:changed', event => {
+        if (guest) return;
         const items = event.detail.items;
         if (!Array.isArray(items)) return;
         currentItems = items;

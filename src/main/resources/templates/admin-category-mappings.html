@@ -17,14 +17,21 @@
         <form method="get" th:action="@{/admin/category-mappings}" class="product-search">
             <label for="mappingQuery">OFF-Kategorie suchen</label>
             <input id="mappingQuery" name="query" type="search" th:value="${query}">
+            <label for="unmappedOnly">
+                <input id="unmappedOnly" name="unmappedOnly" type="checkbox" value="true"
+                       th:checked="${unmappedOnly}">
+                Nur nicht zugeordnet
+            </label>
             <button type="submit" class="button">Suchen</button>
         </form>
-        <p th:text="${mappingPage.totalElements + ' OFF-Kategorien im Bestand'}"></p>
+        <p th:text="${mappingPage.totalElements + (unmappedOnly ? ' nicht zugeordnete OFF-Kategorien gefunden' : ' OFF-Kategorien gefunden')}"></p>
+        <p th:if="${mappingPage.isEmpty()}">Keine OFF-Kategorien für diese Filter gefunden.</p>
         <div th:each="entry : ${mappingPage.content}">
             <form method="post" th:action="@{/admin/category-mappings}" class="product-search">
                 <input type="hidden" name="value" th:value="${entry.value}">
                 <input type="hidden" name="query" th:value="${query}">
                 <input type="hidden" name="page" th:value="${mappingPage.number}">
+                <input type="hidden" name="unmappedOnly" th:value="${unmappedOnly}">
                 <label th:for="${'mapping-' + entryStat.index}" th:text="${entry.value + ' (OFF)'}"></label>
                 <select th:id="${'mapping-' + entryStat.index}" name="categoryId">
                     <option value="" th:selected="${entry.categoryId == null}">Nicht zugeordnet</option>
@@ -35,9 +42,9 @@
             </form>
         </div>
         <nav class="actions" aria-label="OFF-Kategorienseiten">
-            <a th:if="${mappingPage.hasPrevious()}" th:href="@{/admin/category-mappings(query=${query},page=${mappingPage.number - 1})}">Zurück</a>
+            <a th:if="${mappingPage.hasPrevious()}" th:href="@{/admin/category-mappings(query=${query},unmappedOnly=${unmappedOnly},page=${mappingPage.number - 1})}">Zurück</a>
             <span th:text="${'Seite ' + (mappingPage.totalPages == 0 ? 0 : mappingPage.number + 1) + ' von ' + mappingPage.totalPages}"></span>
-            <a th:if="${mappingPage.hasNext()}" th:href="@{/admin/category-mappings(query=${query},page=${mappingPage.number + 1})}">Weiter</a>
+            <a th:if="${mappingPage.hasNext()}" th:href="@{/admin/category-mappings(query=${query},unmappedOnly=${unmappedOnly},page=${mappingPage.number + 1})}">Weiter</a>
         </nav>
     </section>
 </main>

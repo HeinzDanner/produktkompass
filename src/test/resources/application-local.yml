@@ -1,6 +1,12 @@
 server:
   port: 8082
 
+produktkompass:
+  security:
+    rate-limiting:
+      # Other integration tests share one client address; rate-limit tests explicitly enable this.
+      enabled: false
+
 spring:
   # Jeder Testkontext bekommt eine eigene, isolierte H2-In-Memory-Datenbank.
   # Ohne den zufälligen Namensteil würden mehrere Spring-Kontexte (z. B. ein

@@ -1,6 +1,7 @@
 package de.heinzdanner.produktkompass.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -11,10 +12,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import de.heinzdanner.produktkompass.user.AppUserRepository;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final SecurityRequestRateLimitFilter rateLimitFilter;
+    private final CredentialVersionFilter credentialVersionFilter;
+
+    public SecurityConfig(@Value("${produktkompass.security.rate-limiting.enabled:true}") boolean enabled,
+                          AppUserRepository users) {
+        rateLimitFilter = new SecurityRequestRateLimitFilter(enabled);
+        credentialVersionFilter = new CredentialVersionFilter(users);
+    }
 
     /**
      * Erste Filterkette: alles unter /api/**.
@@ -27,6 +39,8 @@ public class SecurityConfig {
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**")
+                .addFilterBefore(rateLimitFilter, CsrfFilter.class)
+                .addFilterBefore(credentialVersionFilter, AuthorizationFilter.class)
                 .csrf(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
@@ -79,6 +93,8 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .addFilterBefore(rateLimitFilter, CsrfFilter.class)
+                .addFilterBefore(credentialVersionFilter, AuthorizationFilter.class)
                 .csrf(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
@@ -86,7 +102,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/*/report").permitAll()
                         .requestMatchers(HttpMethod.POST, "/products/*/report").permitAll()
                         .requestMatchers("/", "/products", "/products/**", "/brands/**", "/companies/**",
-                                "/login", "/register", "/error", "/css/**", "/js/**").permitAll()
+                                "/login", "/register", "/forgot-password", "/reset-password", "/verify-email",
+                                "/error", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/admin/users", "/admin/users/**").hasRole("ADMIN")

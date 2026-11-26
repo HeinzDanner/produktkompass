@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Was kann ich kochen? – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Was kann ich mit meinem Warenkorb kochen?</h1>
+        <p th:if="${recipeError}" role="alert" class="alert error" th:text="${recipeError}"></p>
+        <p>Mealie sucht in den Rezepten deiner lokal eingerichteten Instanz. Es werden keine neuen Rezepte generiert.</p>
+        <p class="alert warning">Ein Warenkorb ist kein Vorratsnachweis. Packungsanzahl ist keine Zutatenmenge.
+            Vorlieben und Allergene werden nicht auf Rezepte übertragen; fehlende Angaben bedeuten nicht „frei davon“.
+            Zutaten, Mengen, Geräte und Eignung bitte selbst prüfen.</p>
+        <p th:if="${!configured and recipeError == null}">Mealie ist noch nicht eingerichtet. Für die lokale Anbindung müssen
+            MEALIE_BASE_URL und MEALIE_API_TOKEN beim Start der Anwendung konfiguriert werden.</p>
+        <p th:if="${items.isEmpty() and recipeError == null}">Dein Warenkorb ist leer.</p>
+        <p th:if="${configured and foods.isEmpty()}">In Mealie sind noch keine strukturierten Zutaten vorhanden.
+            Lege dort Zutaten an und verwende sie in deinen Rezepten.</p>
+        <form th:if="${configured and !items.isEmpty() and !foods.isEmpty()}"
+              method="post" th:action="@{/cart/recipes}" class="admin-form">
+            <p>Ordne jedes Produkt bewusst einer Zutat zu oder überspringe es. Erst mit dem Button werden die
+                ausgewählten Zutaten-IDs an Mealie übermittelt. Der Warenkorb wird nicht verändert.</p>
+            <div th:each="item : ${items}">
+                <label th:for="${'food-' + item.id}" th:text="${item.name + ' · Warenkorbmenge: ' + item.quantity}"></label>
+                <select th:id="${'food-' + item.id}" th:name="${'food_' + item.id}" required>
+                    <option value="" disabled th:selected="${selected[item.id] == null}">Zutat auswählen</option>
+                    <option value="skip" th:selected="${selected[item.id] == 'skip'}">Bewusst überspringen</option>
+                    <option th:each="food : ${foods}" th:value="${food.id}" th:text="${food.name}"
+                            th:selected="${selected[item.id] == food.id.toString()}"></option>
+                </select>
+            </div>
+            <button type="submit" class="button primary">Rezepte in Mealie suchen</button>
+        </form>
+    </section>
+    <section class="box" th:if="${suggestions != null}">
+        <h2>Rezeptideen aus Mealie</h2>
+        <p th:if="${!ignored.isEmpty()}" th:text="${'Nicht berücksichtigt: ' + #strings.listJoin(ignored, ', ')}"></p>
+        <p th:if="${suggestions.isEmpty()}">Keine passenden Rezepte im Mealie-Bestand gefunden.</p>
+        <article th:each="suggestion : ${suggestions}" class="admin-item">
+            <div>
+                <h3 th:text="${suggestion.recipe.name}"></h3>
+                <p th:if="${suggestion.missingFoods.isEmpty()}">Keine fehlende strukturierte Zutat gemeldet.
+                    Mengen und unstrukturierte Rezeptangaben trotzdem prüfen.</p>
+                <th:block th:unless="${suggestion.missingFoods.isEmpty()}">
+                    <p>Fehlende Zutaten laut Mealie:</p>
+                    <ul><li th:each="food : ${suggestion.missingFoods}" th:text="${food.name}"></li></ul>
+                </th:block>
+            </div>
+        </article>
+        <p>Öffne das gewünschte Rezept in deiner Mealie-Instanz für Zubereitung und Mengenangaben.</p>
+    </section>
+    <p><a th:if="${recipeError}" th:href="@{/cart/recipes}">Zuordnung erneut öffnen</a></p>
+    <p><a th:href="@{/cart}">Zurück zum Warenkorb</a></p>
+</main>
+</body>
+</html>

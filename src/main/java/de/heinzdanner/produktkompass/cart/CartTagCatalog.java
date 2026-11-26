@@ -6,6 +6,7 @@ import de.heinzdanner.produktkompass.product.OpenFoodFactsLabel;
 import de.heinzdanner.produktkompass.product.OpenFoodFactsLabelRepository;
 import de.heinzdanner.produktkompass.product.ProductLabel;
 import de.heinzdanner.produktkompass.usertag.UserTagService;
+import de.heinzdanner.produktkompass.usertag.UserTag;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,7 +92,8 @@ public class CartTagCatalog {
                         "OFF", null, raw, null));
             }
         }
-        for (var tag : personalTags.getTagOptionsForUser(username)) {
+        for (var tag : username == null ? List.<UserTag>of()
+                : personalTags.getTagOptionsForUser(username)) {
             String key = "personal:" + tag.getId();
             available.put(key, new Tag(key, tag.getName(), "Mein Tag", null, null, tag.getId()));
         }

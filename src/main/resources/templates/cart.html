@@ -21,6 +21,9 @@
         </div>
         <p data-cart-summary tabindex="-1" th:text="${items.size() + ' Artikel'}">0 Artikel</p>
         <a class="button secondary" th:href="@{/products}">Zum Produktkatalog</a>
+        <a class="button secondary" th:href="@{/cart/retailer-list}">Händler-Einkaufsliste erstellen</a>
+        <a class="button secondary" th:href="@{/cart/retailer-lists}">Meine Händler-Einkaufslisten</a>
+        <a class="button secondary" th:href="@{/cart/recipes}">Was kann ich kochen? · Mealie</a>
         <template data-cart-row-template>
             <article class="cart-list-item">
                 <a data-cart-item-link th:href="@{/products/0}">Produkt</a>

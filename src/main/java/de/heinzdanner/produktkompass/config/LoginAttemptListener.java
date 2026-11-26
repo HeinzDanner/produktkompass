@@ -13,11 +13,8 @@ import org.springframework.stereotype.Component;
  * {@link AppUserService#LOCKOUT_DURATION} gesperrt. Ein erfolgreicher Login
  * setzt den Fehlversuchszähler wieder zurück.
  *
- * <p>Es wird bewusst auf {@link AbstractAuthenticationFailureEvent} (statt nur
- * auf die konkrete Unterklasse für falsche Passwörter) gehört, damit auch
- * andere Fehlerarten (z. B. unbekannter Benutzername) mitgezählt werden –
- * so lässt sich nicht durch Ausprobieren "gültiger" gegenüber "ungültiger"
- * Benutzernamen unterscheiden.</p>
+ * <p>Fehler für unbekannte Konten werden nicht in der Benutzertabelle gespeichert.
+ * Das separate IP-Rate-Limit begrenzt auch solche Anmeldeversuche.</p>
  */
 @Component
 public class LoginAttemptListener {

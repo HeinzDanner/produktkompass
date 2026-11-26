@@ -104,7 +104,7 @@ class MasterDataPaginationTest {
         assertOptions(result.getModelAndView().getModel().get("brands"), selectedBrand);
         assertOptions(result.getModelAndView().getModel().get("categories"), selectedCategory);
         assertThat(result.getResponse().getContentAsString().replaceAll("\\s+", " "))
-                .contains("class=\"product-search catalog-search\"",
+                .contains("data-guest-search",
                         "value=\"" + selectedCategory + "\" selected=\"selected\"")
                 .doesNotContain("<select id=\"brandId\"", "lookup-picker.js");
         verifyNoFullLoads();

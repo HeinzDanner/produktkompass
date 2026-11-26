@@ -13,6 +13,8 @@
     <section class="login-panel box">
         <h1>Registrieren</h1>
         <p>Erstelle ein Konto, um Produkte zu merken und später deine Favoriten zu verwalten.</p>
+        <p class="hint">Hinterlege nach der Anmeldung unter „Kontosicherheit“ eine bestätigte E-Mail-Adresse,
+            damit du ein vergessenes Passwort selbst zurücksetzen kannst.</p>
 
         <div th:if="${errorMessage}" class="alert error" th:text="${errorMessage}">Fehler beim Registrieren.</div>
 

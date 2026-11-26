@@ -1,6 +1,23 @@
 spring:
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
+      mail.smtp.starttls.required: ${SMTP_STARTTLS:false}
+      mail.smtp.ssl.checkserveridentity: true
+      mail.smtp.connectiontimeout: 3000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
   application:
     name: produktkompass
+  servlet:
+    multipart:
+      max-file-size: 64MB
+      max-request-size: 64MB
 
   profiles:
     default: local
@@ -18,6 +35,13 @@ spring:
     enabled: true
 
 produktkompass:
+  security:
+    recovery:
+      base-url: ${RECOVERY_BASE_URL:http://localhost:8080}
+      from: ${RECOVERY_MAIL_FROM:no-reply@produktkompass.local}
+  mealie:
+    base-url: ${MEALIE_BASE_URL:http://localhost:9925}
+    token: ${MEALIE_API_TOKEN:}
   open-food-facts:
     cards:
       max-labels: 3

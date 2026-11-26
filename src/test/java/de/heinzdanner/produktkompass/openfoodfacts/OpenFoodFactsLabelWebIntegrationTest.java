@@ -72,6 +72,8 @@ class OpenFoodFactsLabelWebIntegrationTest {
 
             String cards = mvc.perform(get("/products").param("query", "Labelcatalog fixture"))
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            // Public search now lists all available tags independently of the labels rendered on product cards.
+            cards = cards.substring(cards.indexOf("<article "), cards.indexOf("</article>") + "</article>".length());
             assertThat(count(cards, "off-label-badge")).isEqualTo(3);
             assertThat(cards).contains("Ohne Gluten", "Ohne Laktose", "Vegan", "Quelle: Open Food Facts")
                     .contains("second")

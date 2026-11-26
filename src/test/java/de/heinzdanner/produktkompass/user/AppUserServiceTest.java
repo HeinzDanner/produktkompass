@@ -88,7 +88,7 @@ class AppUserServiceTest {
     @Test
     void registerFailedLoginLocksAccountAfterMaxAttempts() {
         AppUser user = new AppUser("max", "pw", Role.USER);
-        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.findByUsernameForUpdate("max")).thenReturn(Optional.of(user));
         when(appUserRepository.save(user)).thenReturn(user);
 
         for (int i = 0; i < AppUserService.MAX_FAILED_LOGIN_ATTEMPTS - 1; i++) {
@@ -109,7 +109,7 @@ class AppUserServiceTest {
         AppUser user = new AppUser("max", "pw", Role.USER);
         user.setFailedLoginAttempts(4);
         user.setLockedUntil(java.time.LocalDateTime.now().plusMinutes(10));
-        when(appUserRepository.findByUsername("max")).thenReturn(Optional.of(user));
+        when(appUserRepository.findByUsernameForUpdate("max")).thenReturn(Optional.of(user));
         when(appUserRepository.save(user)).thenReturn(user);
 
         appUserService.registerSuccessfulLogin("max");
@@ -117,6 +117,35 @@ class AppUserServiceTest {
         assertThat(user.getFailedLoginAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
         assertThat(user.isCurrentlyLocked()).isFalse();
+    }
+
+    @Test
+    void attemptsDuringLockDoNotExtendLockOrIncreaseCount() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        var expiry = java.time.LocalDateTime.now().plusMinutes(10);
+        user.setFailedLoginAttempts(5);
+        user.setLockedUntil(expiry);
+        when(appUserRepository.findByUsernameForUpdate("max")).thenReturn(Optional.of(user));
+
+        appUserService.registerFailedLogin("max");
+
+        assertThat(user.getLockedUntil()).isEqualTo(expiry);
+        assertThat(user.getFailedLoginAttempts()).isEqualTo(5);
+        org.mockito.Mockito.verify(appUserRepository, org.mockito.Mockito.never()).save(user);
+    }
+
+    @Test
+    void firstFailureAfterExpiredLockStartsFreshCounter() {
+        AppUser user = new AppUser("max", "pw", Role.USER);
+        user.setFailedLoginAttempts(5);
+        user.setLockedUntil(java.time.LocalDateTime.now().minusMinutes(1));
+        when(appUserRepository.findByUsernameForUpdate("max")).thenReturn(Optional.of(user));
+
+        appUserService.registerFailedLogin("max");
+
+        assertThat(user.getFailedLoginAttempts()).isEqualTo(1);
+        assertThat(user.getLockedUntil()).isNull();
+        org.mockito.Mockito.verify(appUserRepository).save(user);
     }
 
     @Test

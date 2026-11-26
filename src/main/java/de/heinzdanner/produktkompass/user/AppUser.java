@@ -53,6 +53,67 @@ public class AppUser {
     @Column(name = "locked_until")
     private LocalDateTime lockedUntil;
 
+    @Column(name = "recovery_email", length = 254)
+    private String recoveryEmail;
+
+    @Column(name = "recovery_email_verified", nullable = false)
+    private boolean recoveryEmailVerified;
+
+    @Column(name = "verification_token_hash", length = 64, unique = true)
+    private String verificationTokenHash;
+
+    @Column(name = "verification_expires_at")
+    private LocalDateTime verificationExpiresAt;
+
+    @Column(name = "verification_sent_at")
+    private LocalDateTime verificationSentAt;
+
+    @Column(name = "reset_token_hash", length = 64, unique = true)
+    private String resetTokenHash;
+
+    @Column(name = "reset_expires_at")
+    private LocalDateTime resetExpiresAt;
+
+    @Column(name = "credential_version", nullable = false)
+    private long credentialVersion;
+
+    public String getRecoveryEmail() { return recoveryEmail; }
+    public boolean isRecoveryEmailVerified() { return recoveryEmailVerified; }
+    public String getVerificationTokenHash() { return verificationTokenHash; }
+    public LocalDateTime getVerificationExpiresAt() { return verificationExpiresAt; }
+    public LocalDateTime getVerificationSentAt() { return verificationSentAt; }
+    public String getResetTokenHash() { return resetTokenHash; }
+    public LocalDateTime getResetExpiresAt() { return resetExpiresAt; }
+    public long getCredentialVersion() { return credentialVersion; }
+
+    public void requestEmailVerification(String email, String hash, LocalDateTime expiresAt, LocalDateTime sentAt) {
+        recoveryEmail = email;
+        recoveryEmailVerified = false;
+        verificationTokenHash = hash;
+        verificationExpiresAt = expiresAt;
+        verificationSentAt = sentAt;
+    }
+
+    public void confirmRecoveryEmail() {
+        recoveryEmailVerified = true;
+        verificationTokenHash = null;
+        verificationExpiresAt = null;
+    }
+
+    public void setResetToken(String hash, LocalDateTime expiresAt) {
+        resetTokenHash = hash;
+        resetExpiresAt = expiresAt;
+    }
+
+    public void completePasswordReset(String encodedPassword) {
+        password = encodedPassword;
+        credentialVersion++;
+        resetTokenHash = null;
+        resetExpiresAt = null;
+        failedLoginAttempts = 0;
+        lockedUntil = null;
+    }
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "app_user_favorites",

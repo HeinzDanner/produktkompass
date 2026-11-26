@@ -1,16 +1,366 @@
 # ProduktKompass
 
-ProduktKompass ist eine Spring Boot-Anwendung für einen neutralen Produkt- und Markenkompass mit Katalog, Quellen, Favoriten und Admin-Verwaltung.
+**Capstone-Projekt einer Fortbildung · In Entwicklung · Geplanter Abschluss: 15. Januar 2027**
 
-## Technologien
+ProduktKompass ist eine webbasierte Informationsplattform für Produkte, Marken und
+Unternehmen. Sie soll Verbrauchern ermöglichen, Produktinformationen und
+Unternehmenszuordnungen anhand ihrer Quellen nachzuvollziehen und Alternativen zu
+entdecken – sachlich und ohne moralische oder politische Bewertung.
 
-- Java 21
-- Spring Boot 4.1.1
-- Spring Data JPA
-- Flyway
-- PostgreSQL (lokale Entwicklung und Produktivbetrieb)
-- H2 nur noch für automatisierte Tests
-- Thymeleaf für eine einfache Weboberfläche
+Das Capstone-Projekt startet offiziell am **26. November 2026** und baut auf bereits
+entwickelten Prototypfunktionen auf. Das Repository dokumentiert den laufenden
+Entwicklungsstand: Die Anwendung ist **noch nicht fertig** und nicht als
+produktionsreifes oder vollständig redaktionell geprüftes Angebot zu verstehen.
+
+## Das Projekt im Überblick
+
+| Bereich | Bereits umgesetzt |
+|---|---|
+| **Produktkatalog** | Öffentliche Suche und Filter, Produktdetails mit Marken- und Unternehmensbezug, Quellen und Prüfdatum sowie redaktionelle und automatische Alternativen |
+| **Persönlicher Bereich** | Registrierung, Login, Favoriten, persönliche Tags und persistenter Warenkorb mit bevorzugten oder ausgeschlossenen Merkmalen |
+| **Redaktion** | Verwaltung von Produkten, Marken, Unternehmen, Kategorien und Quellen; Datenqualitätswarnungen, Produktmeldungen, Rollen und Audit-Log |
+| **Einkaufslisten** | CSV-Import eines Händlerkatalog-Snapshots, Vorschläge für Ersatzprodukte, bewusste Auswahl und Export einer Einkaufsliste |
+| **Optionale Integration** | Suche nach vorhandenen Rezepten einer selbst betriebenen Mealie-Instanz anhand explizit zugeordneter Zutaten |
+| **Sicherheit** | BCrypt-Passworthashes, rollenbasierte Zugriffe, CSRF-Schutz, Kontosperren und Rate-Limits sowie E-Mail-basierte Passwortwiederherstellung |
+
+Die Anwendung ist als Spring-Boot-Monolith mit serverseitig gerenderten
+Thymeleaf-Seiten und REST-Endpunkten aufgebaut. Controller, Services und
+Repositories trennen HTTP-Verarbeitung, Fachlogik und Datenzugriff. Flyway
+versioniert Datenbankschema und Migrationen; automatisierte Unit- und
+Integrationstests prüfen unter anderem Suche, Imports und Sicherheitsabläufe.
+
+**Technologien:** Java 21, Spring Boot 4.1.1, Spring Security, Spring Data JPA,
+Maven, PostgreSQL, Flyway, Thymeleaf, HTML/CSS/JavaScript und Docker Compose.
+H2 wird für automatisierte Tests verwendet.
+
+## Projektstand und Grenzen
+
+- **Datenqualität:** Open Food Facts liefert Community-Daten, die separat von
+  redaktionellen Angaben und Quellen gekennzeichnet sind. Ein Prüfdatum ist kein
+  Nachweis, dass sämtliche Produktangaben vollständig geprüft wurden.
+- **Alternativen und Händlerlisten:** Automatische Vorschläge sind keine
+  redaktionelle Empfehlung. Händlerdaten sind importierte Momentaufnahmen;
+  Preise, Sortiment und Verfügbarkeit einer bestimmten Filiale werden nicht garantiert.
+  Der integrierte Händler-Demokatalog ist synthetisch.
+- **Rezeptideen:** Mealie ist optional und sucht in selbst angelegten Rezepten;
+  es generiert keine Rezepte und prüft weder Mengen noch Allergene zuverlässig.
+- **Sicherheit und Betrieb:** Schutzmechanismen sind implementiert, ersetzen aber
+  keine abschließende Sicherheitsprüfung. Für einen öffentlichen Betrieb sind
+  insbesondere HTTPS, sichere Deployment-Konfiguration und ein geeigneter
+  SMTP-Dienst erforderlich. MFA und ein sicherer Wechsel bestätigter
+  Wiederherstellungsadressen fehlen noch.
+
+Bis zum geplanten Abschluss stehen insbesondere die weitere fachliche und
+redaktionelle Prüfung, Tests, Dokumentation und die Vorbereitung einer
+nachvollziehbaren Präsentation im Fokus. Umfang und Prioritäten können sich während
+des Capstones noch ändern.
+
+## Lokal ausprobieren
+
+**Voraussetzungen:** Java 21, Docker mit Compose und eine freie lokale Portnummer
+`5432` für PostgreSQL. Der Maven Wrapper ist im Projekt enthalten; Maven muss nicht
+separat installiert werden.
+
+PostgreSQL über Docker starten und die Anwendung auf dem Host ausführen:
+
+```powershell
+$env:POSTGRES_PASSWORD = "produktkompass_local_pw"
+docker compose up -d postgres
+$env:RECOVERY_BASE_URL = "http://localhost:8082"
+.\mvnw.cmd spring-boot:run
+```
+
+Danach ist die Anwendung unter **http://localhost:8082** erreichbar. Flyway
+richtet das Schema beim Start ein. Die Befehle verwenden das lokale
+Entwicklungsprofil und dessen Beispielzugangsdaten; sie sind nicht für den
+Produktivbetrieb gedacht. Wird bereits ein PostgreSQL-Volume verwendet, ändert
+eine neue Umgebungsvariable dessen bestehendes Passwort nicht automatisch.
+
+Für einen ersten Rundgang: Im öffentlichen Katalog ein Produkt suchen und dessen
+Details öffnen; anschließend als Demo-Benutzer `max` mit Passwort `pw` anmelden
+und den Warenkorb ausprobieren. Der Demo-Admin `admin` / `admin123` öffnet den
+Redaktionsbereich. Diese Zugänge sind ausschließlich für lokale Entwicklung und
+Tests vorgesehen; bei aktiviertem Profil `prod` werden sie nicht angelegt.
+Details zur optionalen Mailpit-Demo und zu anderen Profilen stehen unten.
+
+Tests starten:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Für macOS/Linux jeweils `./mvnw` statt `.\mvnw.cmd` verwenden.
+
+## Weiterführende Dokumentation
+
+- [Login-Schutz und Rate-Limits](#login-schutz-und-rate-limits)
+- [Passwortwiederherstellung und Mailpit](#passwort-vergessen-und-bestätigte-wiederherstellungsadresse)
+- [Händlerkataloge und Einkaufslisten](#händlerkataloge-und-einkaufslisten)
+- [Mealie-Rezeptsuche](#rezeptideen-aus-dem-warenkorb-mit-mealie)
+- [Open-Food-Facts-Daten und Import](#open-food-facts-datenmodell)
+- [Entwicklungsprofile und Datenbank](#entwicklungsprofile)
+- [Administration und MVP-Abgleich](#admin-bereich)
+- [Hinweise zum Produktivbetrieb](#produktivbetrieb-prod-profil)
+
+## Login-Schutz und Rate-Limits
+
+Passwörter werden mit BCrypt (zufälliges Salt, Standard-Kostenfaktor 10) gespeichert.
+Nach fünf fehlgeschlagenen Anmeldungen ist ein vorhandenes Konto 15 Minuten gesperrt.
+Versuche während einer Sperre verlängern sie nicht. Nach Ablauf beginnt der
+Fehlversuchszähler beim nächsten falschen Passwort wieder mit 1; eine erfolgreiche
+Anmeldung setzt Zähler und Sperre zurück. Datenbank-Zeilensperren serialisieren
+gleichzeitige Aktualisierungen des Login-Zählers.
+
+Zusätzlich gelten folgende feste Zeitfenster je Client-IP und Anwendungsinstanz:
+
+| Aktion | Limit |
+|---|---|
+| Formular-Login und API-Aufrufe mit HTTP Basic, gemeinsam | 20 Anfragen pro Minute |
+| Web- und API-Registrierung, gemeinsam | 5 Anfragen pro 15 Minuten |
+| Produktmeldungen, über alle Produkt-IDs hinweg | 10 Anfragen pro 15 Minuten |
+
+Auch erfolgreiche, ungültige und CSRF-abgewiesene Anfragen verbrauchen das jeweilige
+Kontingent. Unbekannte Benutzernamen werden ebenfalls vom IP-Limit erfasst.
+Überschreitungen liefern HTTP 429, eine sichtbare Fehlermeldung und `Retry-After`
+in Sekunden. Abgewiesene Anfragen verlängern das Zeitfenster nicht. Öffentliche
+Katalogabfragen ohne Basic-Anmeldung bleiben davon unberührt.
+
+Der Filter läuft in beiden Spring-Security-Filterketten vor CSRF und
+Authentifizierung. Er hält höchstens 10.000 aktive IP-/Aktionsfenster im Speicher,
+entfernt abgelaufene Einträge und verdrängt keine aktiven Limits. Bei ausgeschöpftem
+Speicher werden neue IP-/Aktionskombinationen ebenfalls mit 429 abgewiesen.
+Die Limits sind standardmäßig aktiv; für isolierte Tests kann
+`produktkompass.security.rate-limiting.enabled=false` gesetzt werden.
+Die dedizierten Rate-Limit-Integrationstests aktivieren sie ausdrücklich.
+
+**Betriebsgrenzen:** Neustarts setzen die IP-Kontingente zurück. Mehrere Instanzen
+teilen sie nicht; dafür ist ein gemeinsamer Limiter im Reverse Proxy/API-Gateway
+oder z. B. mit Redis notwendig. Nutzer mit derselben öffentlichen IP teilen ein
+Kontingent. Feste Zeitfenster erlauben kurze Bursts an der Fenstergrenze.
+Verteilte Angriffe werden durch IP-Limits allein nicht verhindert.
+
+Der Filter verwendet `request.getRemoteAddr()`, nicht direkt einen
+`X-Forwarded-For`-Header. Im Profil `prod` verarbeitet Spring Forwarded-Header:
+Der Reverse Proxy muss externe Forwarded-/X-Forwarded-Header entfernen und selbst
+korrekt setzen; die Anwendung darf nicht direkt aus dem Internet erreichbar sein.
+HTTPS/TLS muss dort eingerichtet werden. Die vorhandene separate Meldung für
+gesperrte Konten bleibt bestehen; MFA und eine Content Security Policy sind noch
+nicht global implementiert. Wiederherstellungsseiten haben eine eigene restriktive
+Content Security Policy.
+
+## Passwort vergessen und bestätigte Wiederherstellungsadresse
+
+Auf der Login-Seite gibt es „Passwort vergessen?“. Neue und bestehende Benutzer
+hinterlegen ihre E-Mail-Adresse nach der Anmeldung unter **Kontosicherheit**
+(`/account/security`) und bestätigen dabei ihr aktuelles Passwort. Anschließend
+muss der Link im Postfach per Button bestätigt werden. Die Registrierung bleibt
+unverändert; ohne vorher bestätigte Adresse ist kein Self-Service-Reset möglich.
+Ein Wechsel einer bereits bestätigten Adresse ist in dieser Version bewusst nicht
+freigeschaltet und braucht einen gesonderten, abgesicherten Supportprozess.
+
+Die öffentliche Wiederherstellung fragt den **Benutzernamen**, nicht eine neue
+Zieladresse ab. Für vorhandene, unbekannte, deaktivierte und nicht bestätigte Konten
+ist die Rückmeldung gleich. Jede syntaktisch gültige Anfrage wird in dieselbe
+begrenzte Hintergrundwarteschlange gestellt, damit SMTP-Latenz keine Konten verrät.
+Die Rückmeldung bestätigt ausdrücklich nicht, dass eine Nachricht zugestellt wurde.
+
+| Schutz | Umsetzung |
+|---|---|
+| Token-Erzeugung | 32 zufällige Bytes mit `SecureRandom` (256 Bit), URL-safe Base64 |
+| Speicherung | Nur SHA-256-Hash des Tokens; Passwörter weiterhin BCrypt |
+| Ablauf | E-Mail-Bestätigung nach 30 Minuten, Passwort-Reset nach 15 Minuten |
+| Einmaligkeit | Zeilensperre und atomarer Passwortwechsel mit Tokenlöschung; parallele Einlösungen erlauben nur einen Wechsel |
+| Zweckbindung | Getrennte Hash-Felder für Bestätigung und Passwort-Reset |
+| Erneute Anforderung | Ein gültiger Reset-Link wird nicht durch anonyme neue Anfragen ersetzt; Bestätigungsversand höchstens einmal pro Minute je Konto |
+| Rate-Limits je IP | Reset-Anforderung 5/15 Minuten; Adresse hinterlegen 5/15 Minuten; Bestätigung und Reset-Einlösung gemeinsam 10/Minute |
+| Webschutz | CSRF auf allen POSTs; GET-Aufrufe verändern nichts und verbrauchen keinen Token |
+| Browser | `Cache-Control: no-store`, `Referrer-Policy: no-referrer`, restriktive CSP auf Recovery-Seiten |
+| Passwortwahl beim Reset | Mindestens 15 Zeichen, keine erzwungenen Zeichenklassen, höchstens 72 UTF-8-Bytes wegen BCrypt; keine leeren Passphrasen |
+| Sitzungen | Credential-Version in der DB; ältere Web-/API-Sessions werden beim nächsten Zugriff abgewiesen und invalidiert |
+| Benachrichtigung | E-Mail nach Passwortwechsel; keine automatische Anmeldung |
+| Audit | Bestätigung und Passwortwechsel ohne Token, Passwort oder E-Mail-Adresse im Audit-Detail |
+
+E-Mail-Fehler rollen Token-/Passwortänderungen zurück. Beim angemeldeten
+Bestätigungsversand oder Reset erscheint HTTP 503; Hintergrundfehler werden ohne
+Adressen, Token oder SMTP-Inhalte protokolliert. Die Warteschlange hält maximal
+100 ausstehende Anfragen; bei Überlast erhält der Aufrufer HTTP 503.
+Sie ist nicht persistent: Bei einem Prozessabbruch können noch nicht bearbeitete
+Anfragen verloren gehen. Mailversand und Datenbank sind keine verteilte Transaktion;
+ein seltenes Commit-Problem nach bereits versendeter Mail kann einen ungültigen
+Link erzeugen. Für größere Deployments ist eine transaktionale Outbox sinnvoll.
+Ausgehende SMTP-Verbindungen haben kurze Connect-/Read-/Write-Timeouts.
+
+### Lokale Demo mit Mailpit
+
+```powershell
+docker compose --profile mail up -d mailpit
+```
+
+Starte ProduktKompass wie bisher lokal. Standardmäßig gehen Mails an
+`localhost:1025`; das Testpostfach ist unter **http://localhost:8025** erreichbar.
+Bei lokalem App-Start auf Port `8082` muss vor dem Start
+`RECOVERY_BASE_URL=http://localhost:8082` gesetzt werden, damit die Links auf die
+richtige Adresse zeigen (siehe [Lokal ausprobieren](#lokal-ausprobieren)).
+Mailpit stellt keine Nachrichten ins Internet zu. Verwende erfundene Adressen,
+z. B. `demo@example.org`. Beide veröffentlichten Mailpit-Ports sind nur an Loopback
+gebunden; Postfach und SMTP dürfen nicht öffentlich zugänglich gemacht werden.
+
+Demoablauf: anmelden → Kontosicherheit → Adresse mit aktuellem Passwort hinterlegen
+→ Mailpit öffnen → Link öffnen und bestätigen → abmelden → Passwort vergessen
+→ Benutzernamen eingeben → Reset-Mail öffnen → neue Passphrase setzen → neu anmelden.
+
+Für die App im Compose-Netz:
+
+```powershell
+docker compose --profile mail up -d
+```
+
+Die App verwendet dann den SMTP-Host `mailpit` und Port `8080`. Das vollständige
+Container-Setup ist ein Entwicklungsszenario und noch kein Produktionsdeployment.
+
+### Produktion
+
+Profil `prod` aktivieren und folgende Umgebungsvariablen bereitstellen:
+
+| Variable | Bedeutung |
+|---|---|
+| `RECOVERY_BASE_URL` | Feste öffentliche HTTPS-Origin, z. B. `https://produktkompass.example.org` |
+| `RECOVERY_MAIL_FROM` | Beim SMTP-Anbieter zugelassene Absenderadresse |
+| `SMTP_HOST` / `SMTP_PORT` | SMTP-Server; Standardport im Produktionsprofil 587 |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | SMTP-Zugangsdaten aus Deployment-Secrets, niemals ins Repo |
+
+Im Produktionsprofil sind SMTP-Authentifizierung und STARTTLS zwingend aktiviert;
+die Serveridentität wird geprüft. Die Basis-URL wird validiert und **nicht** aus
+Host-/Forwarded-Headern übernommen. HTTP ist ausschließlich lokal erlaubt, nicht
+im Produktionsprofil. SPF/DKIM/DMARC beim Mailanbieter einrichten, Zustellfehler
+überwachen und App/Proxy-Zugriffslogs so konfigurieren, dass Query-Strings mit
+Recovery-Tokens nicht protokolliert werden. Links und Testpostfächer enthalten
+Anmeldegeheimnisse und dürfen nicht geteilt werden.
+
+Dies ist kein vollständiger Identity-Provider: MFA, Prüfung gegen bekannte
+kompromittierte Passwörter und ein abgesicherter E-Mail-Wechsel fehlen weiterhin.
+Die bisherige Registrierungs-Passwortregel ist unverändert; die neue
+15-Zeichen-Regel gilt zunächst für Passwort-Resets.
+
+## Händlerkataloge und Einkaufslisten
+
+Im Warenkorb kann eine neue, händlerspezifische Einkaufsliste aus einem gespeicherten
+Katalog erstellt werden. Ein Admin importiert dazu über `/admin/retailer-catalog`
+eine UTF-8-CSV mit Semikolon-Trennung. Die herunterladbare Vorlage zeigt die
+unterstützten Spalten: Produktname (Pflicht), externe ID, Marke, Kategoriepfad,
+Packungsgröße, Preis, Produkt-/Bild-URL, Beschreibung, Vorlieben, Allergene,
+Spuren und Verfügbarkeit. URLs müssen HTTP(S) sein. Je Händlercode wird der
+Snapshot vollständig ersetzt; fehlerhafte Importe überschreiben den bisherigen
+Bestand nicht. Der Import ruft keine Händlerseite oder URL ab.
+
+Für jedes Produkt im Warenkorb muss der Nutzer einen vorgeschlagenen Katalogtreffer
+bestätigen oder den Originalnamen als manuell zu prüfende Position übernehmen.
+Vorschläge verwenden Namen, Kategorien und explizit vorhandene Vorlieben; sie
+bestätigen weder das Sortiment einer bestimmten Filiale noch aktuelle Verfügbarkeit.
+Zusätzlich werden die bekannten Katalog- und OFF-Labels des jeweiligen
+Warenkorbprodukts mit den importierten Händler-Tags verglichen. Nach den explizit
+bevorzugten Tags werden Kandidaten mit mehr passenden Ausgangslabels höher
+sortiert, danach entscheidet die Text-/Kategorieähnlichkeit. Explizite Ausschlüsse
+gelten unverändert. Gleichwertige Katalog-/OFF-Labels zählen nicht doppelt.
+Die Vorschau zeigt passende und nicht bestätigte Ausgangslabels mit ihrer Herkunft.
+Fehlende Händlerangaben bleiben unbestätigt; Labels werden weder kopiert noch
+aus Zutatenlücken abgeleitet. Kandidaten ohne Labeltreffer bleiben auswählbar.
+Bestätigte Treffer werden nutzerbezogen für spätere Vorschauen vorgemerkt. Die
+gespeicherte Liste behält Namen, Mengen und Preise als Snapshot und kann als
+Semikolon-CSV exportiert werden. Tabellenkalkulations-Formelpräfixe in Textfeldern
+werden beim Export entschärft.
+
+Der vorinstallierte `DEMO`-Katalog enthält ausschließlich synthetische Beispiele
+und kann nicht durch einen Upload überschrieben werden. Keine Lidl-Daten und kein
+Crawler oder automatischer Abruf sind Bestandteil des öffentlichen Projekts.
+Echte lokale Importdaten müssen unabhängig von der technischen Importfunktion
+rechtmäßig erhoben und genutzt werden. Fehlende Zutaten-, Allergen- und
+Spurenangaben bleiben unbekannt und werden nicht als „frei davon“ interpretiert.
+
+## Rezeptideen aus dem Warenkorb mit Mealie
+
+Im Warenkorb führt „Was kann ich kochen? · Mealie“ zu `/cart/recipes`.
+Die optionale Anbindung sucht **bestehende Rezepte in einer eigenen lokalen
+Mealie-Instanz**, sie generiert keine Rezepte und nutzt keinen öffentlichen
+Rezeptkatalog. Jedes Warenkorbprodukt muss bewusst einer strukturierten
+Mealie-Zutat zugeordnet oder übersprungen werden. Es gibt keine automatische
+Gleichsetzung von Produktname und Zutat.
+
+Erst beim Absenden gehen die ausgewählten Zutaten-UUIDs an Mealie.
+Benutzername, Produktnamen, Mengen und persönliche Vorlieben werden nicht
+übermittelt; der Warenkorb bleibt unverändert. Gleiche Zutaten werden für die
+Rezeptsuche zusammengefasst. Die Vorschau zeigt Rezeptnamen und fehlende Zutaten.
+„Keine fehlende strukturierte Zutat“ ist **keine Aussage über ausreichende
+Mengen, Vorräte, Allergene oder unstrukturierte Rezeptangaben**.
+Vorlieben/Ausschlüsse werden nicht auf Rezepte übertragen. Geräte und
+Zubereitung sind direkt in Mealie zu prüfen.
+
+### Lokale Einrichtung
+
+Mealie ist im Compose-Profil `recipes` enthalten, getrennt von der
+ProduktKompass-Datenbank und nur auf `127.0.0.1:9925` veröffentlicht.
+Zum Starten ausschließlich dieses optionalen Dienstes:
+
+```powershell
+docker compose --profile recipes up -d mealie
+```
+
+Unter `http://localhost:9925` die Mealie-Ersteinrichtung durchführen,
+das anfängliche Passwort ändern und im eigenen Benutzerprofil einen API-Token
+erstellen. Rezepte und strukturierte Zutaten müssen dort angelegt werden.
+Der Token bestimmt den zugänglichen Mealie-Rezeptbestand; bei mehreren
+ProduktKompass-Nutzern wird dieselbe konfigurierte Mealie-Instanz verwendet.
+Tokens gehören nicht in Git, Rezeptdateien oder Logs.
+
+ProduktKompass anschließend **lokal auf dem Host** mit diesen
+Umgebungsvariablen starten (Token durch deinen eigenen ersetzen):
+
+```powershell
+$env:MEALIE_BASE_URL = "http://localhost:9925"
+$env:MEALIE_API_TOKEN = "<eigener Mealie-API-Token>"
+.\mvnw.cmd spring-boot:run
+```
+
+Auch für den IDE-Start lassen sich diese Variablen in der Run-Konfiguration
+setzen. Diese erste Integration akzeptiert ausschließlich HTTP auf
+`localhost`, `127.0.0.1` oder `::1`; entfernte Server und Weiterleitungen
+werden abgewiesen. Der ProduktKompass-App-Container kann mit dieser
+Loopback-Adresse nicht auf den separaten Mealie-Container zugreifen.
+Eine netzwerkfähige oder nutzerindividuelle Anbindung ist nicht enthalten.
+Ohne Token erscheint ein Einrichtungshinweis. Verbindungs-, Authentifizierungs-
+und ungültige API-Antworten werden als Fehler gezeigt, nicht als leere Treffer.
+
+### Kleine Demo ohne fremde Rezeptdaten
+
+Lege beispielsweise diese selbst erstellten Testrezepte in Mealie an, mit
+**strukturierten Food-Zuordnungen** statt ausschließlich Freitext-Zutaten:
+
+| Testrezept | Strukturierte Zutaten |
+| --- | --- |
+| Demo-Tomatenreis | Reis, Tomaten, Olivenöl |
+| Demo-Kichererbsenpfanne | Kichererbsen, Tomaten, Olivenöl |
+| Demo-Haferbrei | Haferflocken, Haferdrink |
+
+Fülle den ProduktKompass-Warenkorb etwa mit Reis und Tomaten, ordne die beiden
+Mealie-Zutaten zu und starte die Suche. Olivenöl sollte beim entsprechenden
+Testrezept als fehlende Zutat erscheinen. Ein Nonfood-Artikel kann bewusst
+übersprungen werden. Mengenumrechnung und Ernährungs-/Allergenprüfung sind
+ausdrücklich nicht Bestandteil dieses Demonstrationsablaufs.
+
+### API-Vertrag und Abgrenzung
+
+Compose pinnt Mealie auf `v3.29.0`. Die Anbindung nutzt
+`GET /api/foods` mit Pagination (maximal 5.000 Zutaten) und
+`GET /api/recipes/suggestions` mit wiederholten `foods=<UUID>`-Parametern,
+`limit=10` und `maxMissingFoods=5`. Mealie-Vorratsdaten, Geräte-Vorräte und
+automatische Zutatenersetzungen sind für diese Anfrage deaktiviert.
+GET/Pagination und das Antwortfeld `missingFoods` wurden mit den offiziellen
+[Vorschlagsschemas](https://github.com/mealie-recipes/mealie/blob/v3.29.0/mealie/schema/recipe/recipe_suggestion.py)
+und [Zutatenschemas](https://github.com/mealie-recipes/mealie/blob/v3.29.0/mealie/schema/recipe/recipe_ingredient.py)
+abgeglichen. Mealie ist ein separat betriebenes Drittprogramm mit eigener
+Lizenz; die Rezeptinhalte brauchen ebenfalls eine geeignete Nutzungsgrundlage.
+Die [Installationsdokumentation](https://mealie.io/documentation/getting-started/installation/sqlite/)
+beschreibt dessen Betrieb.
 
 ## Open-Food-Facts-Datenmodell
 
@@ -405,6 +755,9 @@ OFF-Kategorien bleiben wörtliche, ungeprüfte Herkunftsangaben.
 Unter `/admin/category-mappings` können ADMIN und EDITOR einzelne Begriffe
 einer Katalogkategorie zuordnen, ändern oder durch „Nicht zugeordnet“ entfernen.
 Die Liste ist durchsuchbar und auf 20 Einträge pro Seite begrenzt.
+„Nur nicht zugeordnet“ zeigt ausschließlich OFF-Begriffe ohne Zuordnung.
+Der Filter ist mit der Textsuche kombinierbar und bleibt beim Blättern und
+Speichern erhalten; neu zugeordnete Begriffe verschwinden aus dieser Auswahl.
 Änderungen sind CSRF-geschützt, werden mit Bearbeiter auditiert und wirken
 sofort auf Web- und API-Kategoriefilter. Produktdaten bleiben unverändert.
 V26/V27 legen die Zuordnungstabelle und eine konservative Startauswahl an,
@@ -597,25 +950,11 @@ angepasst werden (oder per Umgebungsvariable überschrieben werden).
 
 Alternative, falls keine lokale PostgreSQL-Installation vorhanden ist:
 
-1. Kopiere die Beispiel-Umgebungsdatei:
-
-```bash
-cp .env.example .env
-```
-
-2. Starte die Infrastruktur:
-
-```bash
-docker compose up -d
-```
-
-3. Starte die App mit dem Docker-Profil:
-
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=docker
-```
-
-Die App verbindet sich dann über den Compose-Service `postgres` mit PostgreSQL.
+Starte für die Host-Entwicklung ausschließlich den Datenbankdienst und anschließend
+die App mit dem Standardprofil `local`, wie unter
+[Lokal ausprobieren](#lokal-ausprobieren) beschrieben. Das Profil `docker`
+verwendet den Hostnamen `postgres` innerhalb des Compose-Netzwerks und eignet
+sich nicht unverändert für eine auf dem Host gestartete Anwendung.
 
 ## Zugriff
 
@@ -735,10 +1074,12 @@ Erreichbarkeit noch inhaltliche Qualität. Prüfdaten dürfen nicht in der
 Zukunft liegen (maßgeblich ist die Serverzeit). Ungültige Eingaben werden
 abgelehnt; bestehende Quellen werden nicht automatisch verändert.
 
-### MVP-Abgleich (Oktober 2026)
+### Historischer MVP-Abgleich (Oktober 2026)
 
-„Fertig“ bezeichnet den technischen MVP-Umfang, nicht die Vollständigkeit
-oder redaktionelle Prüfung des gesamten Datenbestands.
+Dieser Abgleich dokumentiert den damaligen Stand vor Beginn des offiziellen
+Capstones. „Fertig“ bezeichnet hier nur den technischen MVP-Umfang des jeweiligen
+Bereichs, nicht den Abschluss des Projekts oder die Vollständigkeit und
+redaktionelle Prüfung des gesamten Datenbestands.
 
 | Bereich | Stand | Einordnung |
 |---|---|---|
@@ -879,6 +1220,11 @@ SPRING_PROFILES_ACTIVE=docker,prod \
 SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/produktkompass \
 SPRING_DATASOURCE_USERNAME=<user> \
 SPRING_DATASOURCE_PASSWORD=<passwort> \
+RECOVERY_BASE_URL=https://<öffentlicher-host> \
+RECOVERY_MAIL_FROM=<absenderadresse> \
+SMTP_HOST=<smtp-host> \
+SMTP_USERNAME=<smtp-benutzer> \
+SMTP_PASSWORD=<smtp-passwort> \
 ./mvnw spring-boot:run
 ```
 

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Händler-Einkaufslisten – ProduktKompass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main class="container page-content">
+    <section class="box">
+        <h1>Meine Händler-Einkaufslisten</h1>
+        <div th:if="${#lists.isEmpty(shoppingLists)}" class="empty-state">Noch keine Händler-Einkaufslisten gespeichert.</div>
+        <div class="admin-list" th:unless="${#lists.isEmpty(shoppingLists)}">
+            <article class="admin-item" th:each="list : ${shoppingLists}">
+                <div>
+                    <strong><a th:href="@{/cart/retailer-lists/{id}(id=${list.id})}" th:text="${list.name}">Liste</a></strong>
+                    <div class="meta-row">
+                        <span th:text="${list.catalogName}">Händler</span>
+                        <span th:text="${list.itemCount + ' Produkte'}">0 Produkte</span>
+                        <span th:text="${#temporals.format(list.createdAt, 'dd.MM.yyyy HH:mm')}">Erstellt</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <p><a class="button secondary" th:href="@{/cart}">Zum Warenkorb</a>
+            <a class="button primary" th:href="@{/cart/retailer-list}">Neue Liste erstellen</a></p>
+    </section>
+</main>
+</body>
+</html>

@@ -59,10 +59,11 @@ class PublicCatalogSearchIntegrationTest {
         assertThat(html).contains("aria-label=\"Katalog durchsuchen\"", "method=\"get\"", "action=\"/products\"",
                 "value=\"PublicCatalog\"", "value=\"" + category.getId() + "\" selected=\"selected\"",
                 "query=PublicCatalog", "categoryId=" + category.getId(), "page=1", "size=1",
-                "class=\"product-search catalog-search\"");
+                "guest-catalog-workspace", "guest-catalog-search", "data-guest-search", "Tag-Suche");
         String form = html.substring(html.indexOf("<form method=\"get\""), html.indexOf("</form>"));
         assertThat(form).doesNotContain("name=\"page\"", "<select id=\"brandId\"", "name=\"preferred\"",
-                "Zurücksetzen", "data-lookup-url");
+                "data-lookup-url");
+        assertThat(html).doesNotContain("class=\"product-search catalog-search\"");
         assertThat(html).doesNotContain("lookup-picker.js", "Suche ohne Anmeldung.", "Kategorien suchen");
 
         var next = mvc.perform(get("/products").param("query", "PublicCatalog")
@@ -70,6 +71,29 @@ class PublicCatalogSearchIntegrationTest {
                 .andExpect(status().isOk()).andReturn();
         assertThat(page(next).getContent()).extracting(ProductSummary::id).containsExactly(second.getId());
         assertThat(next.getResponse().getContentAsString()).contains("value=\"PublicCatalog\"", "page=0");
+    }
+
+    @Test
+    void anonymousTagsRankExcludeAndStayInPaginationWithoutPersonalData() throws Exception {
+        second.setLabels(new java.util.HashSet<>(java.util.Set.of(ProductLabel.BIO)));
+        products.flush();
+        var preferred = mvc.perform(get("/products").param("query", "PublicCatalog")
+                        .param("categoryId", category.getId().toString()).param("preferred", "label:BIO")
+                        .param("size", "1"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(page(preferred).getContent()).extracting(ProductSummary::id).containsExactly(second.getId());
+        assertThat(preferred.getResponse().getContentAsString())
+                .contains("preferred=label:BIO", "cart-search.js").doesNotContain("personal:", "/cart/preferences");
+        var excluded = mvc.perform(get("/products").param("query", "PublicCatalog")
+                        .param("categoryId", category.getId().toString()).param("tag.label:BIO", "excluded"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(page(excluded).getContent()).extracting(ProductSummary::id).containsExactly(first.getId());
+        mvc.perform(get("/products").param("tag.personal:1", "preferred")).andExpect(status().isBadRequest());
+        mvc.perform(get("/products").param("tag.label:BIO", "invalid")).andExpect(status().isBadRequest());
+        var signedIn = mvc.perform(get("/products").with(user("max")).param("query", "PublicCatalog"))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(signedIn.getResponse().getContentAsString())
+                .contains("class=\"product-search catalog-search\"").doesNotContain("data-guest-search");
     }
 
     @Test
